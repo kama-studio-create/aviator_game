@@ -1,10 +1,22 @@
-import {useRef, useEffect, FC} from 'react';
+import {useRef, useEffect, FC, useState} from 'react';
 import PlaneImage from '../assets/plane.svg';
 import BgImage from '../assets/canvas-bg.svg';
 import {GRADIENTS} from "../styles/colors.ts";
+import {GameState} from "../types/game.type.ts";
+import Counter from "./Counter.tsx";
+import {getRandomNumber} from "../utils/generators.ts";
 
 
 const GameView: FC = () => {
+  const min = 1;
+  const max = 8;
+  const [gameState, setGameState] = useState<GameState>('WAITING');
+  let multiplier = getRandomNumber(min, max);
+  const [userMultiplier, setUserMultiplier] = useState(1);
+  const [currentMultiplier, setCurrentMultiplier] = useState(1);
+  const [canvasWidth, setCanvasWidth] = useState(300);
+  const [canvasHeight, setCanvasHeight] = useState(300)
+
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const bgCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -16,12 +28,49 @@ const GameView: FC = () => {
   backgroundRef.current.src = BgImage;
   backgroundRef.current.style.zIndex = '-1';
 
+  // generate random number between 1 and 8 with two decimal points
+
+
+  const startGame = () => {
+    multiplier = getRandomNumber(min, max);
+    setUserMultiplier(1);
+    setCurrentMultiplier(1);
+    setGameState("PLAYING");
+  }
+
+  const exitGame = () => {
+    setGameState("EXITED");
+  }
+
+
+  useEffect(() => {
+
+    switch (gameState) {
+      case 'WAITING':
+        multiplier = getRandomNumber(min, max);
+        setUserMultiplier(1);
+        setCurrentMultiplier(1);
+        break;
+      case 'PLAYING':
+        animatePlaneForward();
+        break;
+      case 'EXITED':
+        setUserMultiplier(currentMultiplier);
+        break;
+      case 'ENDED':
+        console.log('ended')
+        break;
+      default:
+        break;
+    }
+  }, [gameState]);
+
   useEffect(() => {
     if (containerRef.current && canvasRef.current && bgCanvasRef.current) {
       const ctx = canvasRef.current.getContext('2d');
       const bgCtx = bgCanvasRef.current.getContext('2d');
-      const lineCtx = lineRef.current?.getContext('2d');
-
+      setCanvasWidth(containerRef.current.clientWidth);
+      setCanvasHeight(containerRef.current.clientHeight)
       if (ctx) {
         ctx.canvas.width = containerRef.current.offsetWidth;
         ctx.canvas.height = containerRef.current.offsetWidth;
@@ -31,13 +80,8 @@ const GameView: FC = () => {
         bgCtx.canvas.width = containerRef.current.offsetWidth;
         bgCtx.canvas.height = containerRef.current.offsetWidth;
       }
-      if(lineCtx) {
-        lineCtx.canvas.width = containerRef.current.offsetWidth;
-        lineCtx.canvas.height = containerRef.current.offsetWidth;
-      }
       drawBackground();
       drawPlane();
-      animatePlaneForward();
     }
   }, [containerRef, canvasRef]);
 
@@ -78,16 +122,16 @@ const GameView: FC = () => {
     if (canvasRef.current && imageRef.current) {
       const ctx = canvasRef.current.getContext('2d');
       if (ctx) {
-        ctx.drawImage(imageRef.current, 10, ctx.canvas.height * 0.8, 75, 37);
+        ctx.drawImage(imageRef.current, 10, ctx.canvas.height-37, 75, 37);
       }
     }
   };
 
   // animate plane from bottom to top right corner of the canvas
   const animatePlaneForward = () => {
-    let yPos = canvasRef.current ? canvasRef.current.height * 0.8 : 0;
+    let yPos = canvasRef.current ? canvasRef.current.height * 0.8 : 50;
     let xPos = 0;
-    let progress = 100;
+    const progress = 100;
     const color = 'red';
     const width = 3;
     const startX = 100;
@@ -112,72 +156,44 @@ const GameView: FC = () => {
           ctx.stroke();
           ctx.fillStyle = 'rgba(241,4,4,0.5)';
           ctx.fill();
-          if(xPos > canvasRef.current.width * 0.85) {
-            yPos += yPos * 0.1
+          if(gameState === 'PLAYING' && yPos > 10 && xPos < canvasRef.current.width * 0.85) {
+            if(xPos > canvasRef.current.width * 0.85) {
+              yPos += yPos * 0.1
 
-          } else {
-            yPos = ctx.canvas.height - (xPos * ctx.canvas.height / ctx.canvas.width);
-            xPos += 1.5;
+            } else {
+              yPos = ctx.canvas.height - (xPos * ctx.canvas.height / ctx.canvas.width);
+              xPos += 1.5;
+            }
+
+          } else if(gameState === 'ENDED') {
+            xPos += 2;
           }
 
         }
+        requestAnimationFrame(animate);
 
-        //animate only until the plane reaches the top of the canvas
-        if(yPos > 10 && xPos < canvasRef.current.width * 0.85) {
-          requestAnimationFrame(animate);
+      }
+    };
+
+    const animateOut = () => {
+      if (canvasRef.current && imageRef.current) {
+        const ctx = canvasRef.current.getContext('2d');
+        if (ctx) {
+          ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+          ctx.drawImage(imageRef.current, xPos, yPos, 75, 37);
+          xPos += 2;
+          if(xPos < canvasRef.current.width * 1.5) {
+            requestAnimationFrame(animateOut)
+          }
         }
       }
-    };
-    // Define the function that draws the partial line
-    const drawLine = ()=> {
-      const ctx = lineRef.current?.getContext('2d');
-      const canvas = lineRef.current;
-      if(!ctx || !canvas) {
-        return;
-      }
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      // Set the stroke style
-      ctx.strokeStyle = color;
-      ctx.lineWidth = width;
-
-      // Begin the path
-      ctx.beginPath();
-
-      // Move to the start point
-      ctx.moveTo(startX, startY);
-
-      // Calculate the current point based on the progress
-      // Draw the arc using the arcTo method
-      ctx.arcTo(
-        startX + radius,
-        startY,
-        xPos,
-        yPos - radius,
-        radius
-      );
-
-
-      // Line to the current point
-      // ctx.lineTo(currentX, currentY);
-
-      // Stroke the path
-      ctx.stroke();
-      ctx.save();
-
-      // Decrease the progress by 0.01
-      progress -= 0.01; // Changed to negative
-
-      // Check if the progress is greater than or equal to zero
-      if (progress >= 0) { // Changed to zero
-        // Request the next frame
-        requestAnimationFrame(drawLine);
-      }
-    };
-    // drawLine();
-    animate();
+    }
+    if(gameState === 'PLAYING') {
+      animate();
+    } else if(gameState === 'ENDED') {
+      animateOut();
+    }
   };
-
 
 
   return (
@@ -190,6 +206,10 @@ const GameView: FC = () => {
       </canvas>
       <canvas ref={lineRef} style={{  position: 'absolute', left: 0, top: 0, zIndex: 1, borderRadius: 12 }}></canvas>
       <canvas ref={bgCanvasRef} style={{  position: 'absolute', left: 0, top: 0, zIndex: 1, borderRadius: 12 }}></canvas>
+      <Counter min={min} max={multiplier} width={canvasWidth} height={canvasHeight}  />
+      <div>
+        <button onClick={startGame} css={{padding: 16, border: 'none'}}>Start</button>
+      </div>
     </div>
 
   );

@@ -1,10 +1,12 @@
-import {ComponentPropsWithoutRef, FC, useEffect, useRef, useState} from "react";
+import {ComponentPropsWithoutRef, FC, RefObject, useEffect, useRef, useState} from "react";
 import PlaneImage from '../assets/plane.svg';
 import BgImage from '../assets/canvas-bg.svg';
+import SpinnerImage from '../assets/spinner.svg';
 import {css} from "@emotion/react";
 import {GRADIENTS} from "../styles/colors.ts";
 import {getRandomNumber} from "../utils/generators.ts";
-import {GameState} from "../types/game.type.ts";
+import {IGameState} from "../types/game.type.ts";
+
 
 const gameStyles = css({
   width: '100%',
@@ -16,30 +18,42 @@ const gameStyles = css({
   canvas: {
     position: 'absolute',
     top: 16,
-    left: 16
+    left: 16,
+    ".bg-canvas" : {
+      opacity: 0,
+      transition: 'opacity 0.5s ease-in-out'
+    }
   }
 })
-export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = (() => {
+export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const bgCanvasRef = useRef<HTMLCanvasElement>(null);
   const textCanvasRef = useRef<HTMLCanvasElement>(null);
+  const waitingCanvasRef = useRef<HTMLCanvasElement>(null);
   // create a canvas image source
   const imageRef = useRef<HTMLImageElement>(new Image());
   const backgroundRef = useRef<HTMLImageElement>(new Image());
+  const spinnerRef = useRef<HTMLImageElement>(new Image());
   imageRef.current.src = PlaneImage;
   backgroundRef.current.src = BgImage;
   backgroundRef.current.style.zIndex = '-1';
+  spinnerRef.current.src = SpinnerImage;
 
   let currentMultiplier = 1;
-
 
   const [canvasWidth, setCanvasWidth] = useState(300);
   const [canvasHeight, setCanvasHeight] = useState(300);
 
-  const [gameState, setGameState] = useState('WAITING');
+  const [gameState, setGameState] = useState<IGameState>('WAITING');
   const [userMultiplier, setUserMultiplier] = useState(1);
   const [mainMultiplier, setMainMultiplier] = useState(getRandomNumber(1,8));
+  const [userBetAmount, setUserBetAmount] = useState(0);
+
+  const [backgroundFrameId, setBackgroundFrameId] = useState(0);
+  const [planeFrameId, setPlaneFrameId] = useState(0);
+  const [textFrameId, setTextFrameId] = useState(0);
+  const [spinnerFrameId, setSpinnerFrameId] = useState(0);
 
   const [planeXPos, setPlaneXPos] = useState(0);
 
@@ -49,6 +63,15 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = (() => {
 
   const startGame = () => {
     setGameState('PLAYING');
+  }
+
+  const clearCanvas = (targetCanvasRef: RefObject<HTMLCanvasElement>) => {
+    if(targetCanvasRef.current) {
+      const ctx = targetCanvasRef.current.getContext('2d');
+      if(ctx) {
+        ctx.clearRect(0, 0, targetCanvasRef.current.width, targetCanvasRef.current.height);
+      }
+    }
   }
 
   const drawBackground = () => {
@@ -77,9 +100,51 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = (() => {
             angle = 0;
           }
         }
-        requestAnimationFrame(animate);
+        const frameID = requestAnimationFrame(animate);
+        setBackgroundFrameId(frameID);
+      } else {
+        clearCanvas(bgCanvasRef);
       }
     }
+    
+    animate();
+    
+  }
+
+  const drawWaiting = () => {
+    let angle = 0;
+
+    const animate = () => {
+      const canvas = waitingCanvasRef.current;
+      if (!canvas) return;
+
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.save();
+
+      ctx.translate(canvas.width / 2, canvas.height / 2);
+      ctx.rotate(angle);
+      ctx.drawImage(
+        spinnerRef.current,
+        -spinnerRef.current.width / 2,
+        -spinnerRef.current.height / 2,
+      );
+      ctx.restore();
+
+      angle += 0.14;
+
+
+      ctx.font = '18px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#c9c9c9';
+      ctx.fillText('Waiting for next round', canvas.width / 2, canvas.height * 0.85);
+      ctx.canvas.style.background = 'rgba(0,0,0,0.5)';
+      const frameId = requestAnimationFrame(animate);
+      setSpinnerFrameId(frameId);
+    }
+
     animate()
 
   }
@@ -100,7 +165,7 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = (() => {
 
       if (canvasRef.current && imageRef.current) {
         const ctx = canvasRef.current.getContext('2d');
-        if (ctx){
+        if (ctx && gameState === 'PLAYING') {
           ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
           ctx.drawImage(imageRef.current, xPos, yPos-30, 75, 37);
           ctx.beginPath();
@@ -109,18 +174,19 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = (() => {
             ctx.lineTo(path[i].x, path[i].y);
           }
           ctx.lineTo(xPos, ctx.canvas.height);
-          ctx.closePath()
+          ctx.closePath();
           ctx.strokeStyle = 'rgba(241,4,4,0.5)';
           ctx.stroke();
           ctx.fillStyle = 'rgba(241,4,4,0.3)';
           ctx.fill();
           if( yPos > 50 && xPos < canvasRef.current.width * 0.85) {
             const xOffset = xPos / (canvasRef.current.width * 0.85); // Normalize x position for curve calculation
-            yPos = canvasRef.current.height - (canvasRef.current.height * Math.pow(xOffset, 2)); // Parabolic equation
+            yPos = canvasRef.current.height - canvasRef.current.height * Math.pow(xOffset, 2); // Parabolic equation
             xPos += 1.5;
             setPlaneXPos(xPos);
             path.push({x: xPos, y: yPos});
-            requestAnimationFrame(animate);
+            const frameID = requestAnimationFrame(animate);
+            setPlaneFrameId(frameID);
           }
         }
       }
@@ -129,13 +195,8 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = (() => {
     animate()
   };
 
-  useEffect(() => {
-    console.log('planeXPos', planeXPos)
-  }, [planeXPos])
 
   const animatePlaneOut = () => {
-    const canvasCtx = canvasRef.current?.getContext('2d');
-    console.log('canvasCtx', canvasCtx)
     const animate = () => {
       if (canvasRef.current && imageRef.current) {
         const ctx = canvasRef.current.getContext('2d');
@@ -165,9 +226,9 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = (() => {
           ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
           ctx.save();
           ctx.fillStyle = 'white';
-          ctx.font = 'bold 70px Arial';
+          ctx.font = 'bold 72px Arial';
           ctx.textAlign = 'center';
-          ctx.fillText(currentMultiplier.toFixed(2), ctx.canvas.width / 2, ctx.canvas.height / 2);
+          ctx.fillText(`${currentMultiplier.toFixed(2)}x`, ctx.canvas.width / 2, ctx.canvas.height / 2);
           ctx.restore();
           currentMultiplier += 0.01;
         }
@@ -190,20 +251,26 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = (() => {
       const ctx = canvasRef.current.getContext('2d');
       const bgCtx = bgCanvasRef.current?.getContext('2d');
       const textCtx = textCanvasRef.current?.getContext('2d');
+      const waitingCtx = waitingCanvasRef.current?.getContext('2d');
       if (ctx) {
         ctx.canvas.width = containerRef.current.clientWidth;
         ctx.canvas.height = containerRef.current.clientWidth;
-        ctx.canvas.style.borderRadius = 8 + 'px';
+        ctx.canvas.style.borderRadius = `8px`;
       }
       if(bgCtx) {
         bgCtx.canvas.width = containerRef.current.clientWidth;
         bgCtx.canvas.height = containerRef.current.clientWidth;
-
+        bgCtx.canvas.style.borderRadius = `8px`;
       }
       if(textCtx) {
         textCtx.canvas.width = containerRef.current.clientWidth;
         textCtx.canvas.height = containerRef.current.clientWidth;
-
+        textCtx.canvas.style.borderRadius = `8px`;
+      }
+      if(waitingCtx) {
+        waitingCtx.canvas.width = containerRef.current.clientWidth;
+        waitingCtx.canvas.height = containerRef.current.clientWidth;
+        waitingCtx.canvas.style.borderRadius = `8px`;
       }
     }
   }, [canvasRef, containerRef]);
@@ -213,10 +280,16 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = (() => {
 
     switch (gameState) {
       case 'WAITING':
-        setMainMultiplier(getRandomNumber(1,8));
+        clearCanvas(canvasRef);
+        clearCanvas(textCanvasRef);
         drawPlane();
+        drawWaiting()
+        setTimeout(() => {
+          setGameState('PLAYING');
+        }, 8000)
         break;
       case 'PLAYING':
+        setMainMultiplier(getRandomNumber(1,8));
         drawBackground();
         animateMultiplier();
         animatePlaneForward();
@@ -224,7 +297,10 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = (() => {
       case 'EXITED':
         break;
       case 'ENDED':
+        cancelAnimationFrame(planeFrameId);
         animatePlaneOut()
+        cancelAnimationFrame(backgroundFrameId);
+        clearCanvas(bgCanvasRef);
         setTimeout(() => {
           setGameState('WAITING');
         }, 5000)
@@ -233,16 +309,15 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = (() => {
     }
   }, [gameState])
 
-  return (
-    <div css={[gameStyles, {minHeight: canvasHeight}]}>
-      <div ref={containerRef} css={{width: '100%', height: canvasHeight, background: GRADIENTS.dark, borderRadius: 8}}>
-        <canvas ref={bgCanvasRef} />
-        <canvas ref={canvasRef} />
-        <canvas ref={textCanvasRef} />
-      </div>
-      <div>
-        <button onClick={() => startGame()}>Start Game</button>
-      </div>
+  return <div css={[gameStyles, {minHeight: canvasHeight, minWidth: canvasWidth}]}>
+    <div ref={containerRef} css={{width: '100%', height: canvasHeight, background: GRADIENTS.dark, borderRadius: 8}}>
+      <canvas className="bg-canvas" ref={bgCanvasRef} />
+      <canvas ref={canvasRef} />
+      <canvas ref={textCanvasRef} />
+      <canvas style={{display: gameState === 'WAITING' ? 'block': 'none'}} ref={waitingCanvasRef}/>
     </div>
-  )
-})
+    <div>
+      <button disabled={gameState !== 'WAITING'} onClick={() => startGame()}>Start Game</button>
+    </div>
+  </div>
+}

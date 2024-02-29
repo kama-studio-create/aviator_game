@@ -2,7 +2,7 @@ import {useRef, useEffect, FC, useState} from 'react';
 import PlaneImage from '../assets/plane.svg';
 import BgImage from '../assets/canvas-bg.svg';
 import {GRADIENTS} from "../styles/colors.ts";
-import {GameState} from "../types/game.type.ts";
+import {IGameState} from "../types/game.type.ts";
 import Counter from "./Counter.tsx";
 import {getRandomNumber} from "../utils/generators.ts";
 
@@ -10,7 +10,7 @@ import {getRandomNumber} from "../utils/generators.ts";
 const GameView: FC = () => {
   const min = 1;
   const max = 8;
-  const [gameState, setGameState] = useState<GameState>('WAITING');
+  const [gameState, setGameState] = useState<IGameState>('WAITING');
   let multiplier = getRandomNumber(min, max);
   const [userMultiplier, setUserMultiplier] = useState(1);
   const [currentMultiplier, setCurrentMultiplier] = useState(1);

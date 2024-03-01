@@ -9,7 +9,6 @@ const GameContainerStyles = css({
   padding: 8,
   borderRadius: 8,
   [mq[0]]: {
-    height: window.innerWidth,
     marginBlock: 'auto',
   }
 });

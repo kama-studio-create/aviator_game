@@ -1,4 +1,4 @@
-import {ComponentPropsWithoutRef, FC, RefObject, useEffect, useRef, useState} from "react";
+import {ComponentPropsWithoutRef, FC, useEffect, useRef, useState} from "react";
 import PlaneImage from '../assets/plane.svg';
 import BgImage from '../assets/canvas-bg.svg';
 import SpinnerImage from '../assets/spinner.svg';
@@ -6,6 +6,7 @@ import {css} from "@emotion/react";
 import {GRADIENTS} from "../styles/colors.ts";
 import {getRandomNumber} from "../utils/generators.ts";
 import {IGameState} from "../types/game.type.ts";
+import useClearCanvas from "../hooks/useClearCanvas.ts";
 
 
 const gameStyles = css({
@@ -23,15 +24,24 @@ const gameStyles = css({
       opacity: 0,
       transition: 'opacity 0.5s ease-in-out'
     }
-  }
+  },
+
 })
+
+
 export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const bgCanvasRef = useRef<HTMLCanvasElement>(null);
   const textCanvasRef = useRef<HTMLCanvasElement>(null);
   const waitingCanvasRef = useRef<HTMLCanvasElement>(null);
-  // create a canvas image source
+
+  const clearCanvas = useClearCanvas({canvasRef});
+  const clearWaitingCanvas = useClearCanvas({canvasRef: waitingCanvasRef});
+  const clearTextCanvas = useClearCanvas({canvasRef: textCanvasRef});
+  const clearBgCanvas = useClearCanvas({canvasRef: bgCanvasRef})
+
+
   const imageRef = useRef<HTMLImageElement>(new Image());
   const backgroundRef = useRef<HTMLImageElement>(new Image());
   const spinnerRef = useRef<HTMLImageElement>(new Image());
@@ -46,33 +56,21 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
   const [canvasHeight, setCanvasHeight] = useState(300);
 
   const [gameState, setGameState] = useState<IGameState>('WAITING');
-  const [userMultiplier, setUserMultiplier] = useState(1);
+
   const [mainMultiplier, setMainMultiplier] = useState(getRandomNumber(1,8));
-  const [userBetAmount, setUserBetAmount] = useState(0);
+
 
   const [backgroundFrameId, setBackgroundFrameId] = useState(0);
   const [planeFrameId, setPlaneFrameId] = useState(0);
-  const [textFrameId, setTextFrameId] = useState(0);
   const [spinnerFrameId, setSpinnerFrameId] = useState(0);
 
   const [planeXPos, setPlaneXPos] = useState(0);
+  const [planeYPos, setPlaneYPos] = useState(0);
 
 
   let yPos = canvasRef.current ? canvasRef.current.height * 0.75 : 50;
   let xPos = 0;
 
-  const startGame = () => {
-    setGameState('PLAYING');
-  }
-
-  const clearCanvas = (targetCanvasRef: RefObject<HTMLCanvasElement>) => {
-    if(targetCanvasRef.current) {
-      const ctx = targetCanvasRef.current.getContext('2d');
-      if(ctx) {
-        ctx.clearRect(0, 0, targetCanvasRef.current.width, targetCanvasRef.current.height);
-      }
-    }
-  }
 
   const drawBackground = () => {
     let angle = 0;
@@ -102,18 +100,15 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
         }
         const frameID = requestAnimationFrame(animate);
         setBackgroundFrameId(frameID);
-      } else {
-        clearCanvas(bgCanvasRef);
       }
     }
-    
     animate();
-    
   }
 
   const drawWaiting = () => {
     let angle = 0;
-
+    let progress = 0;
+    const startTime = Date.now();
     const animate = () => {
       const canvas = waitingCanvasRef.current;
       if (!canvas) return;
@@ -131,22 +126,36 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
         -spinnerRef.current.width / 2,
         -spinnerRef.current.height / 2,
       );
+
+
+      const progressInterval = setInterval(() => {
+        const elapsedTime = Date.now() - startTime;
+        progress = Math.min(elapsedTime / 8000, 1) * 100;
+
+        if (progress >= 100) {
+          clearInterval(progressInterval);
+        }
+      }, 50);
+
+
       ctx.restore();
-
       angle += 0.14;
-
-
       ctx.font = '18px sans-serif';
       ctx.textAlign = 'center';
       ctx.fillStyle = '#c9c9c9';
       ctx.fillText('Waiting for next round', canvas.width / 2, canvas.height * 0.85);
       ctx.canvas.style.background = 'rgba(0,0,0,0.5)';
+      ctx.fillStyle = 'red';
+      ctx.fillRect(
+        canvas.width / 2 - 100,  // Center horizontally
+        canvas.height * 0.75, // Below the image
+        progress * 2,         // 200 pixels wide at max
+        7                    // Height of bar
+      );
       const frameId = requestAnimationFrame(animate);
       setSpinnerFrameId(frameId);
     }
-
     animate()
-
   }
 
   const drawPlane = () => {
@@ -158,63 +167,66 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
     }
   }
 
-  const animatePlaneForward = () => {
+  const animatePlane = () => {
     const path : {x: number, y: number}[] = [];
+    let frameID = 0;
+    let x = planeXPos
     const animate = () => {
-
-
-      if (canvasRef.current && imageRef.current) {
+      const currentGameState = gameState;
+      if(canvasRef.current && imageRef.current) {
         const ctx = canvasRef.current.getContext('2d');
-        if (ctx && gameState === 'PLAYING') {
-          ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-          ctx.drawImage(imageRef.current, xPos, yPos-30, 75, 37);
-          ctx.beginPath();
-          ctx.moveTo(0, ctx.canvas.height);
-          for (let i = 0; i < path.length; i++) {
-            ctx.lineTo(path[i].x, path[i].y);
-          }
-          ctx.lineTo(xPos, ctx.canvas.height);
-          ctx.closePath();
-          ctx.strokeStyle = 'rgba(241,4,4,0.5)';
-          ctx.stroke();
-          ctx.fillStyle = 'rgba(241,4,4,0.3)';
-          ctx.fill();
-          if( yPos > 50 && xPos < canvasRef.current.width * 0.85) {
-            const xOffset = xPos / (canvasRef.current.width * 0.85); // Normalize x position for curve calculation
-            yPos = canvasRef.current.height - canvasRef.current.height * Math.pow(xOffset, 2); // Parabolic equation
-            xPos += 1.5;
-            setPlaneXPos(xPos);
-            path.push({x: xPos, y: yPos});
-            const frameID = requestAnimationFrame(animate);
-            setPlaneFrameId(frameID);
-          }
-        }
-      }
-    };
+        if(!ctx) return;
+        switch (currentGameState) {
+          case 'WAITING' :
+            cancelAnimationFrame(planeFrameId);
+            clearCanvas();
+            break;
+          case 'PLAYING':
+            ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+            ctx.drawImage(imageRef.current, xPos, yPos-37, 75, 37);
+            ctx.beginPath();
+            ctx.moveTo(0, ctx.canvas.height);
+            for (let i = 0; i < path.length; i++) {
+              ctx.lineTo(path[i].x, path[i].y);
+            }
+            ctx.lineTo(xPos, ctx.canvas.height);
+            ctx.closePath();
+            ctx.strokeStyle = 'rgba(241,4,4,0.8)';
+            ctx.stroke();
+            ctx.fillStyle = 'rgba(241,4,4,0.5)';
+            ctx.fill();
+            if( yPos > 100 && xPos < canvasRef.current.width * 0.85) {
+              const xOffset = xPos / (canvasRef.current.width * 0.85); // Normalize x position for curve calculation
+              yPos = canvasRef.current.height - canvasRef.current.height * Math.pow(xOffset, 2); // Parabolic equation
+              xPos += 1.5;
+              x +=1.5;
+              setPlaneXPos(xPos);
+              setPlaneYPos(yPos);
+              path.push({x: xPos, y: yPos});
 
-    animate()
-  };
+            }
 
-
-  const animatePlaneOut = () => {
-    const animate = () => {
-      if (canvasRef.current && imageRef.current) {
-        const ctx = canvasRef.current.getContext('2d');
-        if (!ctx) {
-          return;
+            break;
+          case 'ENDED':
+            cancelAnimationFrame(frameID);
+            ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+            ctx.drawImage(imageRef.current, x, planeYPos - 37, 75, 37);
+            if(x < ctx.canvas.width * 1.5) {
+              x += 6;
+              setPlaneXPos(x)
+            }
+            break;
         }
-        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-        ctx.drawImage(imageRef.current, xPos, yPos-37, 75, 37);
-        xPos += 10;
-        yPos -= 0.5;
-        setPlaneXPos(xPos)
-        if(xPos < canvasRef.current.width * 1.5) {
-          requestAnimationFrame(animate);
-        }
+        frameID = requestAnimationFrame(animate);
+        setPlaneFrameId(frameID);
       }
     }
     animate()
   }
+
+
+
+
 
 
   const animateMultiplier = () => {
@@ -225,7 +237,7 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
         if (ctx) {
           ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
           ctx.save();
-          ctx.fillStyle = 'white';
+          ctx.fillStyle = currentMultiplier < mainMultiplier ? 'white': 'red';
           ctx.font = 'bold 72px Arial';
           ctx.textAlign = 'center';
           ctx.fillText(`${currentMultiplier.toFixed(2)}x`, ctx.canvas.width / 2, ctx.canvas.height / 2);
@@ -272,35 +284,34 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
         waitingCtx.canvas.height = containerRef.current.clientWidth;
         waitingCtx.canvas.style.borderRadius = `8px`;
       }
+      animatePlane();
     }
   }, [canvasRef, containerRef]);
 
 
   useEffect(() => {
-
+    animatePlane();
     switch (gameState) {
       case 'WAITING':
-        clearCanvas(canvasRef);
-        clearCanvas(textCanvasRef);
+        clearTextCanvas();
         drawPlane();
         drawWaiting()
         setTimeout(() => {
           setGameState('PLAYING');
-        }, 8000)
+        }, 6000)
         break;
       case 'PLAYING':
-        setMainMultiplier(getRandomNumber(1,8));
+        clearWaitingCanvas()
+        setMainMultiplier(getRandomNumber(1,3));
         drawBackground();
         animateMultiplier();
-        animatePlaneForward();
+
         break;
       case 'EXITED':
         break;
       case 'ENDED':
-        cancelAnimationFrame(planeFrameId);
-        animatePlaneOut()
         cancelAnimationFrame(backgroundFrameId);
-        clearCanvas(bgCanvasRef);
+        clearBgCanvas();
         setTimeout(() => {
           setGameState('WAITING');
         }, 5000)
@@ -309,15 +320,19 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
     }
   }, [gameState])
 
-  return <div css={[gameStyles, {minHeight: canvasHeight, minWidth: canvasWidth}]}>
-    <div ref={containerRef} css={{width: '100%', height: canvasHeight, background: GRADIENTS.dark, borderRadius: 8}}>
-      <canvas className="bg-canvas" ref={bgCanvasRef} />
-      <canvas ref={canvasRef} />
-      <canvas ref={textCanvasRef} />
-      <canvas style={{display: gameState === 'WAITING' ? 'block': 'none'}} ref={waitingCanvasRef}/>
+  return (
+
+    <div css={[gameStyles, {minHeight: canvasHeight, minWidth: canvasWidth}]}>
+      <div ref={containerRef} css={{width: '100%', minHeight: canvasHeight, background: GRADIENTS.dark, borderRadius: 8}}>
+        <canvas className="bg-canvas" ref={bgCanvasRef} />
+        <canvas ref={canvasRef} />
+        <canvas ref={textCanvasRef} />
+        <canvas style={{display: gameState === 'WAITING' ? 'block': 'none'}} ref={waitingCanvasRef}/>
+        <div style={{height: canvasHeight, width: canvasWidth}}></div>
+      </div>
+
     </div>
-    <div>
-      <button disabled={gameState !== 'WAITING'} onClick={() => startGame()}>Start Game</button>
-    </div>
-  </div>
+
+
+  )
 }

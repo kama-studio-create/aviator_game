@@ -5,6 +5,7 @@ import Header from "./Header.tsx";
 import BetsContainer from "./BetsContainer.tsx";
 import BgImage from '../../assets/bg.jpg'
 import {breakpoints, mq} from "../../styles/breakpoints.ts";
+import {TranscluscentBackgroundStyles} from "../../styles/common.ts";
 
 interface LayoutProps extends ComponentProps<"div"> {
   isAuthenticated?: boolean
@@ -26,7 +27,7 @@ const ContainerStyles = css({
   height: '100%',
   padding: 4,
   [mq[0]]: {
-    height: 'auto',
+    // height: 'auto',
   }
 })
 
@@ -51,7 +52,7 @@ const GameContainerStyles = css({
     gridTemplateColumns: '1fr',
     gap: 0,
     height: 'auto',
-  }
+  },
 })
 
 const Layout: FC<LayoutProps>  = ({children, ...props}) => {
@@ -60,11 +61,10 @@ const Layout: FC<LayoutProps>  = ({children, ...props}) => {
       <div css={MainContainerStyles}>
         <div css={ContainerStyles} >
           <Header />
-          <div css={GameContainerStyles}>
+          <div css={[GameContainerStyles, TranscluscentBackgroundStyles]}>
             {window.innerWidth > breakpoints[0] && <BetsContainer/>}
             {children}
           </div>
-
         </div>
         <Sidebar />
       </div>

@@ -224,23 +224,31 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
     animate()
   }
 
-
-
-
-
-
   const animateMultiplier = () => {
-
+    let currentState = gameState
     const animate = () => {
-      if (textCanvasRef.current) {
+      currentState = gameState;
+      if (textCanvasRef.current && currentState !== 'WAITING') {
         const ctx = textCanvasRef.current.getContext('2d');
         if (ctx) {
           ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
           ctx.save();
-          ctx.fillStyle = currentMultiplier < mainMultiplier ? 'white': 'red';
-          ctx.font = 'bold 72px Arial';
-          ctx.textAlign = 'center';
-          ctx.fillText(`${currentMultiplier.toFixed(2)}x`, ctx.canvas.width / 2, ctx.canvas.height / 2);
+          if(currentState === 'ENDED') {
+            ctx.fillStyle = '#f7f7f7';
+            ctx.font = 'bold 32px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(`FLEW AT`, ctx.canvas.width / 2, ctx.canvas.height / 2.3);ctx.fillStyle = currentMultiplier < mainMultiplier ? 'white': 'red';
+            ctx.fillStyle = 'red';
+            ctx.font = 'bold 72px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(`${mainMultiplier.toFixed(2)}x`, ctx.canvas.width / 2, ctx.canvas.height / 1.7);
+          } else if(currentState === 'PLAYING') {
+            ctx.fillStyle = currentMultiplier < mainMultiplier ? 'white': 'red';
+            ctx.font = 'bold 72px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(`${currentMultiplier.toFixed(2)}x`, ctx.canvas.width / 2, ctx.canvas.height / 1.7);
+          }
+
           ctx.restore();
           currentMultiplier += 0.01;
         }
@@ -291,6 +299,7 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
 
   useEffect(() => {
     animatePlane();
+    animateMultiplier();
     switch (gameState) {
       case 'WAITING':
         clearTextCanvas();

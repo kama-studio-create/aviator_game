@@ -57,7 +57,7 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
 
   const [gameState, setGameState] = useState<IGameState>('WAITING');
 
-  const [mainMultiplier, setMainMultiplier] = useState(getRandomNumber(1,8));
+  const [mainMultiplier, setMainMultiplier] = useState(1);
 
 
   const [backgroundFrameId, setBackgroundFrameId] = useState(0);
@@ -252,7 +252,7 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
           ctx.restore();
           currentMultiplier += 0.01;
         }
-        if(currentMultiplier < mainMultiplier) {
+        if(currentMultiplier < mainMultiplier && currentState === 'PLAYING') {
           requestAnimationFrame(animate);
         } else {
           setGameState("ENDED");
@@ -298,27 +298,27 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
 
 
   useEffect(() => {
-    animatePlane();
-    animateMultiplier();
     switch (gameState) {
       case 'WAITING':
         clearTextCanvas();
         drawPlane();
         drawWaiting()
         setTimeout(() => {
+          setMainMultiplier(getRandomNumber(1,8));
           setGameState('PLAYING');
         }, 6000)
         break;
       case 'PLAYING':
         clearWaitingCanvas()
-        setMainMultiplier(getRandomNumber(1,3));
         drawBackground();
         animateMultiplier();
-
+        animatePlane()
         break;
       case 'EXITED':
         break;
       case 'ENDED':
+        animatePlane();
+        animateMultiplier();
         cancelAnimationFrame(backgroundFrameId);
         clearBgCanvas();
         setTimeout(() => {

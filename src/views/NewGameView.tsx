@@ -7,6 +7,7 @@ import {GRADIENTS} from "../styles/colors.ts";
 import {getRandomNumber} from "../utils/generators.ts";
 import {IGameState} from "../types/game.type.ts";
 import useClearCanvas from "../hooks/useClearCanvas.ts";
+import {breakpoints} from "../styles/breakpoints.ts";
 
 
 const gameStyles = css({
@@ -70,6 +71,9 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
 
   let yPos = canvasRef.current ? canvasRef.current.height * 0.75 : 50;
   let xPos = 0;
+
+  const planeWidth = window.innerWidth > breakpoints[0] ? 150 : 75;
+  const planeHeight = window.innerWidth > breakpoints[0] ? 74: 37;
 
 
   const drawBackground = () => {
@@ -162,7 +166,7 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
     if (canvasRef.current && imageRef.current) {
       const ctx = canvasRef.current.getContext('2d');
       if (ctx) {
-        ctx.drawImage(imageRef.current, 10, ctx.canvas.height-37, 75, 37);
+        ctx.drawImage(imageRef.current, 10, ctx.canvas.height-planeHeight, planeWidth, planeHeight);
       }
     }
   }
@@ -170,9 +174,10 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
   const animatePlane = () => {
     const path : {x: number, y: number}[] = [];
     let frameID = 0;
-    let x = planeXPos
+    let x = planeXPos;
+    let currentGameState: IGameState = 'WAITING'
     const animate = () => {
-      const currentGameState = gameState;
+      currentGameState = gameState;
       if(canvasRef.current && imageRef.current) {
         const ctx = canvasRef.current.getContext('2d');
         if(!ctx) return;
@@ -183,7 +188,7 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
             break;
           case 'PLAYING':
             ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-            ctx.drawImage(imageRef.current, xPos, yPos-37, 75, 37);
+            ctx.drawImage(imageRef.current, xPos, yPos-planeHeight, planeWidth, planeHeight);
             ctx.beginPath();
             ctx.moveTo(0, ctx.canvas.height);
             for (let i = 0; i < path.length; i++) {
@@ -210,10 +215,12 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
           case 'ENDED':
             cancelAnimationFrame(frameID);
             ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-            ctx.drawImage(imageRef.current, x, planeYPos - 37, 75, 37);
+            ctx.drawImage(imageRef.current, x, planeYPos - planeHeight, planeWidth, planeHeight);
             if(x < ctx.canvas.width * 1.5) {
-              x += 6;
-              setPlaneXPos(x)
+              x += 12;
+              yPos -= 2;
+              setPlaneYPos(yPos);
+              setPlaneXPos(x);
             }
             break;
         }
@@ -223,7 +230,6 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
     }
     animate()
   }
-
   const animateMultiplier = () => {
     let currentState = gameState
     const animate = () => {
@@ -309,7 +315,8 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
         }, 6000)
         break;
       case 'PLAYING':
-        clearWaitingCanvas()
+        cancelAnimationFrame(spinnerFrameId);
+        clearWaitingCanvas();
         drawBackground();
         animateMultiplier();
         animatePlane()

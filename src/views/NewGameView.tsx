@@ -2,6 +2,8 @@ import {ComponentPropsWithoutRef, FC, useEffect, useRef, useState} from "react";
 import PlaneImage from '../assets/plane.svg';
 import BgImage from '../assets/canvas-bg.svg';
 import SpinnerImage from '../assets/spinner.svg';
+import AudioFile from '../assets/audio/audio.mp3';
+import BgAudioFile from '../assets/audio/bg_music.mp3'
 import {css} from "@emotion/react";
 import {GRADIENTS} from "../styles/colors.ts";
 import {getRandomNumber} from "../utils/generators.ts";
@@ -29,6 +31,8 @@ const gameStyles = css({
 
 })
 
+const imageRef = new Image();
+imageRef.src = PlaneImage;
 
 export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -36,6 +40,8 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
   const bgCanvasRef = useRef<HTMLCanvasElement>(null);
   const textCanvasRef = useRef<HTMLCanvasElement>(null);
   const waitingCanvasRef = useRef<HTMLCanvasElement>(null);
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const bgAudioRef = useRef<HTMLAudioElement>(null);
 
   const clearCanvas = useClearCanvas({canvasRef});
   const clearWaitingCanvas = useClearCanvas({canvasRef: waitingCanvasRef});
@@ -43,10 +49,9 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
   const clearBgCanvas = useClearCanvas({canvasRef: bgCanvasRef})
 
 
-  const imageRef = useRef<HTMLImageElement>(new Image());
   const backgroundRef = useRef<HTMLImageElement>(new Image());
   const spinnerRef = useRef<HTMLImageElement>(new Image());
-  imageRef.current.src = PlaneImage;
+
   backgroundRef.current.src = BgImage;
   backgroundRef.current.style.zIndex = '-1';
   spinnerRef.current.src = SpinnerImage;
@@ -55,6 +60,8 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
 
   const [canvasWidth, setCanvasWidth] = useState(300);
   const [canvasHeight, setCanvasHeight] = useState(300);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [hasInteracted, setHasInteracted] = useState(false);
 
   const [gameState, setGameState] = useState<IGameState>('WAITING');
 
@@ -75,7 +82,55 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
   const planeWidth = window.innerWidth > breakpoints[0] ? 150 : 75;
   const planeHeight = window.innerWidth > breakpoints[0] ? 74: 37;
 
+  const audioSprite = {
+    flyAway: [2000, 3000],
+    start: [5000, 2000]
+  }
 
+  const handlePlayBgAudio = () => {
+    if (!hasInteracted && bgAudioRef.current) {
+      bgAudioRef.current.play();
+      bgAudioRef.current.volume = 0.5;
+      setHasInteracted(true);
+    }
+  };
+
+  const playSegment = (segmentName: string) => {
+    const [startTime, duration] = audioSprite[segmentName];
+    if(!audioRef.current) return;
+    audioRef.current.currentTime = startTime / 1000;
+    audioRef.current.play();
+    setIsPlaying(true);
+
+    setTimeout(() => {
+      if(!audioRef.current) return;
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      setIsPlaying(false);
+    }, duration);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (isPlaying) {
+        if(!audioRef.current || !bgAudioRef.current) return;
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+      }
+    };
+  }, [isPlaying]);
+
+  useEffect(() => {
+    window.addEventListener('click', handlePlayBgAudio);
+    window.addEventListener('touchstart', handlePlayBgAudio);
+    window.addEventListener('keydown', handlePlayBgAudio);
+
+    return () => {
+      window.removeEventListener('click', handlePlayBgAudio);
+      window.removeEventListener('touchstart', handlePlayBgAudio);
+      window.removeEventListener('keydown', handlePlayBgAudio);
+    };
+  }, []);
   const drawBackground = () => {
     let angle = 0;
     const animate = () => {
@@ -163,10 +218,10 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
   }
 
   const drawPlane = () => {
-    if (canvasRef.current && imageRef.current) {
+    if (canvasRef.current && imageRef) {
       const ctx = canvasRef.current.getContext('2d');
       if (ctx) {
-        ctx.drawImage(imageRef.current, 10, ctx.canvas.height-planeHeight, planeWidth, planeHeight);
+        ctx.drawImage(imageRef, 10, ctx.canvas.height-planeHeight, planeWidth, planeHeight);
       }
     }
   }
@@ -178,7 +233,7 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
     let currentGameState: IGameState = 'WAITING'
     const animate = () => {
       currentGameState = gameState;
-      if(canvasRef.current && imageRef.current) {
+      if(canvasRef.current && imageRef) {
         const ctx = canvasRef.current.getContext('2d');
         if(!ctx) return;
         switch (currentGameState) {
@@ -188,7 +243,7 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
             break;
           case 'PLAYING':
             ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-            ctx.drawImage(imageRef.current, xPos, yPos-planeHeight, planeWidth, planeHeight);
+            ctx.drawImage(imageRef, xPos, yPos-planeHeight, planeWidth, planeHeight);
             ctx.beginPath();
             ctx.moveTo(0, ctx.canvas.height);
             for (let i = 0; i < path.length; i++) {
@@ -208,14 +263,13 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
               setPlaneXPos(xPos);
               setPlaneYPos(yPos);
               path.push({x: xPos, y: yPos});
-
             }
 
             break;
           case 'ENDED':
             cancelAnimationFrame(frameID);
             ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-            ctx.drawImage(imageRef.current, x, planeYPos - planeHeight, planeWidth, planeHeight);
+            ctx.drawImage(imageRef, x, planeYPos - planeHeight, planeWidth, planeHeight);
             if(x < ctx.canvas.width * 1.5) {
               x += 12;
               yPos -= 2;
@@ -315,6 +369,7 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
         }, 6000)
         break;
       case 'PLAYING':
+        playSegment("start");
         cancelAnimationFrame(spinnerFrameId);
         clearWaitingCanvas();
         drawBackground();
@@ -324,6 +379,7 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
       case 'EXITED':
         break;
       case 'ENDED':
+        playSegment("flyAway")
         animatePlane();
         animateMultiplier();
         cancelAnimationFrame(backgroundFrameId);
@@ -339,11 +395,14 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
   return (
 
     <div css={[gameStyles, {minHeight: canvasHeight, minWidth: canvasWidth}]}>
-      <div ref={containerRef} css={{width: '100%', minHeight: canvasHeight, background: GRADIENTS.dark, borderRadius: 8}}>
-        <canvas className="bg-canvas" ref={bgCanvasRef} />
-        <canvas ref={canvasRef} />
-        <canvas ref={textCanvasRef} />
-        <canvas style={{display: gameState === 'WAITING' ? 'block': 'none'}} ref={waitingCanvasRef}/>
+      <audio ref={bgAudioRef} src={BgAudioFile} loop />
+      <audio ref={audioRef} src={AudioFile}/>
+      <div ref={containerRef}
+        css={{width: '100%', minHeight: canvasHeight, background: GRADIENTS.dark, borderRadius: 8}}>
+        <canvas className="bg-canvas" ref={bgCanvasRef}/>
+        <canvas ref={canvasRef}/>
+        <canvas ref={textCanvasRef}/>
+        <canvas style={{display: gameState === 'WAITING' ? 'block' : 'none'}} ref={waitingCanvasRef}/>
         <div style={{height: canvasHeight, width: canvasWidth}}></div>
       </div>
 

@@ -1,7 +1,4 @@
 import {ComponentPropsWithoutRef, FC, useEffect, useRef, useState} from "react";
-import PlaneImage from '../assets/plane.svg';
-import BgImage from '../assets/canvas-bg.svg';
-import SpinnerImage from '../assets/spinner.svg';
 import AudioFile from '../assets/audio/audio.mp3';
 import BgAudioFile from '../assets/audio/bg_music.mp3'
 import {css} from "@emotion/react";
@@ -10,6 +7,8 @@ import {getRandomNumber} from "../utils/generators.ts";
 import {IGameState} from "../types/game.type.ts";
 import useClearCanvas from "../hooks/useClearCanvas.ts";
 import {breakpoints} from "../styles/breakpoints.ts";
+import {backgroundImage, plane1, planeSprites, spinnerImage} from "../common/images.ts";
+import {audioSprite} from "../common/audio.ts";
 
 
 const gameStyles = css({
@@ -31,8 +30,7 @@ const gameStyles = css({
 
 })
 
-const imageRef = new Image();
-imageRef.src = PlaneImage;
+
 
 export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -40,6 +38,7 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
   const bgCanvasRef = useRef<HTMLCanvasElement>(null);
   const textCanvasRef = useRef<HTMLCanvasElement>(null);
   const waitingCanvasRef = useRef<HTMLCanvasElement>(null);
+  const dotsCanvasRef = useRef<HTMLCanvasElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
   const bgAudioRef = useRef<HTMLAudioElement>(null);
 
@@ -47,14 +46,6 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
   const clearWaitingCanvas = useClearCanvas({canvasRef: waitingCanvasRef});
   const clearTextCanvas = useClearCanvas({canvasRef: textCanvasRef});
   const clearBgCanvas = useClearCanvas({canvasRef: bgCanvasRef})
-
-
-  const backgroundRef = useRef<HTMLImageElement>(new Image());
-  const spinnerRef = useRef<HTMLImageElement>(new Image());
-
-  backgroundRef.current.src = BgImage;
-  backgroundRef.current.style.zIndex = '-1';
-  spinnerRef.current.src = SpinnerImage;
 
   let currentMultiplier = 1;
 
@@ -72,8 +63,10 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
   const [planeFrameId, setPlaneFrameId] = useState(0);
   const [spinnerFrameId, setSpinnerFrameId] = useState(0);
 
-  const [planeXPos, setPlaneXPos] = useState(0);
-  const [planeYPos, setPlaneYPos] = useState(0);
+  const [dotPositions, setDotPositions] = useState<number[]>([]);
+
+
+  const [imagesLoaded, setImagesLoaded] = useState(false);
 
 
   let yPos = canvasRef.current ? canvasRef.current.height * 0.75 : 50;
@@ -82,10 +75,19 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
   const planeWidth = window.innerWidth > breakpoints[0] ? 150 : 75;
   const planeHeight = window.innerWidth > breakpoints[0] ? 74: 37;
 
-  const audioSprite = {
-    flyAway: [2000, 3000],
-    start: [5000, 2000]
-  }
+  const [planeXPos, setPlaneXPos] = useState(0);
+  const [planeYPos, setPlaneYPos] = useState(0);
+  const handleImageLoad = () => {
+    if (backgroundImage.complete && plane1.complete && spinnerImage.complete) {
+      setImagesLoaded(true);
+    }
+  };
+
+  useEffect(() => {
+    backgroundImage.onload = () => handleImageLoad();
+    plane1.onload = () => handleImageLoad();
+    spinnerImage.onload = () => handleImageLoad();
+  }, []);
 
   const handlePlayBgAudio = () => {
     if (!hasInteracted && bgAudioRef.current) {
@@ -96,6 +98,7 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
   };
 
   const playSegment = (segmentName: string) => {
+    if(!hasInteracted) return;
     const [startTime, duration] = audioSprite[segmentName];
     if(!audioRef.current) return;
     audioRef.current.currentTime = startTime / 1000;
@@ -144,7 +147,7 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
           ctx.rotate(angle);
           ctx.scale(1, -1)
           ctx.drawImage(
-            backgroundRef.current,
+            backgroundImage,
             -Math.floor(ctx.canvas.width * 3),
             -Math.floor(ctx.canvas.width * 3),
             ctx.canvas.width * 6,
@@ -181,9 +184,9 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
       ctx.translate(canvas.width / 2, canvas.height / 2);
       ctx.rotate(angle);
       ctx.drawImage(
-        spinnerRef.current,
-        -spinnerRef.current.width / 2,
-        -spinnerRef.current.height / 2,
+        spinnerImage,
+        -spinnerImage.width / 2,
+        -spinnerImage.height / 2,
       );
 
 
@@ -218,10 +221,10 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
   }
 
   const drawPlane = () => {
-    if (canvasRef.current && imageRef) {
+    if (canvasRef.current && plane1) {
       const ctx = canvasRef.current.getContext('2d');
       if (ctx) {
-        ctx.drawImage(imageRef, 10, ctx.canvas.height-planeHeight, planeWidth, planeHeight);
+        ctx.drawImage(plane1, 10, ctx.canvas.height-planeHeight, planeWidth, planeHeight);
       }
     }
   }
@@ -230,10 +233,11 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
     const path : {x: number, y: number}[] = [];
     let frameID = 0;
     let x = planeXPos;
-    let currentGameState: IGameState = 'WAITING'
+    let currentGameState: IGameState = 'WAITING';
+    let currentSprite = 0
     const animate = () => {
       currentGameState = gameState;
-      if(canvasRef.current && imageRef) {
+      if(canvasRef.current && plane1) {
         const ctx = canvasRef.current.getContext('2d');
         if(!ctx) return;
         switch (currentGameState) {
@@ -243,7 +247,7 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
             break;
           case 'PLAYING':
             ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-            ctx.drawImage(imageRef, xPos, yPos-planeHeight, planeWidth, planeHeight);
+            ctx.drawImage(planeSprites[currentSprite], xPos, yPos-planeHeight, planeWidth, planeHeight);
             ctx.beginPath();
             ctx.moveTo(0, ctx.canvas.height);
             for (let i = 0; i < path.length; i++) {
@@ -263,13 +267,18 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
               setPlaneXPos(xPos);
               setPlaneYPos(yPos);
               path.push({x: xPos, y: yPos});
+              if(currentSprite === planeSprites.length - 1) {
+                currentSprite = 0;
+              } else {
+                currentSprite += 1;
+              }
             }
 
             break;
           case 'ENDED':
             cancelAnimationFrame(frameID);
             ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-            ctx.drawImage(imageRef, x, planeYPos - planeHeight, planeWidth, planeHeight);
+            ctx.drawImage(planeSprites[currentSprite], x, planeYPos - planeHeight, planeWidth, planeHeight);
             if(x < ctx.canvas.width * 1.5) {
               x += 12;
               yPos -= 2;
@@ -323,6 +332,45 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
     animate()
   }
 
+  const animateDots = () => {
+    const dotSpacing = 40;
+    const dotRadius = 5;
+    const currentState = gameState;
+    const numDotsX = Math.floor(canvasWidth / dotSpacing) + 1;
+    const numDotsY = Math.floor(canvasHeight / dotSpacing) + 1;
+    let dotPositionsX = Array(numDotsY).fill(0);
+    const animationSpeed = 24;
+    const dotColor = 'white';
+    const initialPositions = Array(numDotsX).fill(canvasWidth + dotRadius);
+    setDotPositions(initialPositions);
+    const animate = () => {
+      if(dotsCanvasRef.current && currentState !== 'WAITING') {
+        const ctx = dotsCanvasRef.current.getContext('2d');
+        if(!ctx) return;
+        ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+        setDotPositions((prevPositions) =>
+          prevPositions.map((x) => (x - animationSpeed + canvasWidth) % canvasWidth)
+        );
+        dotPositionsX = dotPositionsX.map((x) => (x + 2) % (canvasWidth - dotRadius * 2));
+
+        for (let i = 0; i < numDotsX; i++) {
+          const x = dotPositions[i];
+          const y = canvasHeight - dotRadius; // Place dots on the bottom
+
+          ctx.beginPath();
+          ctx.arc(x, y, dotRadius, 0, Math.PI * 2);
+          ctx.fillStyle = dotColor;
+          ctx.fill();
+        }
+
+        requestAnimationFrame(animate);
+      }
+
+    }
+
+    animate();
+  }
+
 
   useEffect(()=> {
     if (canvasRef.current && containerRef.current) {
@@ -332,6 +380,7 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
       const bgCtx = bgCanvasRef.current?.getContext('2d');
       const textCtx = textCanvasRef.current?.getContext('2d');
       const waitingCtx = waitingCanvasRef.current?.getContext('2d');
+      const dotsCtx = dotsCanvasRef.current?.getContext('2d');
       if (ctx) {
         ctx.canvas.width = containerRef.current.clientWidth;
         ctx.canvas.height = containerRef.current.clientWidth;
@@ -352,12 +401,18 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
         waitingCtx.canvas.height = containerRef.current.clientWidth;
         waitingCtx.canvas.style.borderRadius = `8px`;
       }
+      if(dotsCtx) {
+        dotsCtx.canvas.width = containerRef.current.clientWidth;
+        dotsCtx.canvas.height = containerRef.current.clientWidth;
+        dotsCtx.canvas.style.borderRadius = `8px`;
+      }
       animatePlane();
     }
   }, [canvasRef, containerRef]);
 
 
   useEffect(() => {
+    if(!imagesLoaded) return;
     switch (gameState) {
       case 'WAITING':
         clearTextCanvas();
@@ -374,7 +429,8 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
         clearWaitingCanvas();
         drawBackground();
         animateMultiplier();
-        animatePlane()
+        animatePlane();
+        animateDots();
         break;
       case 'EXITED':
         break;
@@ -383,6 +439,7 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
         animatePlane();
         animateMultiplier();
         cancelAnimationFrame(backgroundFrameId);
+        // animateDots();
         clearBgCanvas();
         setTimeout(() => {
           setGameState('WAITING');
@@ -390,10 +447,9 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
         break;
       default: break;
     }
-  }, [gameState])
+  }, [gameState, imagesLoaded])
 
   return (
-
     <div css={[gameStyles, {minHeight: canvasHeight, minWidth: canvasWidth}]}>
       <audio ref={bgAudioRef} src={BgAudioFile} loop />
       <audio ref={audioRef} src={AudioFile}/>
@@ -402,10 +458,11 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
         <canvas className="bg-canvas" ref={bgCanvasRef}/>
         <canvas ref={canvasRef}/>
         <canvas ref={textCanvasRef}/>
+        <canvas ref={dotsCanvasRef}/>
+
         <canvas style={{display: gameState === 'WAITING' ? 'block' : 'none'}} ref={waitingCanvasRef}/>
         <div style={{height: canvasHeight, width: canvasWidth}}></div>
       </div>
-
     </div>
 
 

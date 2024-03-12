@@ -13,12 +13,15 @@ import {BORDER_RADIUS, PLANE_FRAME_RATE, PLANE_HEIGHT, PLANE_WIDTH} from "../com
 
 
 const gameStyles = css({
-  width: '100%', padding: 8, backgroundSize: 'cover', display: 'flex', flexDirection: 'column', gap: 16, canvas: {
-    position: 'absolute', top: 16, left: 16, ".bg-canvas": {
-      opacity: 0, transition: 'opacity 0.5s ease-in-out'
-    }
+  width: '100%',
+  padding: 8,
+  backgroundSize: 'cover',
+  display: 'flex',
+  flexDirection: 'column',
+  gap: 16,
+  canvas: {
+    position: 'absolute', top: 16, left: 16,
   },
-
 })
 
 
@@ -204,12 +207,14 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
               if (xPos > ctx.canvas.width * 0.7) {
                 if (currentPlaneDirection === 'UP') {
                   yPos += 0.4
+                  xPos += 0.4
                   if (steps === 160) {
                     currentPlaneDirection = 'DOWN';
                     steps = 0
                   } else steps++;
                 } else {
                   yPos -= 0.4
+                  xPos -= 0.4
                   if (steps === 160) {
                     currentPlaneDirection = 'UP';
                     steps = 0
@@ -372,7 +377,5 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
         <canvas style={{display: gameState === 'WAITING' ? 'block' : 'none'}} ref={waitingCanvasRef}/>
       </div>
     </div>
-
-
   )
 }

@@ -8,7 +8,8 @@ export const COLORS = {
   success: '#00de60',
   error: '#f00',
   white: '#fff',
-  black: '#000'
+  black: '#000',
+  bgRed: 'rgba(241,4,4,0.5)'
 }
 
 export const BUTTON_COLORS = {

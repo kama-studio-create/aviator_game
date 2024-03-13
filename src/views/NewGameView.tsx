@@ -7,7 +7,6 @@ import {IGameState, IPlaneDirection} from "../types/game.type.ts";
 import useClearCanvas from "../hooks/useClearCanvas.ts";
 import {backgroundImage, planeSprites, spinnerImage} from "../common/images.ts";
 import {COLORS} from "../common/colors.ts";
-import {getRandomNumber} from "../utils/generators.ts";
 import {
   AUDIO_FLY_AWAY,
   AUDIO_START,
@@ -60,8 +59,8 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
   const [backgroundFrameId, setBackgroundFrameId] = useState(0);
   const [spinnerFrameId, setSpinnerFrameId] = useState(0);
 
-  let yPos = canvasRef.current ? canvasRef.current.height * 0.75 : 50;
-  let xPos = 0;
+  let yPos = canvasRef.current ? canvasRef.current.height - PLANE_HEIGHT : 50;
+  let xPos = PLANE_HEIGHT;
 
   const [planeXPos, setPlaneXPos] = useState(PLANE_HEIGHT);
   const [planeYPos, setPlaneYPos] = useState(0);
@@ -148,6 +147,30 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
     let currentPlaneDirection: IPlaneDirection = 'UP';
     let steps = 0;
     let counter = 0;
+    const dotSpacing = 80;
+    let moveX = 0;
+    const dotRadius = 2
+    let moveY = dotRadius;
+
+
+    const drawDots = (ctx:CanvasRenderingContext2D) => {
+      ctx.beginPath();
+      for(let dotX = canvasWidth; dotX >= 0; dotX -= dotSpacing){
+        ctx.arc(dotX - moveX, canvasHeight - dotRadius, dotRadius, 0, Math.PI * 2, false);
+      }
+      ctx.fillStyle = COLORS.white;
+      ctx.fill();
+      ctx.closePath();
+    }
+    const drawYDots = (ctx:CanvasRenderingContext2D) => {
+      ctx.beginPath();
+      for(let dotY = moveY; dotY < canvasHeight; dotY += dotSpacing) {
+        ctx.arc(dotRadius, dotY, dotRadius, 0, 2 * Math.PI, false);
+      }
+      ctx.fillStyle = COLORS.blue;
+      ctx.fill();
+      ctx.closePath();
+    }
     const animate = () => {
       currentGameState = gameState;
       if (canvasRef.current) {
@@ -164,7 +187,7 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
             ctx.moveTo(0, ctx.canvas.height);
             ctx.lineWidth = 5
             ctx.strokeStyle = COLORS.error;
-            ctx.quadraticCurveTo(xPos, ctx.canvas.height, xPos + 5, yPos);
+            ctx.quadraticCurveTo(xPos / 3, ctx.canvas.height, xPos + 5, yPos);
             ctx.stroke();
             ctx.lineWidth = 0.5;
             ctx.lineTo(xPos, ctx.canvas.height);
@@ -173,6 +196,9 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
             ctx.stroke();
             ctx.fillStyle = COLORS.bgRed;
             ctx.fill();
+            drawDots(ctx);
+            drawYDots(ctx);
+
             if (yPos > 100 && xPos < canvasRef.current.width * 0.8) {
               if (xPos > ctx.canvas.width * 0.7) {
                 if (currentPlaneDirection === 'UP') {
@@ -191,6 +217,13 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
                   } else steps++;
                 }
                 setPlaneYPos(yPos);
+
+                moveX++;
+                if(moveX > dotSpacing) moveX = 0;
+
+                moveY++;
+                if (moveY - dotRadius > dotSpacing) moveY = dotRadius;
+
               } else {
                 const xOffset = xPos / (canvasRef.current.width * 0.85); // Normalize x position for curve calculation
                 yPos = canvasRef.current.height - canvasRef.current.height * Math.pow(xOffset, 2); // Parabolic equation
@@ -308,7 +341,8 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
         animatePlane();
         drawWaiting()
         setTimeout(() => {
-          setMainMultiplier(getRandomNumber(1, 12));
+          // setMainMultiplier(getRandomNumber(1, 12));
+          setMainMultiplier(14.4555)
           setGameState(PLAYING);
         }, 6000)
         break;

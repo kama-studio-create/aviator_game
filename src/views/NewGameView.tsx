@@ -6,10 +6,19 @@ import {GRADIENTS} from "../styles/colors.ts";
 import {IGameState, IPlaneDirection} from "../types/game.type.ts";
 import useClearCanvas from "../hooks/useClearCanvas.ts";
 import {backgroundImage, planeSprites, spinnerImage} from "../common/images.ts";
-import {audioSprite} from "../common/audio.ts";
 import {COLORS} from "../common/colors.ts";
 import {getRandomNumber} from "../utils/generators.ts";
-import {BORDER_RADIUS, PLANE_FRAME_RATE, PLANE_HEIGHT, PLANE_WIDTH} from "../common/constants.ts";
+import {
+  AUDIO_FLY_AWAY,
+  AUDIO_START,
+  BORDER_RADIUS,
+  PLANE_FRAME_RATE,
+  PLANE_HEIGHT,
+  PLANE_WIDTH,
+  PLAYING,
+  WAITING
+} from "../common/constants.ts";
+import {useAudio} from "../hooks/audio/useAudio.ts";
 
 
 const gameStyles = css({
@@ -31,8 +40,8 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
   const bgCanvasRef = useRef<HTMLCanvasElement>(null);
   const textCanvasRef = useRef<HTMLCanvasElement>(null);
   const waitingCanvasRef = useRef<HTMLCanvasElement>(null);
-  const audioRef = useRef<HTMLAudioElement>(null);
-  const bgAudioRef = useRef<HTMLAudioElement>(null);
+
+  const { audioRef, playSegment, isPlaying, bgAudioRef } = useAudio();
 
   const clearWaitingCanvas = useClearCanvas({canvasRef: waitingCanvasRef});
   const clearTextCanvas = useClearCanvas({canvasRef: textCanvasRef});
@@ -42,8 +51,6 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
 
   const [canvasWidth, setCanvasWidth] = useState(300);
   const [canvasHeight, setCanvasHeight] = useState(300);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [hasInteracted, setHasInteracted] = useState(false);
 
   const [gameState, setGameState] = useState<IGameState>('WAITING');
 
@@ -59,32 +66,6 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
   const [planeXPos, setPlaneXPos] = useState(PLANE_HEIGHT);
   const [planeYPos, setPlaneYPos] = useState(0);
 
-  const handlePlayBgAudio = () => {
-    if (!hasInteracted && bgAudioRef.current) {
-      bgAudioRef.current.play().catch((e) => {
-        throw Error(e);
-      });
-      bgAudioRef.current.volume = 0.5;
-      setHasInteracted(true);
-    }
-  };
-
-  const playSegment = (segmentName: string) => {
-    if (!hasInteracted) return;
-    const [startTime, duration] = audioSprite[segmentName];
-    if (!audioRef.current) return;
-    audioRef.current.currentTime = startTime / 1000;
-    audioRef.current.play().catch((e) => {
-      throw Error(e);
-    });
-    setIsPlaying(true);
-    setTimeout(() => {
-      if (!audioRef.current) return;
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-      setIsPlaying(false);
-    }, duration);
-  };
 
   useEffect(() => {
     const ref = audioRef.current
@@ -94,19 +75,8 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
         ref.currentTime = 0;
       }
     };
-  }, [isPlaying]);
+  }, [audioRef, isPlaying]);
 
-  useEffect(() => {
-    window.addEventListener('click', handlePlayBgAudio);
-    window.addEventListener('touchstart', handlePlayBgAudio);
-    window.addEventListener('keydown', handlePlayBgAudio);
-
-    return () => {
-      window.removeEventListener('click', handlePlayBgAudio);
-      window.removeEventListener('touchstart', handlePlayBgAudio);
-      window.removeEventListener('keydown', handlePlayBgAudio);
-    };
-  });
   const drawBackground = () => {
     let angle = 0;
     const animate = () => {
@@ -339,11 +309,11 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
         drawWaiting()
         setTimeout(() => {
           setMainMultiplier(getRandomNumber(1, 12));
-          setGameState('PLAYING');
+          setGameState(PLAYING);
         }, 6000)
         break;
       case 'PLAYING':
-        playSegment("start");
+        playSegment(AUDIO_START);
         cancelAnimationFrame(spinnerFrameId);
         clearWaitingCanvas();
         drawBackground();
@@ -351,14 +321,14 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
         animatePlane();
         break;
       case 'ENDED':
-        playSegment("flyAway")
+        playSegment(AUDIO_FLY_AWAY);
         animatePlane();
         animateMultiplier();
         cancelAnimationFrame(backgroundFrameId);
         drawBackground();
         clearBgCanvas();
         setTimeout(() => {
-          setGameState('WAITING');
+          setGameState(WAITING);
         }, 5000)
         break;
       default:

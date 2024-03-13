@@ -2,7 +2,6 @@ import {ComponentPropsWithoutRef, FC, useEffect, useRef, useState} from "react";
 import AudioFile from '../assets/audio/audio.mp3';
 import BgAudioFile from '../assets/audio/bg_music.mp3'
 import {css} from "@emotion/react";
-import {GRADIENTS} from "../styles/colors.ts";
 import {IGameState, IPlaneDirection} from "../types/game.type.ts";
 import useClearCanvas from "../hooks/useClearCanvas.ts";
 import {backgroundImage, planeSprites, spinnerImage} from "../common/images.ts";
@@ -18,6 +17,7 @@ import {
   WAITING
 } from "../common/constants.ts";
 import {useAudio} from "../hooks/audio/useAudio.ts";
+import {GRADIENTS} from "../styles/colors.ts";
 
 
 const gameStyles = css({
@@ -82,13 +82,20 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
       if (bgCanvasRef.current) {
         const ctx = bgCanvasRef.current.getContext('2d');
         if (ctx) {
-          ctx.clearRect(0, 0, ctx.canvas.width - 32, ctx.canvas.height - 32);
+          ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
           ctx.save();
-          ctx.canvas.style.opacity = '0.2';
+          ctx.canvas.style.marginLeft = '16px';
+          ctx.canvas.style.marginBottom = '16px';
           ctx.translate(0, ctx.canvas.width)
           ctx.rotate(angle);
           ctx.scale(1, -1)
+          ctx.globalAlpha = 0.2;
           ctx.drawImage(backgroundImage, -Math.floor(ctx.canvas.width * 4), -Math.floor(ctx.canvas.height * 4), ctx.canvas.width * 8, ctx.canvas.width * 8,);
+          ctx.globalAlpha = 1;
+          ctx.canvas.style.background = GRADIENTS.dark;
+          ctx.canvas.style.borderLeft = '1px solid white';
+          ctx.canvas.style.borderBottom = '1px solid white';
+
           ctx.restore();
 
           angle += 0.003;
@@ -178,19 +185,19 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
         if (!ctx) return;
         switch (currentGameState) {
           case 'WAITING' :
-            ctx.drawImage(planeSprites[currentSprite], 0, ctx.canvas.height - PLANE_HEIGHT, PLANE_WIDTH, PLANE_HEIGHT);
+            ctx.drawImage(planeSprites[currentSprite], 16, ctx.canvas.height - PLANE_HEIGHT - 16, PLANE_WIDTH, PLANE_HEIGHT);
             break;
           case 'PLAYING':
             ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-            ctx.drawImage(planeSprites[currentSprite], xPos, yPos - PLANE_HEIGHT, PLANE_WIDTH, PLANE_HEIGHT);
+            ctx.drawImage(planeSprites[currentSprite], xPos + 16, yPos - PLANE_HEIGHT - 16, PLANE_WIDTH, PLANE_HEIGHT);
             ctx.beginPath();
-            ctx.moveTo(0, ctx.canvas.height);
+            ctx.moveTo(20, ctx.canvas.height - 20);
             ctx.lineWidth = 5
             ctx.strokeStyle = COLORS.error;
-            ctx.quadraticCurveTo(xPos / 3, ctx.canvas.height, xPos + 5, yPos);
+            ctx.quadraticCurveTo(xPos / 2.5, ctx.canvas.height -16, xPos + 32, yPos - 32);
             ctx.stroke();
             ctx.lineWidth = 0.5;
-            ctx.lineTo(xPos, ctx.canvas.height);
+            ctx.lineTo(xPos + 32, ctx.canvas.height - 20);
             ctx.closePath();
             ctx.strokeStyle = COLORS.error;
             ctx.stroke();
@@ -202,16 +209,16 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
             if (yPos > 100 && xPos < canvasRef.current.width * 0.8) {
               if (xPos > ctx.canvas.width * 0.7) {
                 if (currentPlaneDirection === 'UP') {
-                  yPos += 0.4
+                  yPos += 1.2
                   xPos += 0.4
-                  if (steps === 160) {
+                  if (steps === 120) {
                     currentPlaneDirection = 'DOWN';
                     steps = 0
                   } else steps++;
                 } else {
-                  yPos -= 0.4
+                  yPos -= 1.2
                   xPos -= 0.4
-                  if (steps === 160) {
+                  if (steps === 120) {
                     currentPlaneDirection = 'UP';
                     steps = 0
                   } else steps++;
@@ -315,15 +322,14 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
         setCanvasHeight(currentHeight);
         ctx.canvas.width = currentWidth;
         ctx.canvas.height = currentHeight;
-        bgCtx.canvas.width = currentWidth;
-        bgCtx.canvas.height = currentHeight;
+        bgCtx.canvas.width = currentWidth - 20;
+        bgCtx.canvas.height = currentHeight - 20;
         textCtx.canvas.width = currentWidth;
         textCtx.canvas.height = currentHeight;
         waitingCtx.canvas.width = currentWidth;
         waitingCtx.canvas.height = currentHeight;
       }
       ctx.canvas.style.borderRadius = BORDER_RADIUS;
-      bgCtx.canvas.style.borderRadius = BORDER_RADIUS;
       textCtx.canvas.style.borderRadius = BORDER_RADIUS;
       waitingCtx.canvas.style.borderRadius = BORDER_RADIUS;
     }
@@ -374,8 +380,8 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
     <div style={{minHeight: canvasHeight, minWidth: canvasWidth}} css={[gameStyles]}>
       <audio ref={bgAudioRef} src={BgAudioFile} loop/>
       <audio ref={audioRef} src={AudioFile}/>
-      <div ref={containerRef} style={{width: '100%', minHeight: canvasHeight, background: GRADIENTS.dark, borderRadius: 8}}>
-        <canvas className="bg-canvas" ref={bgCanvasRef}/>
+      <div ref={containerRef} style={{width: '100%', minHeight: canvasHeight, borderRadius: 8}}>
+        <canvas style={{background: GRADIENTS.dark}} ref={bgCanvasRef}/>
         <canvas ref={canvasRef}/>
         <canvas ref={textCanvasRef}/>
         <canvas style={{display: gameState === 'WAITING' ? 'block' : 'none'}} ref={waitingCanvasRef}/>

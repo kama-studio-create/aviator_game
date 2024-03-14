@@ -3,7 +3,7 @@ import {TranscluscentBackgroundStyles} from "../../styles/common.ts";
 import {ComponentProps, FC} from "react";
 import {mq} from "../../styles/breakpoints.ts";
 
-const GameContainerStyles = css({
+const GameContainerStyles = css([{
   width: '100%',
   height: '100%',
   padding: 8,
@@ -11,16 +11,13 @@ const GameContainerStyles = css({
   [mq[0]]: {
     marginBlock: 'auto',
   }
-});
+}, TranscluscentBackgroundStyles]);
 
-type GameContainerProps = {
-  isAuthenticated?: boolean
-} & ComponentProps<'div'>
 
-const GameContainer: FC<GameContainerProps> = ({children, ...props}) => {
+const GameContainer: FC<ComponentProps<'div'>> = ({children, ...props}) => {
   return (
     <div
-      css={[GameContainerStyles, TranscluscentBackgroundStyles]}
+      css={GameContainerStyles}
       {...props}
     >{children}</div>
   );

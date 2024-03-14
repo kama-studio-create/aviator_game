@@ -1,6 +1,6 @@
 import {css} from "@emotion/react";
 import {ComponentProps, FC} from "react";
-import {BUTTON_COLORS} from "../../common/colors.ts";
+import {COLORS} from "../../common/colors.ts";
 
 type Props = {
   variant?: 'primary' | 'secondary' | 'dark' | 'light' | 'success' | 'error',
@@ -16,20 +16,44 @@ const baseStyles = css({
   border: 'none',
   cursor: 'pointer',
   textDecoration: 'capitalize',
+  '[data-variant]=primary': {
+    background: COLORS.primary,
+    color: COLORS.white,
+  },
+  '[data-variant]=secondary': {
+    background: COLORS.secondary,
+    color: COLORS.white,
+  },
+  '[data-variant]=dark': {
+    background: COLORS.dark,
+    color: COLORS.white,
+  },
+  '[data-variant]=light': {
+    background: COLORS.light,
+    color: COLORS.dark,
+  },
+  '[data-variant]=success': {
+    background: COLORS.success,
+    color: COLORS.white,
+  },
+  '[data-size]=md': {
+    paddingBlock: 16,
+    paddingInline: 32,
+  },
+  '[data-size]=lg': {
+    paddingBlock: 24,
+    paddingInline: 40,
+  }
 })
 
-const customStyles = {
-  sm: css({}),
-  md: css({}),
-  lg: css({}),
-  xl: css({}),
-}
 export const PillButton: FC<Props> = ({variant = 'primary', size = 'md', children, ...props}) => {
 
   return (
     <button
-      css={[baseStyles, BUTTON_COLORS[variant], customStyles[size]]}
+      css={baseStyles}
       {...props}
+      data-variant={variant}
+      data-size={size}
     >
       {children}
     </button>

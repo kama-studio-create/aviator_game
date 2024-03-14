@@ -1,14 +1,14 @@
 import {css} from "@emotion/react";
 import {TranscluscentBackgroundStyles} from "../../styles/common.ts";
 
-const SideBarStyles = css({
+const sideBarStyles = css([{
   width: '100%',
   height: '100%',
 
-})
+}, TranscluscentBackgroundStyles])
 const Sidebar = () => {
   return (
-    <div css={[SideBarStyles, TranscluscentBackgroundStyles]}>
+    <div css={sideBarStyles}>
      Sidebar
     </div>
   )

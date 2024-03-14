@@ -7,28 +7,31 @@ import useClearCanvas from "../hooks/useClearCanvas.ts";
 import {backgroundImage, planeSprites, spinnerImage} from "../common/images.ts";
 import {COLORS} from "../common/colors.ts";
 import {
-  AUDIO_FLY_AWAY,
-  AUDIO_START,
-  BORDER_RADIUS,
-  PLANE_FRAME_RATE,
-  PLANE_HEIGHT,
-  PLANE_WIDTH,
-  PLAYING,
-  WAITING
+    AUDIO_FLY_AWAY,
+    AUDIO_START,
+    BORDER_RADIUS,
+    CANVAS_PADDING,
+    PLANE_FRAME_RATE,
+    PLANE_HEIGHT,
+    PLANE_WIDTH,
+    PLAYING,
+    WAITING
 } from "../common/constants.ts";
 import {useAudio} from "../hooks/audio/useAudio.ts";
 import {GRADIENTS} from "../styles/colors.ts";
 
 
 const gameStyles = css({
-  width: '100%',
-  padding: 8,
-  backgroundSize: 'cover',
-  display: 'flex',
-  flexDirection: 'column',
-  gap: 16,
+  width: '100%', 
+  padding: 8, 
+  backgroundSize: 'cover', 
+  display: 'flex', 
+  flexDirection: 'column', 
+  gap: 16, 
   canvas: {
-    position: 'absolute', top: 16, left: 16,
+    position: 'absolute', 
+    top: CANVAS_PADDING, 
+    left: CANVAS_PADDING,
   },
 })
 
@@ -40,7 +43,7 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
   const textCanvasRef = useRef<HTMLCanvasElement>(null);
   const waitingCanvasRef = useRef<HTMLCanvasElement>(null);
 
-  const { audioRef, playSegment, isPlaying, bgAudioRef } = useAudio();
+  const {audioRef, playSegment, isPlaying, bgAudioRef} = useAudio();
 
   const clearWaitingCanvas = useClearCanvas({canvasRef: waitingCanvasRef});
   const clearTextCanvas = useClearCanvas({canvasRef: textCanvasRef});
@@ -84,8 +87,8 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
         if (ctx) {
           ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
           ctx.save();
-          ctx.canvas.style.marginLeft = '16px';
-          ctx.canvas.style.marginBottom = '16px';
+          ctx.canvas.style.marginLeft = `${CANVAS_PADDING}px`;
+          ctx.canvas.style.marginBottom = `${CANVAS_PADDING}px`;
           ctx.translate(0, ctx.canvas.width)
           ctx.rotate(angle);
           ctx.scale(1, -1)
@@ -160,18 +163,18 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
     let moveY = dotRadius;
 
 
-    const drawDots = (ctx:CanvasRenderingContext2D) => {
+    const drawDots = (ctx: CanvasRenderingContext2D) => {
       ctx.beginPath();
-      for(let dotX = canvasWidth; dotX >= 0; dotX -= dotSpacing){
+      for (let dotX = canvasWidth; dotX >= 0; dotX -= dotSpacing) {
         ctx.arc(dotX - moveX, canvasHeight - dotRadius, dotRadius, 0, Math.PI * 2, false);
       }
       ctx.fillStyle = COLORS.white;
       ctx.fill();
       ctx.closePath();
     }
-    const drawYDots = (ctx:CanvasRenderingContext2D) => {
+    const drawYDots = (ctx: CanvasRenderingContext2D) => {
       ctx.beginPath();
-      for(let dotY = moveY; dotY < canvasHeight; dotY += dotSpacing) {
+      for (let dotY = moveY; dotY < canvasHeight; dotY += dotSpacing) {
         ctx.arc(dotRadius, dotY, dotRadius, 0, 2 * Math.PI, false);
       }
       ctx.fillStyle = COLORS.blue;
@@ -185,19 +188,19 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
         if (!ctx) return;
         switch (currentGameState) {
           case 'WAITING' :
-            ctx.drawImage(planeSprites[currentSprite], 16, ctx.canvas.height - PLANE_HEIGHT - 16, PLANE_WIDTH, PLANE_HEIGHT);
+            ctx.drawImage(planeSprites[currentSprite], CANVAS_PADDING, ctx.canvas.height - PLANE_HEIGHT - CANVAS_PADDING, PLANE_WIDTH, PLANE_HEIGHT);
             break;
           case 'PLAYING':
             ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-            ctx.drawImage(planeSprites[currentSprite], xPos + 16, yPos - PLANE_HEIGHT - 16, PLANE_WIDTH, PLANE_HEIGHT);
+            ctx.drawImage(planeSprites[currentSprite], xPos + CANVAS_PADDING, yPos - PLANE_HEIGHT - CANVAS_PADDING, PLANE_WIDTH, PLANE_HEIGHT);
             ctx.beginPath();
-            ctx.moveTo(20, ctx.canvas.height - 20);
+            ctx.moveTo(CANVAS_PADDING, ctx.canvas.height - CANVAS_PADDING - 4);
             ctx.lineWidth = 5
             ctx.strokeStyle = COLORS.error;
-            ctx.quadraticCurveTo(xPos / 2.5, ctx.canvas.height -16, xPos + 32, yPos - 32);
+            ctx.quadraticCurveTo(xPos / 2.5, ctx.canvas.height - CANVAS_PADDING, xPos + (CANVAS_PADDING * 2), yPos - (CANVAS_PADDING * 2));
             ctx.stroke();
             ctx.lineWidth = 0.5;
-            ctx.lineTo(xPos + 32, ctx.canvas.height - 20);
+            ctx.lineTo(xPos + (CANVAS_PADDING * 2), ctx.canvas.height - (CANVAS_PADDING + 4));
             ctx.closePath();
             ctx.strokeStyle = COLORS.error;
             ctx.stroke();
@@ -206,8 +209,8 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
             drawDots(ctx);
             drawYDots(ctx);
 
-            if (yPos > 100 && xPos < canvasRef.current.width * 0.8) {
-              if (xPos > ctx.canvas.width * 0.7) {
+            if (yPos > 100 && xPos < canvasRef.current.width * 0.85) {
+              if (xPos > ctx.canvas.width * 0.65) {
                 if (currentPlaneDirection === 'UP') {
                   yPos += 1.2
                   xPos += 0.4
@@ -226,7 +229,7 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
                 setPlaneYPos(yPos);
 
                 moveX++;
-                if(moveX > dotSpacing) moveX = 0;
+                if (moveX > dotSpacing) moveX = 0;
 
                 moveY++;
                 if (moveY - dotRadius > dotSpacing) moveY = dotRadius;
@@ -253,7 +256,7 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
           default:
             break;
         }
-        if(counter % PLANE_FRAME_RATE === 0) {
+        if (counter % PLANE_FRAME_RATE === 0) {
           if (currentSprite === planeSprites.length - 1) {
             currentSprite = 0;
           } else {
@@ -376,16 +379,14 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
     }
   }, [gameState])
 
-  return (
-    <div style={{minHeight: canvasHeight, minWidth: canvasWidth}} css={[gameStyles]}>
-      <audio ref={bgAudioRef} src={BgAudioFile} loop/>
-      <audio ref={audioRef} src={AudioFile}/>
-      <div ref={containerRef} style={{width: '100%', minHeight: canvasHeight, borderRadius: 8}}>
-        <canvas style={{background: GRADIENTS.dark}} ref={bgCanvasRef}/>
-        <canvas ref={canvasRef}/>
-        <canvas ref={textCanvasRef}/>
-        <canvas style={{display: gameState === 'WAITING' ? 'block' : 'none'}} ref={waitingCanvasRef}/>
-      </div>
+  return (<div style={{minHeight: canvasHeight, minWidth: canvasWidth}} css={gameStyles}>
+    <audio ref={bgAudioRef} src={BgAudioFile} loop/>
+    <audio ref={audioRef} src={AudioFile}/>
+    <div ref={containerRef} style={{width: '100%', minHeight: canvasHeight, borderRadius: 8}}>
+      <canvas style={{background: GRADIENTS.dark}} ref={bgCanvasRef}/>
+      <canvas ref={canvasRef}/>
+      <canvas ref={textCanvasRef}/>
+      <canvas style={{display: gameState === 'WAITING' ? 'block' : 'none'}} ref={waitingCanvasRef}/>
     </div>
-  )
+  </div>)
 }

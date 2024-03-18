@@ -7,18 +7,19 @@ import useClearCanvas from "../hooks/useClearCanvas.ts";
 import {backgroundImage, planeSprites, spinnerImage} from "../common/images.ts";
 import {COLORS} from "../common/colors.ts";
 import {
-  AUDIO_FLY_AWAY,
-  AUDIO_START,
-  BORDER_RADIUS,
-  CANVAS_PADDING,
-  PLANE_FRAME_RATE,
-  PLANE_HEIGHT,
-  PLANE_WIDTH,
-  PLAYING,
-  WAITING
+	AUDIO_FLY_AWAY,
+	AUDIO_START,
+	BORDER_RADIUS,
+	CANVAS_PADDING,
+	PLANE_FRAME_RATE,
+	PLANE_HEIGHT,
+	PLANE_WIDTH,
+	PLAYING,
+	WAITING
 } from "../common/constants.ts";
 import {useAudio} from "../hooks/audio/useAudio.ts";
 import {GRADIENTS} from "../styles/colors.ts";
+import {getRandomNumber} from "../utils/generators.ts";
 
 
 const gameStyles = css({
@@ -36,7 +37,7 @@ const gameStyles = css({
 })
 
 
-export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
+export const OldView: FC<ComponentPropsWithoutRef<'div'>> = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const bgCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -48,6 +49,7 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
   const clearWaitingCanvas = useClearCanvas({canvasRef: waitingCanvasRef});
   const clearTextCanvas = useClearCanvas({canvasRef: textCanvasRef});
   const clearBgCanvas = useClearCanvas({canvasRef: bgCanvasRef})
+  const clearPlaneCanvas = useClearCanvas({canvasRef});
 
   let currentMultiplier = 1;
 
@@ -67,6 +69,11 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
 
   const [planeXPos, setPlaneXPos] = useState(PLANE_HEIGHT);
   const [planeYPos, setPlaneYPos] = useState(0);
+
+  const [startTime, setStartTime] = useState<number | null>(null);
+  const [endTime, setEndTime] = useState<number | null>(null);
+  const [elapsedTime, setElapsedTime] = useState<number | null>(null);
+  const [duration, setDuration] = useState<number | null>(null);
 
 
   useEffect(() => {
@@ -175,7 +182,6 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
         const progressInterval = setInterval(() => {
           const elapsedTime = Date.now() - startTime;
           progress = Math.min(elapsedTime / 8000, 1) * 100;
-
           if (progress >= 100) {
             clearInterval(progressInterval);
           }
@@ -243,8 +249,8 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
               if (yPos > 100 && xPos < canvasRef.current.width * 0.85) {
                 if (xPos > ctx.canvas.width * 0.6) {
                   if (currentPlaneDirection === 'UP') {
-                    yPos += 1.2
-                    xPos += 0.4
+                    yPos += 1.2;
+                    xPos += 0.4;
                     if (steps === 120) {
                       currentPlaneDirection = 'DOWN';
                       steps = 0
@@ -266,11 +272,14 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
                   if (moveY - dotRadius > dotSpacing) moveY = dotRadius;
 
                 } else {
-                  const xOffset = xPos / (canvasRef.current.width * 0.85); // Normalize x position for curve calculation
-                  yPos = canvasRef.current.height - canvasRef.current.height * Math.pow(xOffset, 2); // Parabolic equation
-                  xPos += 1.5;
-                  setPlaneXPos(xPos);
-                  setPlaneYPos(yPos);
+                  // const xOffset = xPos / (canvasRef.current.width * 0.85); // Normalize x position for curve calculation
+                  if(elapsedTime && startTime) {
+                    yPos = canvasHeight - Math.exp(0.000006 * elapsedTime); // Parabolic equation
+                    xPos += 1.5;
+                    setPlaneXPos(xPos);
+                    setPlaneYPos(yPos);
+                    setElapsedTime(Date.now() - startTime);
+                  }
                 }
               }
               break;
@@ -282,6 +291,8 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
                 yPos -= 2;
                 setPlaneYPos(yPos);
                 setPlaneXPos(x);
+              } else {
+                clearPlaneCanvas();
               }
               break;
             default:
@@ -340,10 +351,13 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
       switch (gameState) {
         case 'WAITING':
           clearTextCanvas();
-          animatePlane();
+          // animatePlane();
           drawWaiting()
           setTimeout(() => {
+            const duration = getRandomNumber(50000, 10000000);
+            setDuration(duration);
             // setMainMultiplier(getRandomNumber(1, 12));
+            setStartTime(Date.now());
             setMainMultiplier(14.4555)
             setGameState(PLAYING);
           }, 6000)
@@ -375,7 +389,7 @@ export const NewGameView: FC<ComponentPropsWithoutRef<'div'>> = () => {
     }
 
     animate();
-
+    console.log('animating')
     return () => {
       cancelAnimationFrame(spinnerFrameId);
     }

@@ -16,4 +16,5 @@ export const spinnerImage = new Image();
 backgroundImage.src = BgImage;
 spinnerImage.src = SpinnerImage;
 
+
 export const planeSprites = [plane1, plane2]

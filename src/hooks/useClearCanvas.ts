@@ -1,10 +1,10 @@
-import {useRef, useEffect, RefObject} from 'react';
+import {RefObject, useEffect, useRef} from 'react';
 
 interface UseClearCanvasProps {
-  canvasRef: RefObject<HTMLCanvasElement | null>;
+  canvasRefs: RefObject<HTMLCanvasElement>[];
 }
 
-function useClearCanvas({ canvasRef }: UseClearCanvasProps): () => void {
+function useClearCanvas({ canvasRefs }: UseClearCanvasProps): () => void {
   const isMounted = useRef(false);
 
   useEffect(() => {
@@ -16,11 +16,15 @@ function useClearCanvas({ canvasRef }: UseClearCanvasProps): () => void {
   }, []);
 
   const clearCanvas = () => {
-    if (isMounted.current && canvasRef.current) {
-      const ctx = canvasRef.current.getContext('2d');
-      if (ctx) {
-        ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
-      }
+    if (isMounted.current && canvasRefs.length > 0) {
+      canvasRefs.forEach((ref) => {
+        if (ref.current) {
+          const ctx = ref.current.getContext('2d');
+          if (ctx) {
+            ctx.clearRect(0, 0, ref.current.width, ref.current.height);
+          }
+        }
+      });
     }
   };
 

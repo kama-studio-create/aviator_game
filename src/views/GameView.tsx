@@ -4,20 +4,19 @@ import {
   AUDIO_START,
   BORDER_RADIUS,
   ENDED,
-  PLANE_FRAME_RATE,
-  PLANE_HEIGHT,
-  PLANE_WIDTH,
+  IGameState,
+  IPlaneDirection,
   PLAYING,
-  WAITING
+  WAITING,
+  WAITING_DURATION
 } from "../common/constants.ts";
 import {GRADIENTS} from "../styles/colors.ts";
 import BgAudioFile from "../assets/audio/bg_music.mp3";
 import AudioFile from "../assets/audio/audio.mp3";
 import {useAudio} from "../hooks/audio/useAudio.ts";
 import {useEffect, useRef, useState} from "react";
-import {IGameState, IPlaneDirection} from "../types/game.type.ts";
-import {backgroundImage, planeSprites, spinnerImage} from "../common/images.ts";
-import {getRandomNumber} from "../utils/generators.ts";
+import {backgroundImage, spinnerImage} from "../common/images.ts";
+import useClearCanvas from "../hooks/useClearCanvas.ts";
 import {COLORS} from "../common/colors.ts";
 
 const CANVAS_PADDING = 16;
@@ -44,16 +43,17 @@ const GameView = () => {
   const textCanvasRef = useRef<HTMLCanvasElement>(null);
 
   const [gameState, setGameState] = useState<IGameState>(WAITING);
-
-  const [mainMultiplier, setMainMultiplier] = useState(1);
-
   const [canvasWidth, setCanvasWidth] = useState(300);
   const [canvasHeight, setCanvasHeight] = useState(300);
 
-  const [startTime, setStartTime] = useState<number | null>(null);
+  const [startTime, setStartTime] = useState<number | null>(Date.now());
   const [endTime, setEndTime] = useState<number | null>(null);
-  const [elapsedTime, setElapsedTime] = useState<number | null>(null);
-  const [duration, setDuration] = useState<number | null>(null);
+  const [duration, setDuration] = useState<number>(0);
+  const [lastTime, setLastTime] = useState(0);
+
+  const [now, setNow] = useState(Date.now());
+
+  const clearCanvases = useClearCanvas({canvasRefs: [bgCanvasRef, canvasRef, textCanvasRef]});
 
   useEffect(() => {
     const ref = audioRef.current
@@ -71,10 +71,9 @@ const GameView = () => {
     const ctx = canvasRef.current.getContext("2d");
     const bgCtx = bgCanvasRef.current?.getContext("2d");
     const textCtx = textCanvasRef.current?.getContext("2d");
-    const waitingCtx = waitingCanvasRef.current?.getContext("2d");
 
     const resizeAndStyleCanvases = () => {
-      if (!containerRef.current || !ctx || !bgCtx || !textCtx || !waitingCtx) return;
+      if (!containerRef.current || !ctx || !bgCtx || !textCtx) return;
       const currentWidth = containerRef.current.clientWidth;
       const currentHeight = currentWidth;
       if (ctx.canvas.width !== currentWidth || ctx.canvas.height !== currentHeight) {
@@ -86,12 +85,9 @@ const GameView = () => {
         bgCtx.canvas.height = currentHeight - 20;
         textCtx.canvas.width = currentWidth;
         textCtx.canvas.height = currentHeight;
-        waitingCtx.canvas.width = currentWidth;
-        waitingCtx.canvas.height = currentHeight;
       }
       ctx.canvas.style.borderRadius = BORDER_RADIUS;
       textCtx.canvas.style.borderRadius = BORDER_RADIUS;
-      waitingCtx.canvas.style.borderRadius = BORDER_RADIUS;
     }
 
     resizeAndStyleCanvases();
@@ -101,93 +97,16 @@ const GameView = () => {
   }, []);
 
   useEffect(() => {
-    let currentSprite = 0;
-    let currentPlaneDirection: IPlaneDirection = "UP";
-    let steps = 0;
-    let counter = 0;
+    const currentSprite = 0;
+    const currentPlaneDirection: IPlaneDirection = "UP";
+    const steps = 0;
+    const counter = 0;
     const dotSpacing = 80;
-    let moveX = 0;
+    const moveX = 0;
     const dotRadius = 2
-    let moveY = dotRadius;
+    const moveY = dotRadius;
 
     const drawBackground = () => {
-      const ctx = bgCanvasRef.current?.getContext("2d");
-      if (!ctx || gameState !== PLAYING) return;
-
-      const {width, height} = ctx.canvas;
-
-      ctx.save();
-
-      // Draw background image
-      ctx.canvas.style.marginLeft = `${CANVAS_PADDING}px`;
-      ctx.canvas.style.marginBottom = `${CANVAS_PADDING}px`;
-      ctx.translate(0, width)
-      const angle = (now - startTime) % 360;
-      ctx.rotate(angle);
-      ctx.scale(1, -1);
-      ctx.globalAlpha = 0.2;
-      ctx.drawImage(backgroundImage, -Math.floor(ctx.canvas.width * 4), -Math.floor(ctx.canvas.height * 4), ctx.canvas.width * 8, ctx.canvas.width * 8,);
-
-      // Draw axis
-      ctx.globalAlpha = 1;
-      ctx.canvas.style.background = GRADIENTS.dark;
-      ctx.canvas.style.borderLeft = "1px solid white";
-      ctx.canvas.style.borderBottom = "1px solid white";
-      ctx.restore();
-    }
-
-    const drawWaiting = () => {
-      const ctx = bgCanvasRef.current?.getContext("2d");
-      if (!ctx || gameState !== WAITING) return;
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      // Draw spinner
-      ctx.save();
-      ctx.translate(canvas.width / 2, canvas.height / 2);
-      ctx.rotate(angle);
-      ctx.drawImage(spinnerImage, -spinnerImage.width / 2, -spinnerImage.height / 2,);
-      ctx.restore();
-
-      // Draw progress bar
-
-      // Draw text
-      ctx.font = "18px sans-serif";
-      ctx.textAlign = "center";
-      ctx.fillStyle = "#c9c9c9";
-      ctx.fillText("Waiting for next round", canvas.width / 2, canvas.height * 0.85);
-      ctx.canvas.style.background = "rgba(0,0,0,0.5)";
-      ctx.fillStyle = "red";
-      ctx.fillRect(canvas.width / 2 - 100, canvas.height * 0.75, progress * 2, 7);
-    }
-
-    const drawMultiplier = () => {
-      if (textCanvasRef.current && gameState !== "WAITING") {
-        const ctx = textCanvasRef.current.getContext("2d");
-        if (ctx) {
-          ctx.save();
-          if (gameState === "ENDED") {
-            ctx.fillStyle = "#f7f7f7";
-            ctx.font = "bold 32px Arial";
-            ctx.textAlign = "center";
-            ctx.fillText(`FLEW AT`, ctx.canvas.width / 2, ctx.canvas.height / 2.3);
-            ctx.fillStyle = currentMultiplier < mainMultiplier ? "white" : "red";
-            ctx.fillStyle = "red";
-            ctx.font = "bold 72px Arial";
-            ctx.textAlign = "center";
-            ctx.fillText(`${mainMultiplier.toFixed(2)}x`, ctx.canvas.width / 2, ctx.canvas.height / 1.7);
-          } else if (gameState === "PLAYING") {
-            ctx.fillStyle = currentMultiplier < mainMultiplier ? "white" : "red";
-            ctx.font = "bold 72px Arial";
-            ctx.textAlign = "center";
-            ctx.fillText(`${currentMultiplier.toFixed(2)}x`, ctx.canvas.width / 2, ctx.canvas.height / 1.7);
-          }
-          ctx.restore();
-        }
-      }
-    }
-
-
-    const drawPlane = () => {
       const drawXDots = (ctx: CanvasRenderingContext2D) => {
         ctx.beginPath();
         for (let dotX = canvasWidth; dotX >= 0; dotX -= dotSpacing) {
@@ -206,106 +125,218 @@ const GameView = () => {
         ctx.fill();
         ctx.closePath();
       }
-      if (canvasRef.current) {
-        const ctx = canvasRef.current.getContext("2d");
-        if (!ctx) return;
-        switch (gameState) {
-          case "WAITING" :
-            ctx.drawImage(planeSprites[currentSprite], CANVAS_PADDING, ctx.canvas.height - PLANE_HEIGHT - CANVAS_PADDING, PLANE_WIDTH, PLANE_HEIGHT);
-            break;
-          case "PLAYING":
-            ctx.drawImage(planeSprites[currentSprite], xPos + CANVAS_PADDING, yPos - PLANE_HEIGHT - CANVAS_PADDING, PLANE_WIDTH, PLANE_HEIGHT);
-            ctx.beginPath();
-            ctx.moveTo(CANVAS_PADDING, ctx.canvas.height - CANVAS_PADDING - 4);
-            ctx.lineWidth = 5
-            ctx.strokeStyle = COLORS.error;
-            ctx.quadraticCurveTo(
-              xPos / 2.5,
-              ctx.canvas.height - CANVAS_PADDING,
-              xPos + (CANVAS_PADDING * 2),
-              yPos - (CANVAS_PADDING * 2)
-            );
-            ctx.stroke();
-            ctx.lineWidth = 0.5;
-            ctx.lineTo(xPos + (CANVAS_PADDING * 2), ctx.canvas.height - (CANVAS_PADDING + 4));
-            ctx.closePath();
-            ctx.strokeStyle = COLORS.error;
-            ctx.stroke();
-            ctx.fillStyle = COLORS.bgRed;
-            ctx.fill();
-            drawXDots(ctx);
-            drawYDots(ctx);
 
-            if (yPos > 100 && xPos < canvasRef.current.width * 0.85) {
-              if (xPos > ctx.canvas.width * 0.6) {
-                if (currentPlaneDirection === "UP") {
-                  yPos += 1.2;
-                  xPos += 0.4;
-                  if (steps === 120) {
-                    currentPlaneDirection = "DOWN";
-                    steps = 0
-                  } else steps++;
-                } else {
-                  yPos -= 1.2
-                  xPos -= 0.4
-                  if (steps === 120) {
-                    currentPlaneDirection = "UP";
-                    steps = 0
-                  } else steps++;
-                }
-                setPlaneYPos(yPos);
+      const ctx = bgCanvasRef.current?.getContext("2d");
+      if (!ctx || gameState !== PLAYING || !startTime) return;
 
-                moveX++;
-                if (moveX > dotSpacing) moveX = 0;
+      const {width, height} = ctx.canvas;
+      ctx.save();
+      // Draw background image
+      ctx.canvas.style.marginLeft = `${CANVAS_PADDING}px`;
+      ctx.canvas.style.marginBottom = `${CANVAS_PADDING}px`;
+      ctx.translate(0, width)
+      const angle = (now - startTime) % 360 * 0.0005;
+      ctx.rotate(angle);
+      ctx.scale(1, -1);
+      ctx.globalAlpha = 0.2;
+      ctx.drawImage(backgroundImage, -Math.floor(width * 4), -Math.floor(height * 4), width * 8, height * 8,);
 
-                moveY++;
-                if (moveY - dotRadius > dotSpacing) moveY = dotRadius;
+      // Draw axis
+      ctx.globalAlpha = 1;
+      ctx.canvas.style.background = GRADIENTS.dark;
+      ctx.canvas.style.borderLeft = "1px solid white";
+      ctx.canvas.style.borderBottom = "1px solid white";
 
-              } else {
-                // const xOffset = xPos / (canvasRef.current.width * 0.85); // Normalize x position for curve calculation
-                if (elapsedTime && startTime) {
-                  yPos = canvasHeight - Math.exp(0.000006 * elapsedTime); // Parabolic equation
-                  xPos += 1.5;
-                  setPlaneXPos(xPos);
-                  setPlaneYPos(yPos);
-                  setElapsedTime(Date.now() - startTime);
-                }
-              }
-            }
-            break;
-          case "ENDED":
-            ctx.drawImage(planeSprites[currentSprite], xPos, planeYPos - PLANE_HEIGHT, PLANE_WIDTH, PLANE_HEIGHT);
-            if (xPos < ctx.canvas.width * 1.5) {
-              xPos += 12;
-              yPos -= 2;
-              setPlaneYPos(yPos);
-              setPlaneXPos(xPos);
-            }
-            break;
-          default:
-            break;
-        }
-        if (counter % PLANE_FRAME_RATE === 0) {
-          if (currentSprite === planeSprites.length - 1) {
-            currentSprite = 0;
-          } else {
-            currentSprite += 1;
-          }
-        }
-        counter++;
+
+      ctx.restore();
+      // draw dots
+      drawXDots(ctx);
+      drawYDots(ctx);
+    }
+
+    const drawWaiting = () => {
+      const ctx = bgCanvasRef.current?.getContext("2d");
+      if (!ctx || gameState !== WAITING || !startTime || !duration) return;
+      const {width, height} = ctx.canvas;
+      const angle = (now - startTime) % 360 * 0.01;
+
+      // Draw spinner
+      ctx.save();
+      ctx.translate(width / 2, width / 2);
+      ctx.rotate(angle);
+      ctx.drawImage(spinnerImage, -spinnerImage.width / 2, -spinnerImage.height / 2,);
+      ctx.restore();
+      const elapsed = now - startTime;
+      // Draw progress bar
+      const progress = elapsed / duration * 100;
+      // Draw text
+      ctx.font = "18px sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillStyle = "#c9c9c9";
+      ctx.fillText("Waiting for next round", width / 2, height * 0.85);
+      ctx.canvas.style.background = "rgba(0,0,0,0.5)";
+      ctx.fillStyle = "red";
+      ctx.fillRect(width / 2 - 100, height * 0.75, progress * 2, 7);
+
+      if(elapsed > duration) {
+        setGameState(PLAYING);
       }
     }
 
+    // const drawMultiplier = () => {
+    //   if (textCanvasRef.current && gameState !== "WAITING") {
+    //     const ctx = textCanvasRef.current.getContext("2d");
+    //     if (ctx) {
+    //       ctx.save();
+    //       if (gameState === "ENDED") {
+    //         ctx.fillStyle = "#f7f7f7";
+    //         ctx.font = "bold 32px Arial";
+    //         ctx.textAlign = "center";
+    //         ctx.fillText(`FLEW AT`, ctx.canvas.width / 2, ctx.canvas.height / 2.3);
+    //         ctx.fillStyle = currentMultiplier < mainMultiplier ? "white" : "red";
+    //         ctx.fillStyle = "red";
+    //         ctx.font = "bold 72px Arial";
+    //         ctx.textAlign = "center";
+    //         ctx.fillText(`${mainMultiplier.toFixed(2)}x`, ctx.canvas.width / 2, ctx.canvas.height / 1.7);
+    //       } else if (gameState === "PLAYING") {
+    //         ctx.fillStyle = currentMultiplier < mainMultiplier ? "white" : "red";
+    //         ctx.font = "bold 72px Arial";
+    //         ctx.textAlign = "center";
+    //         ctx.fillText(`${currentMultiplier.toFixed(2)}x`, ctx.canvas.width / 2, ctx.canvas.height / 1.7);
+    //       }
+    //       ctx.restore();
+    //     }
+    //   }
+    // }
+
+
+    // const drawPlane = () => {
+    //   const drawXDots = (ctx: CanvasRenderingContext2D) => {
+    //     ctx.beginPath();
+    //     for (let dotX = canvasWidth; dotX >= 0; dotX -= dotSpacing) {
+    //       ctx.arc(dotX - moveX, canvasHeight - dotRadius, dotRadius, 0, Math.PI * 2, false);
+    //     }
+    //     ctx.fillStyle = COLORS.white;
+    //     ctx.fill();
+    //     ctx.closePath();
+    //   }
+    //   const drawYDots = (ctx: CanvasRenderingContext2D) => {
+    //     ctx.beginPath();
+    //     for (let dotY = moveY; dotY < canvasHeight; dotY += dotSpacing) {
+    //       ctx.arc(dotRadius, dotY, dotRadius, 0, 2 * Math.PI, false);
+    //     }
+    //     ctx.fillStyle = COLORS.blue;
+    //     ctx.fill();
+    //     ctx.closePath();
+    //   }
+    //   if (canvasRef.current) {
+    //     const ctx = canvasRef.current.getContext("2d");
+    //     if (!ctx) return;
+    //     switch (gameState) {
+    //       case "WAITING" :
+    //         ctx.drawImage(planeSprites[currentSprite], CANVAS_PADDING, ctx.canvas.height - PLANE_HEIGHT - CANVAS_PADDING, PLANE_WIDTH, PLANE_HEIGHT);
+    //         break;
+    //       case "PLAYING":
+    //         ctx.drawImage(planeSprites[currentSprite], xPos + CANVAS_PADDING, yPos - PLANE_HEIGHT - CANVAS_PADDING, PLANE_WIDTH, PLANE_HEIGHT);
+    //         ctx.beginPath();
+    //         ctx.moveTo(CANVAS_PADDING, ctx.canvas.height - CANVAS_PADDING - 4);
+    //         ctx.lineWidth = 5
+    //         ctx.strokeStyle = COLORS.error;
+    //         ctx.quadraticCurveTo(
+    //           xPos / 2.5,
+    //           ctx.canvas.height - CANVAS_PADDING,
+    //           xPos + (CANVAS_PADDING * 2),
+    //           yPos - (CANVAS_PADDING * 2)
+    //         );
+    //         ctx.stroke();
+    //         ctx.lineWidth = 0.5;
+    //         ctx.lineTo(xPos + (CANVAS_PADDING * 2), ctx.canvas.height - (CANVAS_PADDING + 4));
+    //         ctx.closePath();
+    //         ctx.strokeStyle = COLORS.error;
+    //         ctx.stroke();
+    //         ctx.fillStyle = COLORS.bgRed;
+    //         ctx.fill();
+    //         drawXDots(ctx);
+    //         drawYDots(ctx);
+    //
+    //         if (yPos > 100 && xPos < canvasRef.current.width * 0.85) {
+    //           if (xPos > ctx.canvas.width * 0.6) {
+    //             if (currentPlaneDirection === "UP") {
+    //               yPos += 1.2;
+    //               xPos += 0.4;
+    //               if (steps === 120) {
+    //                 currentPlaneDirection = "DOWN";
+    //                 steps = 0
+    //               } else steps++;
+    //             } else {
+    //               yPos -= 1.2
+    //               xPos -= 0.4
+    //               if (steps === 120) {
+    //                 currentPlaneDirection = "UP";
+    //                 steps = 0
+    //               } else steps++;
+    //             }
+    //             setPlaneYPos(yPos);
+    //
+    //             moveX++;
+    //             if (moveX > dotSpacing) moveX = 0;
+    //
+    //             moveY++;
+    //             if (moveY - dotRadius > dotSpacing) moveY = dotRadius;
+    //
+    //           } else {
+    //             // const xOffset = xPos / (canvasRef.current.width * 0.85); // Normalize x position for curve calculation
+    //             if (elapsedTime && startTime) {
+    //               yPos = canvasHeight - Math.exp(0.000006 * elapsedTime); // Parabolic equation
+    //               xPos += 1.5;
+    //               setPlaneXPos(xPos);
+    //               setPlaneYPos(yPos);
+    //               setElapsedTime(Date.now() - startTime);
+    //             }
+    //           }
+    //         }
+    //         break;
+    //       case "ENDED":
+    //         ctx.drawImage(planeSprites[currentSprite], xPos, planeYPos - PLANE_HEIGHT, PLANE_WIDTH, PLANE_HEIGHT);
+    //         if (xPos < ctx.canvas.width * 1.5) {
+    //           xPos += 12;
+    //           yPos -= 2;
+    //           setPlaneYPos(yPos);
+    //           setPlaneXPos(xPos);
+    //         }
+    //         break;
+    //       default:
+    //         break;
+    //     }
+    //     if (counter % PLANE_FRAME_RATE === 0) {
+    //       if (currentSprite === planeSprites.length - 1) {
+    //         currentSprite = 0;
+    //       } else {
+    //         currentSprite += 1;
+    //       }
+    //     }
+    //     counter++;
+    //   }
+    // }
+
     // todo:  clear all canvases here
+    clearCanvases();
     drawBackground();
     drawWaiting();
-    drawMultiplier();
-    drawPlane();
+
+    // drawWaiting();
+    // drawMultiplier();
+    // drawPlane();
   }, [gameState, now]);
 
   useEffect(() => {
     switch (gameState) {
+      case WAITING:
+        setDuration(WAITING_DURATION);
+        setStartTime(Date.now());
+        break;
       case PLAYING:
+        setStartTime(Date.now());
         playSegment(AUDIO_START);
         break;
       case ENDED:
@@ -314,7 +345,6 @@ const GameView = () => {
     }
   }, [gameState]);
 
-  const [now, setNow] = useState(Date.now());
   useEffect(() => {
     let frameID = 0;
 
@@ -335,7 +365,7 @@ const GameView = () => {
       <audio ref={bgAudioRef} src={BgAudioFile} loop/>
       <audio ref={audioRef} src={AudioFile}/>
       <div ref={containerRef}
-           style={{width: "100%", minHeight: canvasHeight, borderRadius: 8, background: GRADIENTS.dark}}>
+        style={{width: "100%", minHeight: canvasHeight, borderRadius: 8, background: GRADIENTS.dark}}>
         <canvas ref={bgCanvasRef}/>
         <canvas ref={canvasRef}/>
         <canvas ref={textCanvasRef}/>

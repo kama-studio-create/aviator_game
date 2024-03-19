@@ -5,7 +5,9 @@ import {
   BORDER_RADIUS,
   ENDED,
   IGameState,
-  IPlaneDirection,
+  PLANE_FRAME_RATE,
+  PLANE_HEIGHT,
+  PLANE_WIDTH,
   PLAYING,
   WAITING,
   WAITING_DURATION
@@ -15,7 +17,7 @@ import BgAudioFile from "../assets/audio/bg_music.mp3";
 import AudioFile from "../assets/audio/audio.mp3";
 import {useAudio} from "../hooks/audio/useAudio.ts";
 import {useEffect, useRef, useState} from "react";
-import {backgroundImage, spinnerImage} from "../common/images.ts";
+import {backgroundImage, planeSprites, spinnerImage} from "../common/images.ts";
 import useClearCanvas from "../hooks/useClearCanvas.ts";
 import {COLORS} from "../common/colors.ts";
 
@@ -49,9 +51,9 @@ const GameView = () => {
   const [startTime, setStartTime] = useState<number | null>(Date.now());
   const [endTime, setEndTime] = useState<number | null>(null);
   const [duration, setDuration] = useState<number>(0);
-  const [lastTime, setLastTime] = useState(0);
 
   const [now, setNow] = useState(Date.now());
+  const [currentSprite, setCurrentSprite] = useState(0);
 
   const clearCanvases = useClearCanvas({canvasRefs: [bgCanvasRef, canvasRef, textCanvasRef]});
 
@@ -97,35 +99,12 @@ const GameView = () => {
   }, []);
 
   useEffect(() => {
-    const currentSprite = 0;
-    const currentPlaneDirection: IPlaneDirection = "UP";
-    const steps = 0;
-    const counter = 0;
     const dotSpacing = 80;
     const moveX = 0;
     const dotRadius = 2
     const moveY = dotRadius;
 
     const drawBackground = () => {
-      const drawXDots = (ctx: CanvasRenderingContext2D) => {
-        ctx.beginPath();
-        for (let dotX = canvasWidth; dotX >= 0; dotX -= dotSpacing) {
-          ctx.arc(dotX - moveX, canvasHeight - dotRadius, dotRadius, 0, Math.PI * 2, false);
-        }
-        ctx.fillStyle = COLORS.white;
-        ctx.fill();
-        ctx.closePath();
-      }
-      const drawYDots = (ctx: CanvasRenderingContext2D) => {
-        ctx.beginPath();
-        for (let dotY = moveY; dotY < canvasHeight; dotY += dotSpacing) {
-          ctx.arc(dotRadius, dotY, dotRadius, 0, 2 * Math.PI, false);
-        }
-        ctx.fillStyle = COLORS.blue;
-        ctx.fill();
-        ctx.closePath();
-      }
-
       const ctx = bgCanvasRef.current?.getContext("2d");
       if (!ctx || gameState !== PLAYING || !startTime) return;
 
@@ -147,11 +126,7 @@ const GameView = () => {
       ctx.canvas.style.borderLeft = "1px solid white";
       ctx.canvas.style.borderBottom = "1px solid white";
 
-
       ctx.restore();
-      // draw dots
-      drawXDots(ctx);
-      drawYDots(ctx);
     }
 
     const drawWaiting = () => {
@@ -210,123 +185,56 @@ const GameView = () => {
     // }
 
 
-    // const drawPlane = () => {
-    //   const drawXDots = (ctx: CanvasRenderingContext2D) => {
-    //     ctx.beginPath();
-    //     for (let dotX = canvasWidth; dotX >= 0; dotX -= dotSpacing) {
-    //       ctx.arc(dotX - moveX, canvasHeight - dotRadius, dotRadius, 0, Math.PI * 2, false);
-    //     }
-    //     ctx.fillStyle = COLORS.white;
-    //     ctx.fill();
-    //     ctx.closePath();
-    //   }
-    //   const drawYDots = (ctx: CanvasRenderingContext2D) => {
-    //     ctx.beginPath();
-    //     for (let dotY = moveY; dotY < canvasHeight; dotY += dotSpacing) {
-    //       ctx.arc(dotRadius, dotY, dotRadius, 0, 2 * Math.PI, false);
-    //     }
-    //     ctx.fillStyle = COLORS.blue;
-    //     ctx.fill();
-    //     ctx.closePath();
-    //   }
-    //   if (canvasRef.current) {
-    //     const ctx = canvasRef.current.getContext("2d");
-    //     if (!ctx) return;
-    //     switch (gameState) {
-    //       case "WAITING" :
-    //         ctx.drawImage(planeSprites[currentSprite], CANVAS_PADDING, ctx.canvas.height - PLANE_HEIGHT - CANVAS_PADDING, PLANE_WIDTH, PLANE_HEIGHT);
-    //         break;
-    //       case "PLAYING":
-    //         ctx.drawImage(planeSprites[currentSprite], xPos + CANVAS_PADDING, yPos - PLANE_HEIGHT - CANVAS_PADDING, PLANE_WIDTH, PLANE_HEIGHT);
-    //         ctx.beginPath();
-    //         ctx.moveTo(CANVAS_PADDING, ctx.canvas.height - CANVAS_PADDING - 4);
-    //         ctx.lineWidth = 5
-    //         ctx.strokeStyle = COLORS.error;
-    //         ctx.quadraticCurveTo(
-    //           xPos / 2.5,
-    //           ctx.canvas.height - CANVAS_PADDING,
-    //           xPos + (CANVAS_PADDING * 2),
-    //           yPos - (CANVAS_PADDING * 2)
-    //         );
-    //         ctx.stroke();
-    //         ctx.lineWidth = 0.5;
-    //         ctx.lineTo(xPos + (CANVAS_PADDING * 2), ctx.canvas.height - (CANVAS_PADDING + 4));
-    //         ctx.closePath();
-    //         ctx.strokeStyle = COLORS.error;
-    //         ctx.stroke();
-    //         ctx.fillStyle = COLORS.bgRed;
-    //         ctx.fill();
-    //         drawXDots(ctx);
-    //         drawYDots(ctx);
-    //
-    //         if (yPos > 100 && xPos < canvasRef.current.width * 0.85) {
-    //           if (xPos > ctx.canvas.width * 0.6) {
-    //             if (currentPlaneDirection === "UP") {
-    //               yPos += 1.2;
-    //               xPos += 0.4;
-    //               if (steps === 120) {
-    //                 currentPlaneDirection = "DOWN";
-    //                 steps = 0
-    //               } else steps++;
-    //             } else {
-    //               yPos -= 1.2
-    //               xPos -= 0.4
-    //               if (steps === 120) {
-    //                 currentPlaneDirection = "UP";
-    //                 steps = 0
-    //               } else steps++;
-    //             }
-    //             setPlaneYPos(yPos);
-    //
-    //             moveX++;
-    //             if (moveX > dotSpacing) moveX = 0;
-    //
-    //             moveY++;
-    //             if (moveY - dotRadius > dotSpacing) moveY = dotRadius;
-    //
-    //           } else {
-    //             // const xOffset = xPos / (canvasRef.current.width * 0.85); // Normalize x position for curve calculation
-    //             if (elapsedTime && startTime) {
-    //               yPos = canvasHeight - Math.exp(0.000006 * elapsedTime); // Parabolic equation
-    //               xPos += 1.5;
-    //               setPlaneXPos(xPos);
-    //               setPlaneYPos(yPos);
-    //               setElapsedTime(Date.now() - startTime);
-    //             }
-    //           }
-    //         }
-    //         break;
-    //       case "ENDED":
-    //         ctx.drawImage(planeSprites[currentSprite], xPos, planeYPos - PLANE_HEIGHT, PLANE_WIDTH, PLANE_HEIGHT);
-    //         if (xPos < ctx.canvas.width * 1.5) {
-    //           xPos += 12;
-    //           yPos -= 2;
-    //           setPlaneYPos(yPos);
-    //           setPlaneXPos(xPos);
-    //         }
-    //         break;
-    //       default:
-    //         break;
-    //     }
-    //     if (counter % PLANE_FRAME_RATE === 0) {
-    //       if (currentSprite === planeSprites.length - 1) {
-    //         currentSprite = 0;
-    //       } else {
-    //         currentSprite += 1;
-    //       }
-    //     }
-    //     counter++;
-    //   }
-    // }
-
-    // todo:  clear all canvases here
+    const drawPlane = () => {
+      const drawXDots = (ctx: CanvasRenderingContext2D) => {
+        ctx.beginPath();
+        for (let dotX = canvasWidth; dotX >= 0; dotX -= dotSpacing) {
+          ctx.arc(dotX - moveX, canvasHeight - dotRadius, dotRadius, 0, Math.PI * 2, false);
+        }
+        ctx.fillStyle = COLORS.white;
+        ctx.fill();
+        ctx.closePath();
+      }
+      const drawYDots = (ctx: CanvasRenderingContext2D) => {
+        ctx.beginPath();
+        for (let dotY = moveY; dotY < canvasHeight; dotY += dotSpacing) {
+          ctx.arc(dotRadius, dotY, dotRadius, 0, 2 * Math.PI, false);
+        }
+        ctx.fillStyle = COLORS.blue;
+        ctx.fill();
+        ctx.closePath();
+      }
+      const ctx = canvasRef.current?.getContext("2d");
+      if (!ctx ||!startTime) return;
+      switch (gameState) {
+        case WAITING:
+          ctx.drawImage(planeSprites[currentSprite], CANVAS_PADDING, ctx.canvas.height - PLANE_HEIGHT - CANVAS_PADDING, PLANE_WIDTH, PLANE_HEIGHT);
+          break;
+        case PLAYING:
+          ctx.drawImage(planeSprites[currentSprite], CANVAS_PADDING, ctx.canvas.height - PLANE_HEIGHT - CANVAS_PADDING, PLANE_WIDTH, PLANE_HEIGHT);
+          drawXDots(ctx);
+          drawYDots(ctx);
+          break;
+        case ENDED:
+          ctx.drawImage(planeSprites[currentSprite], CANVAS_PADDING, ctx.canvas.height - PLANE_HEIGHT - CANVAS_PADDING, PLANE_WIDTH, PLANE_HEIGHT);
+          break;
+        default:
+          break;
+      }
+      if(now % PLANE_FRAME_RATE === 0) {
+        if(currentSprite === planeSprites.length -1 ){
+          setCurrentSprite(0);
+        } else {
+          setCurrentSprite(prev => {
+            return prev + 1;
+          });
+        }
+      }
+    }
     clearCanvases();
     drawBackground();
+    drawPlane();
     drawWaiting();
-
-    // drawWaiting();
-    // drawMultiplier();
-    // drawPlane();
   }, [gameState, now]);
 
   useEffect(() => {

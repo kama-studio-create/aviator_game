@@ -52,6 +52,7 @@ const GameView = () => {
 
   const [startTime, setStartTime] = useState<number | null>(Date.now());
   const [duration, setDuration] = useState<number>(0);
+  const [endTime, setEndTime] = useState(0);
 
   const [now, setNow] = useState(Date.now());
   const [currentSprite, setCurrentSprite] = useState(0);
@@ -59,7 +60,6 @@ const GameView = () => {
   const clearCanvases = useClearCanvas({canvasRefs: [bgCanvasRef, canvasRef, textCanvasRef]});
 
   const [timeToTop, setTimeToTop] = useState<number>(0);
-  const [timeToXposEnd, setTimeToXposEnd] = useState<number>(0);
 
   useEffect(() => {
     const ref = audioRef.current
@@ -152,7 +152,7 @@ const GameView = () => {
       ctx.drawImage(spinnerImage, -spinnerImage.width / 2, -spinnerImage.height / 2,);
       ctx.restore();
       // Draw progress bar
-      let progress = 0;
+      let progress;
       if(elapsedTime > WAITING_DURATION) {
         progress = 100;
       } else {
@@ -168,6 +168,7 @@ const GameView = () => {
       ctx.fillStyle = "red";
       ctx.fillRect(width / 2 - 100, height * 0.8, progress * 2, 7);
       if(elapsedTime > duration) {
+        setStartTime(Date.now());
         setGameState(PLAYING);
       }
     }
@@ -212,14 +213,27 @@ const GameView = () => {
         ctx.closePath();
       }
 
+
       const ctx = canvasRef.current?.getContext("2d");
       if (!ctx ||!startTime) return;
 
-      const { height} = ctx.canvas;
+      const { width, height} = ctx.canvas;
 
       let yPos = height;
       let xPos = CANVAS_PADDING;
-      
+      if(elapsedTime >= duration) {
+        setGameState(ENDED);
+      }
+      if(elapsedTime >= timeToTop) {
+        yPos = height - Math.exp(0.0012 * timeToTop)
+        xPos = Math.exp(0.00117 * timeToTop);
+        const offset = Math.sin(elapsedTime * 0.002) * 32
+        yPos += offset;
+        xPos += (offset * 0.4);
+      } else {
+        yPos = height - Math.exp(0.0012 * elapsedTime)
+        xPos = Math.exp(0.00115 * elapsedTime);
+      }
       switch (gameState) {
         case WAITING:
           ctx.globalAlpha = 0.5;
@@ -227,17 +241,6 @@ const GameView = () => {
           break;
         case PLAYING:
           ctx.globalAlpha = 1;
-          if(elapsedTime < timeToTop) {
-            yPos = height - Math.exp(0.0012 * elapsedTime)
-            xPos = Math.exp(0.0011 * elapsedTime);
-          } else {
-            yPos = height - Math.exp(0.0012 * timeToTop)
-            xPos = Math.exp(0.0011 * timeToTop) + CANVAS_PADDING;
-            const offset = Math.sin(elapsedTime * 0.002) * 32
-            yPos += offset;
-            xPos += (offset * 0.4);
-          }
-
           ctx.drawImage(planeSprites[currentSprite], xPos, yPos - PLANE_HEIGHT - CANVAS_PADDING, PLANE_WIDTH, PLANE_HEIGHT);
 					
           //draw line
@@ -245,7 +248,7 @@ const GameView = () => {
           ctx.moveTo(CANVAS_PADDING, ctx.canvas.height - CANVAS_PADDING - 4);
           ctx.lineWidth = 5
           ctx.strokeStyle = COLORS.error;
-          ctx.quadraticCurveTo(xPos / 2.5, ctx.canvas.height - CANVAS_PADDING, xPos + (CANVAS_PADDING * 2), yPos - (CANVAS_PADDING * 2));
+          ctx.quadraticCurveTo(xPos / 2.5, ctx.canvas.height - CANVAS_PADDING, xPos + (CANVAS_PADDING * 1.5), yPos - (CANVAS_PADDING * 1.5));
           ctx.stroke();
           ctx.lineWidth = 0.5;
           ctx.lineTo(xPos + (CANVAS_PADDING * 2), ctx.canvas.height - (CANVAS_PADDING + 4));
@@ -259,7 +262,12 @@ const GameView = () => {
           drawYDots(ctx);
           break;
         case ENDED:
-          ctx.drawImage(planeSprites[currentSprite], CANVAS_PADDING, ctx.canvas.height - PLANE_HEIGHT - CANVAS_PADDING, PLANE_WIDTH, PLANE_HEIGHT);
+					const elapsedEndTime = now - endTime;
+					if(xPos < width * 1.5) {
+						// yPos = height - (Math.exp(0.0012 * elapsedTime) * 0.5);
+						xPos += Math.exp(0.06 * elapsedEndTime);
+						ctx.drawImage(planeSprites[currentSprite], xPos, yPos, PLANE_WIDTH, PLANE_HEIGHT);
+					}
           break;
         default:
           break;
@@ -295,7 +303,7 @@ const GameView = () => {
         playSegment(AUDIO_START);
         break;
       case ENDED:
-        setStartTime(Date.now());
+        setEndTime(Date.now());
         console.log(ENDED);
         playSegment(AUDIO_FLY_AWAY);
         break;

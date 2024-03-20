@@ -4,7 +4,7 @@ import Sidebar from "./Sidebar.tsx";
 import Header from "./Header.tsx";
 import BetsContainer from "./BetsContainer.tsx";
 import BgImage from '../../assets/bg.jpg'
-import {breakpoints, mq} from "../../styles/breakpoints.ts";
+import {breakpoints, MEDIA_QUERIES} from "../../styles/breakpoints.ts";
 import {TranscluscentBackgroundStyles} from "../../styles/common.ts";
 
 interface LayoutProps extends ComponentProps<"div"> {
@@ -32,7 +32,7 @@ const styles = {
     gridTemplateColumns: '9fr 3fr',
     gap: 4,
     minHeight: '100vh',
-    [mq[0]]: {
+    [MEDIA_QUERIES[0]]: {
       gridTemplateColumns: '1fr',
       minHeight: 'auto',
     }
@@ -43,7 +43,7 @@ const styles = {
     display: 'grid',
     gap: 8,
     gridTemplateColumns: '1fr 2fr',
-    [mq[0]]: {
+    [MEDIA_QUERIES[0]]: {
       gridTemplateColumns: '1fr',
       gap: 0,
       height: 'auto',

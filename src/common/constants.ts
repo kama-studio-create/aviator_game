@@ -15,6 +15,7 @@ export const DOWN = 'DOWN';
 
 export const AUDIO_START = "start";
 export const AUDIO_FLY_AWAY = "flyAway";
+export const PLANE_FLIGHT_RATE = 0.0012;
 
 const GAME_STATES = [WAITING, PLAYING, ENDED] as const;
 const PLANE_DIRECTIONS = [UP, DOWN]

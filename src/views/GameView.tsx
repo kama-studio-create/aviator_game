@@ -1,17 +1,17 @@
 import {css} from "@emotion/react";
 import {
-	AUDIO_FLY_AWAY,
-	AUDIO_START,
-	BORDER_RADIUS,
-	ENDED,
-	IGameState,
-	PLANE_FLIGHT_RATE,
-	PLANE_FRAME_RATE,
-	PLANE_HEIGHT,
-	PLANE_WIDTH,
-	PLAYING,
-	WAITING,
-	WAITING_DURATION
+  AUDIO_FLY_AWAY,
+  AUDIO_START,
+  BORDER_RADIUS,
+  ENDED,
+  IGameState,
+  PLANE_FLIGHT_RATE,
+  PLANE_FRAME_RATE,
+  PLANE_HEIGHT,
+  PLANE_WIDTH,
+  PLAYING,
+  WAITING,
+  WAITING_DURATION
 } from "../common/constants.ts";
 import {GRADIENTS} from "../styles/colors.ts";
 import BgAudioFile from "../assets/audio/bg_music.mp3";
@@ -22,6 +22,7 @@ import {backgroundImage, planeSprites, spinnerImage} from "../common/images.ts";
 import useClearCanvas from "../hooks/useClearCanvas.ts";
 import {COLORS} from "../common/colors.ts";
 import {getRandomNumber} from "../utils/generators.ts";
+import {useImages} from "../hooks/useImages.ts";
 
 const CANVAS_PADDING = 16;
 
@@ -50,14 +51,15 @@ const GameView = () => {
   const [canvasWidth, setCanvasWidth] = useState(300);
   const [canvasHeight, setCanvasHeight] = useState(300);
 
-  const [startTime, setStartTime] = useState<number | null>(Date.now());
+  const [startTime, setStartTime] = useState<number>(Date.now());
   const [duration, setDuration] = useState<number>(0);
   const [endTime, setEndTime] = useState(0);
+  const [imagesLoaded, setImagesLoaded] = useState<boolean>(false);
 
   const [now, setNow] = useState(Date.now());
-  const [currentSprite, setCurrentSprite] = useState(0);
 
   const clearCanvases = useClearCanvas({canvasRefs: [bgCanvasRef, canvasRef, textCanvasRef]});
+  const { loadImages} = useImages();
 
   const [timeToTop, setTimeToTop] = useState<number>(0);
 
@@ -70,6 +72,15 @@ const GameView = () => {
       }
     };
   }, [audioRef, isPlaying]);
+  
+  useEffect(() => {
+    if(!imagesLoaded) {
+      loadImages().then(() => {
+        setImagesLoaded(true)
+      });
+      return;
+    }
+  }, [imagesLoaded, loadImages]);
 
 
   useEffect(() => {
@@ -112,8 +123,8 @@ const GameView = () => {
     const dotRadius = 2
     const moveY = dotRadius;
 
-    if(!startTime || !duration) return;
     const elapsedTime = now - startTime;
+
     const drawBackground = () => {
       const ctx = bgCanvasRef.current?.getContext("2d");
       if (!ctx || gameState !== PLAYING || !startTime) return;
@@ -221,9 +232,6 @@ const GameView = () => {
 
       let yPos = height;
       let xPos = CANVAS_PADDING;
-      if(elapsedTime >= duration) {
-        setGameState(ENDED);
-      }
       if(elapsedTime >= timeToTop) {
         yPos = height - Math.exp(0.0012 * timeToTop)
         xPos = Math.exp(0.00117 * timeToTop);
@@ -234,6 +242,7 @@ const GameView = () => {
         yPos = height - Math.exp(0.0012 * elapsedTime)
         xPos = Math.exp(0.00115 * elapsedTime);
       }
+      const currentSprite = Math.floor(now / PLANE_FRAME_RATE) % planeSprites.length;
       switch (gameState) {
         case WAITING:
           ctx.globalAlpha = 0.5;
@@ -260,39 +269,54 @@ const GameView = () => {
           //draw dots
           drawXDots(ctx);
           drawYDots(ctx);
+
+          if(elapsedTime >= duration) setGameState(ENDED);
           break;
         case ENDED:
-					const elapsedEndTime = now - endTime;
-					if(xPos < width * 1.5) {
-						// yPos = height - (Math.exp(0.0012 * elapsedTime) * 0.5);
-						xPos += Math.exp(0.06 * elapsedEndTime);
-						ctx.drawImage(planeSprites[currentSprite], xPos, yPos, PLANE_WIDTH, PLANE_HEIGHT);
-					}
+          if(xPos < width * 1.5 && endTime) {
+            // yPos = height - (Math.exp(0.0012 * elapsedTime) * 0.5);
+            xPos += Math.exp(0.06 * (now - endTime));
+            ctx.drawImage(planeSprites[currentSprite], xPos, yPos, PLANE_WIDTH, PLANE_HEIGHT);
+          }
+
           break;
         default:
           break;
       }
-      if(now % PLANE_FRAME_RATE === 0) {
-        if(currentSprite === planeSprites.length -1 ){
-          setCurrentSprite(0);
-        } else {
-          setCurrentSprite(prev => {
-            return prev + 1;
-          });
-        }
-      }
+    }
+
+    const drawLoading = () => {
+      const ctx = canvasRef.current?.getContext("2d");
+      if(!ctx) return;
+
+      // Calculate loading dots
+      const interval = 500; // 0.5 seconds
+      const numDots = 3;
+      const dots = '.'.repeat((now % (interval * numDots))  / interval + 1);
+
+      // Draw text
+      ctx.save();
+      ctx.fillStyle = COLORS.white;
+      ctx.font = "bold 16px Arial";
+      ctx.textAlign = "center";
+      ctx.fillText(`LOADING${dots}`, ctx.canvas.width / 2, ctx.canvas.height / 2);
+      ctx.restore();
     }
 
     clearCanvases();
-    drawBackground();
-    drawPlane();
-    drawWaiting();
-    drawMultiplier();
-    // handleGameState();
-  }, [gameState, now]);
+    if(imagesLoaded) {
+
+      drawBackground();
+      drawPlane();
+      drawWaiting();
+      drawMultiplier();
+    } else {
+      drawLoading();
+    }
+
+  }, [canvasHeight, canvasWidth, clearCanvases, duration, endTime, gameState, imagesLoaded, loadImages, now, startTime, timeToTop]);
 
   useEffect(() => {
-
     switch (gameState) {
       case WAITING:
         setDuration(WAITING_DURATION);
@@ -304,22 +328,21 @@ const GameView = () => {
         break;
       case ENDED:
         setEndTime(Date.now());
-        console.log(ENDED);
         playSegment(AUDIO_FLY_AWAY);
         break;
     }
   }, [gameState]);
 
+
+
   useEffect(() => {
     let frameID = 0;
-
+    setImagesLoaded(false);
     function run() {
       setNow(Date.now());
       frameID = requestAnimationFrame(run);
     }
-
     run();
-
     return () => {
       cancelAnimationFrame(frameID);
     }

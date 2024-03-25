@@ -57,8 +57,6 @@ const GameView = () => {
 
   const { loadImages} = useImages();
 
-  const [timeToTop, setTimeToTop] = useState<number>(0);
-
   useEffect(() => {
     const ref = audioRef.current
     return () => {
@@ -85,13 +83,7 @@ const GameView = () => {
     const bgCtx = bgCanvasRef.current?.getContext("2d");
     const textCtx = textCanvasRef.current?.getContext("2d");
 		
-    const calculateTimeToTop = (canvasHeight: number) => {
-      if (PLANE_HEIGHT >= canvasHeight) {
-        throw new Error("PLANE_HEIGHT must be less than canvasHeight");
-      }
-      const top = PLANE_HEIGHT * 2;
-      return Math.log(canvasHeight - top) / PLANE_FLIGHT_RATE;
-    }
+
 
     const resizeAndStyleCanvases = () => {
       if (!containerRef.current || !ctx || !bgCtx || !textCtx) return;
@@ -100,8 +92,6 @@ const GameView = () => {
       if (ctx.canvas.width !== currentWidth || ctx.canvas.height !== currentHeight) {
         setCanvasWidth(currentWidth);
         setCanvasHeight(currentHeight);
-        const timeY = Math.floor(calculateTimeToTop(currentHeight));
-        setTimeToTop(timeY);
       }
       ctx.canvas.style.borderRadius = BORDER_RADIUS;
       textCtx.canvas.style.borderRadius = BORDER_RADIUS;
@@ -122,6 +112,8 @@ const GameView = () => {
     const duration = endTime - startTime;
 
     const canvases = [bgCanvasRef, canvasRef, textCanvasRef];
+
+
 
     const clearCanvases = () => {
       canvases.forEach((ref) => {
@@ -215,6 +207,18 @@ const GameView = () => {
       let yPos;
       let xPos;
 
+      const calculateTimeToTop = (canvasHeight: number) => {
+        if (PLANE_HEIGHT >= canvasHeight) {
+          throw new Error("PLANE_HEIGHT must be less than canvasHeight");
+        }
+        const top = PLANE_HEIGHT * 2;
+        return Math.log(canvasHeight - top) / PLANE_FLIGHT_RATE;
+      }
+
+      const timeToTop = Math.floor(calculateTimeToTop(height));
+
+      const offset = Math.sin(elapsedTime * 0.002) * 32;
+      const exitOffset = Math.exp(elapsedTime - timeToTop);
       const drawXDots = (ctx: CanvasRenderingContext2D) => {
         ctx.beginPath();
         for (let dotX = width; dotX >= 0; dotX -= dotSpacing) {
@@ -234,16 +238,9 @@ const GameView = () => {
         ctx.closePath();
       }
 
-      if(elapsedTime >= timeToTop) {
-        yPos = height - Math.exp(0.0012 * timeToTop)
-        xPos = Math.exp(0.00117 * timeToTop);
-        const offset = Math.sin(elapsedTime * 0.002) * 32
-        yPos += offset;
-        xPos += (offset * 0.4);
-      } else {
-        yPos = height - Math.exp(0.0012 * elapsedTime)
-        xPos = Math.exp(0.00117 * elapsedTime);
-      }
+      yPos = height - Math.exp(0.0012 * elapsedTime)
+      xPos = Math.exp(0.00117 * elapsedTime);
+      
       const currentSprite = Math.floor(now / PLANE_FRAME_RATE) % planeSprites.length;
       switch (gameState) {
         case WAITING:
@@ -251,9 +248,15 @@ const GameView = () => {
           ctx.drawImage(planeSprites[currentSprite], CANVAS_PADDING, ctx.canvas.height - PLANE_HEIGHT - CANVAS_PADDING, PLANE_WIDTH, PLANE_HEIGHT);
           break;
         case PLAYING:
+          if(elapsedTime >= timeToTop) {
+            yPos = height - Math.exp(0.0012 * timeToTop)
+            xPos = Math.exp(0.00117 * timeToTop);
+            yPos += offset;
+            xPos += (offset * 0.4);
+          }
           ctx.globalAlpha = 1;
           ctx.drawImage(planeSprites[currentSprite], xPos, yPos - PLANE_HEIGHT - CANVAS_PADDING, PLANE_WIDTH, PLANE_HEIGHT);
-					
+          
           //draw line
           ctx.beginPath();
           ctx.moveTo(CANVAS_PADDING, ctx.canvas.height - CANVAS_PADDING - 4);
@@ -273,23 +276,35 @@ const GameView = () => {
           drawYDots(ctx);
           break;
         case ENDED:
-          if(xPos < width * 1.5 && endTime) {
-            // yPos = height - (Math.exp(0.0012 * elapsedTime) * 0.5);
-            xPos += Math.exp(0.06 * (now - endTime));
-            ctx.drawImage(planeSprites[currentSprite], xPos, yPos, PLANE_WIDTH, PLANE_HEIGHT);
+          // if(xPos > width * 1.5) return;
+          if(elapsedTime >= timeToTop) {
+            yPos = height - Math.exp(0.0012 * timeToTop)
+            xPos = Math.exp(0.00117 * timeToTop);
+            xPos += (exitOffset * 0.1) ;
           }
-
+          // yPos = height - (Math.exp(0.0012 * elapsedTime) * 0.5);
+          ctx.drawImage(planeSprites[currentSprite], xPos, yPos, PLANE_WIDTH, PLANE_HEIGHT);
+          
           break;
         default:
           break;
       }
     }
 
+    
+    clearCanvases();
+    drawBackground();
+    drawWaiting();
+    drawPlane();
+    drawWaiting();
+    drawMultiplier();
 
+  }, [gameState, startTime, now]);
+
+  useEffect(() => {
     switch (gameState) {
       case WAITING:
         if(now > startTime) {
-          console.log('playing');
           setGameState(PLAYING)
         }
         break;
@@ -305,15 +320,7 @@ const GameView = () => {
       default:
         break;
     }
-    
-    clearCanvases();
-    drawBackground();
-    drawWaiting();
-    drawPlane();
-    drawWaiting();
-    drawMultiplier();
-
-  }, [endTime, gameState, startTime, timeToTop, now]);
+  }, [endTime, gameState, now, startTime]);
 
   useEffect(() => {
     if(gameState === WAITING) {

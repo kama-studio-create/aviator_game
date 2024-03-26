@@ -105,15 +105,10 @@ const GameView = () => {
 
   useEffect(() => {
     const dotSpacing = 80;
-    const moveX = 0;
     const dotRadius = 2
     const moveY = dotRadius;
     const elapsedTime = now - startTime;
-    const duration = endTime - startTime;
-
     const canvases = [bgCanvasRef, canvasRef, textCanvasRef];
-
-
 
     const clearCanvases = () => {
       canvases.forEach((ref) => {
@@ -125,8 +120,6 @@ const GameView = () => {
         }
       });
     }
-
-
 
     const drawBackground = () => {
       const ctx = bgCanvasRef.current?.getContext("2d");
@@ -179,18 +172,18 @@ const GameView = () => {
 
     const drawMultiplier = () => {
       const ctx = textCanvasRef.current?.getContext("2d");
-      if(!ctx || gameState === WAITING ||!startTime ||!duration) return;
+      if(!ctx || gameState === WAITING ||!startTime ) return;
 
       let multiplier = Math.exp(0.00006 * elapsedTime);
-      if(elapsedTime >= duration) multiplier = Math.exp(0.00006 * duration);
+      if(gameState === ENDED && endTime) multiplier = Math.exp(0.00006 * (endTime - startTime));
       ctx.save();
-      if(elapsedTime >= duration) {
+      if(gameState === ENDED) {
         ctx.fillStyle = "#f7f7f7";
         ctx.font = "bold 32px Arial";
         ctx.textAlign = "center";
         ctx.fillText(`FLEW AT`, ctx.canvas.width / 2, ctx.canvas.height / 2.3);
       }
-      ctx.fillStyle = elapsedTime >= duration ? "red": "white";
+      ctx.fillStyle = elapsedTime >= (endTime - startTime) ? "red": "white";
       ctx.font = "bold 72px Arial";
       ctx.textAlign = "center";
       ctx.fillText(`${multiplier.toFixed(2)}x`, ctx.canvas.width / 2, ctx.canvas.height / 1.7);
@@ -218,15 +211,23 @@ const GameView = () => {
       const timeToTop = Math.floor(calculateTimeToTop(height));
 
       const offset = Math.sin(elapsedTime * 0.002) * 32;
-      const exitOffset = Math.exp(elapsedTime - timeToTop);
       const drawXDots = (ctx: CanvasRenderingContext2D) => {
+        let moveX = 0;
         ctx.beginPath();
-        for (let dotX = width; dotX >= 0; dotX -= dotSpacing) {
-          ctx.arc(dotX - moveX, height - dotRadius, dotRadius, 0, Math.PI * 2, false);
+        if(elapsedTime > timeToTop) {
+          moveX = (elapsedTime * dotSpacing / 1000) % (width + dotSpacing);
+          for (let dotX = width; dotX >= -dotSpacing; dotX -= dotSpacing) {
+            ctx.arc(dotX - moveX, height - dotRadius, dotRadius, 0, Math.PI * 2, false);
+          }
+        } else {
+          for (let dotX = width; dotX >= 0; dotX -= dotSpacing) {
+            ctx.arc(dotX - moveX, height - dotRadius, dotRadius, 0, Math.PI * 2, false);
+          }
         }
+
         ctx.fillStyle = COLORS.white;
         ctx.fill();
-        ctx.closePath();
+        ctx.closePath( );
       }
       const drawYDots = (ctx: CanvasRenderingContext2D) => {
         ctx.beginPath();
@@ -240,7 +241,10 @@ const GameView = () => {
 
       yPos = height - Math.exp(0.0012 * elapsedTime)
       xPos = Math.exp(0.00117 * elapsedTime);
-      
+
+      const accelerationFactor = 0.02;
+      const planeExitSpeed = 5 + elapsedTime * accelerationFactor;
+
       const currentSprite = Math.floor(now / PLANE_FRAME_RATE) % planeSprites.length;
       switch (gameState) {
         case WAITING:
@@ -280,9 +284,8 @@ const GameView = () => {
           if(elapsedTime >= timeToTop) {
             yPos = height - Math.exp(0.0012 * timeToTop)
             xPos = Math.exp(0.00117 * timeToTop);
-            xPos += (exitOffset * 0.1) ;
+            xPos += planeExitSpeed;
           }
-          // yPos = height - (Math.exp(0.0012 * elapsedTime) * 0.5);
           ctx.drawImage(planeSprites[currentSprite], xPos, yPos, PLANE_WIDTH, PLANE_HEIGHT);
           
           break;

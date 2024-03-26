@@ -1,13 +1,7 @@
-import {allImages} from "../common/images.ts";
+import {allImages} from "../../common/images.ts";
 
-
-type resizeProps = {
-  canvasWidth: number;
-  canvasHeight: number;
-}
 export const useImages = () => {
 
-  const resizeImages = (measurements: resizeProps) => {}
 
   const loadImages = () => {
 
@@ -33,6 +27,6 @@ export const useImages = () => {
     });
   }
 	
-  return {loadImages, resizeImages}
+  return {loadImages}
 
 }

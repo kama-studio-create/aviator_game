@@ -1,6 +1,13 @@
 import {css} from "@emotion/react";
 import {ComponentProps, FC} from "react";
-import {COLORS} from "../../common/colors.ts";
+import {
+  DARK_COLOR,
+  LIGHT_COLOR,
+  PRIMARY_COLOR,
+  SECONDARY_COLOR,
+  SUCCESS_COLOR,
+  WHITE_COLOR
+} from "../../common/colors.ts";
 
 type Props = {
   variant?: 'primary' | 'secondary' | 'dark' | 'light' | 'success' | 'error',
@@ -17,24 +24,24 @@ const baseStyles = css({
   cursor: 'pointer',
   textDecoration: 'capitalize',
   '[data-variant]=primary': {
-    background: COLORS.primary,
-    color: COLORS.white,
+    background: PRIMARY_COLOR,
+    color: WHITE_COLOR,
   },
   '[data-variant]=secondary': {
-    background: COLORS.secondary,
-    color: COLORS.white,
+    background: SECONDARY_COLOR,
+    color: WHITE_COLOR,
   },
   '[data-variant]=dark': {
-    background: COLORS.dark,
-    color: COLORS.white,
+    background: DARK_COLOR,
+    color: WHITE_COLOR,
   },
   '[data-variant]=light': {
-    background: COLORS.light,
-    color: COLORS.dark,
+    background: LIGHT_COLOR,
+    color: DARK_COLOR,
   },
   '[data-variant]=success': {
-    background: COLORS.success,
-    color: COLORS.white,
+    background: SUCCESS_COLOR,
+    color: WHITE_COLOR,
   },
   '[data-size]=md': {
     paddingBlock: 16,

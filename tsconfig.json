@@ -23,8 +23,6 @@
     "noImplicitAny": true,
     "noImplicitReturns": true,
     "noImplicitThis": true,
-    "noUnusedExpressions": true,
-    "noUnusedVariables": true,
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,
   },

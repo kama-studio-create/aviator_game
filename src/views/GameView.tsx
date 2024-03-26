@@ -1,12 +1,13 @@
 import {css} from "@emotion/react";
 import {
   BORDER_RADIUS,
+  CANVAS_PADDING,
+  DOT_RADIUS,
+  DOT_SPACING,
   ENDED,
   IGameState,
   PLANE_FLIGHT_RATE,
   PLANE_FRAME_RATE,
-  PLANE_HEIGHT,
-  PLANE_WIDTH,
   PLAYING,
   WAITING,
   WAITING_DURATION
@@ -17,11 +18,10 @@ import AudioFile from "../assets/audio/audio.mp3";
 import {useAudio} from "../hooks/audio/useAudio.ts";
 import {useEffect, useRef, useState} from "react";
 import {backgroundImage, planeSprites, spinnerImage} from "../common/images.ts";
-import {COLORS} from "../common/colors.ts";
 import {getRandomNumber} from "../utils/generators.ts";
-import {useImages} from "../hooks/useImages.ts";
+import {useImages} from "../hooks/images/useImages.ts";
+import {BLUE_COLOR, ERROR_COLOR, WHITE_COLOR} from "../common/colors.ts";
 
-const CANVAS_PADDING = 16;
 
 const gameStyles = css({
   width: "100%",
@@ -82,9 +82,6 @@ const GameView = () => {
     const ctx = canvasRef.current?.getContext("2d");
     const bgCtx = bgCanvasRef.current?.getContext("2d");
     const textCtx = textCanvasRef.current?.getContext("2d");
-		
-
-
     const resizeAndStyleCanvases = () => {
       if (!containerRef.current || !ctx || !bgCtx || !textCtx) return;
       const currentWidth = containerRef.current.clientWidth;
@@ -92,6 +89,14 @@ const GameView = () => {
       if (ctx.canvas.width !== currentWidth || ctx.canvas.height !== currentHeight) {
         setCanvasWidth(currentWidth);
         setCanvasHeight(currentHeight);
+        const desiredPlaneWidth = currentWidth * 0.3; // 10% of canvas width
+        planeSprites.map(sprite => {
+          const ratio = desiredPlaneWidth / sprite.width;
+          const newHeight = sprite.height * ratio;
+          sprite.width = desiredPlaneWidth;
+          sprite.height = newHeight;
+          return sprite;
+        });
       }
       ctx.canvas.style.borderRadius = BORDER_RADIUS;
       textCtx.canvas.style.borderRadius = BORDER_RADIUS;
@@ -104,9 +109,7 @@ const GameView = () => {
   }, []);
 
   useEffect(() => {
-    const dotSpacing = 80;
-    const dotRadius = 2
-    const moveY = dotRadius;
+    const moveY = DOT_RADIUS;
     const elapsedTime = now - startTime;
     const canvases = [bgCanvasRef, canvasRef, textCanvasRef];
 
@@ -128,20 +131,24 @@ const GameView = () => {
       const {width, height} = ctx.canvas;
       ctx.save();
       // Draw background image
-      ctx.canvas.style.marginLeft = `${CANVAS_PADDING}px`;
-      ctx.canvas.style.marginBottom = `${CANVAS_PADDING}px`;
       ctx.translate(0, width)
       const angle = (now - startTime) % 360 * 0.0005;
       ctx.rotate(angle);
       ctx.scale(1, -1);
-      ctx.globalAlpha = 0.3;
+      ctx.globalAlpha = 0.5;
       ctx.drawImage(backgroundImage, -Math.floor(width * 4), -Math.floor(height * 4), width * 8, height * 8,);
 
       // Draw axis
-      ctx.globalAlpha = 1;
-      ctx.canvas.style.background = GRADIENTS.dark;
-      ctx.canvas.style.borderLeft = "1px solid white";
-      ctx.canvas.style.borderBottom = "1px solid white";
+
+      ctx.moveTo(CANVAS_PADDING * 3, height - CANVAS_PADDING * 3);
+      ctx.beginPath();
+      ctx.lineTo(width - CANVAS_PADDING * 3, height - CANVAS_PADDING * 3);
+      ctx.closePath();
+
+      ctx.fill();
+      // ctx.canvas.style.background = GRADIENTS.dark;
+      // ctx.canvas.style.borderLeft = "1px solid white";
+      // ctx.canvas.style.borderBottom = "1px solid white";
 
       ctx.restore();
     }
@@ -159,7 +166,8 @@ const GameView = () => {
       ctx.drawImage(spinnerImage, -spinnerImage.width / 2, -spinnerImage.height / 2,);
       ctx.restore();
       // Draw progress bar
-      const progress = waitingTime / WAITING_DURATION * 100;
+      const progress = waitingTime / WAITING_DURATION * 100 > 0 ? waitingTime / WAITING_DURATION * 100 : 0;
+
       // Draw text
       ctx.font = "18px sans-serif";
       ctx.textAlign = "center";
@@ -201,10 +209,11 @@ const GameView = () => {
       let xPos;
 
       const calculateTimeToTop = (canvasHeight: number) => {
-        if (PLANE_HEIGHT >= canvasHeight) {
+        if(planeSprites.length === 0) return 0;
+        if (planeSprites[0].height >= canvasHeight) {
           throw new Error("PLANE_HEIGHT must be less than canvasHeight");
         }
-        const top = PLANE_HEIGHT * 2;
+        const top = planeSprites[0].height * 2;
         return Math.log(canvasHeight - top) / PLANE_FLIGHT_RATE;
       }
 
@@ -215,28 +224,47 @@ const GameView = () => {
         let moveX = 0;
         ctx.beginPath();
         if(elapsedTime > timeToTop) {
-          moveX = (elapsedTime * dotSpacing / 1000) % (width + dotSpacing);
-          for (let dotX = width; dotX >= -dotSpacing; dotX -= dotSpacing) {
-            ctx.arc(dotX - moveX, height - dotRadius, dotRadius, 0, Math.PI * 2, false);
+          moveX = (elapsedTime * DOT_SPACING / 1000) % (width + DOT_SPACING);
+          for (let dotX = width; dotX >= -DOT_SPACING; dotX -= DOT_SPACING) {
+            ctx.arc(dotX - moveX, height - DOT_RADIUS, DOT_RADIUS, 0, Math.PI * 2, false);
           }
         } else {
-          for (let dotX = width; dotX >= 0; dotX -= dotSpacing) {
-            ctx.arc(dotX - moveX, height - dotRadius, dotRadius, 0, Math.PI * 2, false);
+          for (let dotX = width; dotX >= 0; dotX -= DOT_SPACING) {
+            ctx.arc(dotX - moveX, height - DOT_RADIUS, DOT_RADIUS, 0, Math.PI * 2, false);
           }
         }
 
-        ctx.fillStyle = COLORS.white;
+        ctx.fillStyle = WHITE_COLOR;
         ctx.fill();
         ctx.closePath( );
       }
       const drawYDots = (ctx: CanvasRenderingContext2D) => {
         ctx.beginPath();
-        for (let dotY = moveY; dotY < height; dotY += dotSpacing) {
-          ctx.arc(dotRadius, dotY, dotRadius, 0, 2 * Math.PI, false);
+        for (let dotY = moveY; dotY < height; dotY += DOT_SPACING) {
+          ctx.arc(DOT_RADIUS, dotY, DOT_RADIUS, 0, 2 * Math.PI, false);
         }
-        ctx.fillStyle = COLORS.blue;
+        ctx.fillStyle = BLUE_COLOR;
         ctx.fill();
         ctx.closePath();
+      }
+
+      const drawAxis = (ctx: CanvasRenderingContext2D) => {
+        ctx.strokeStyle = WHITE_COLOR;
+        ctx.lineWidth = 1;
+        //draw x axis
+        ctx.beginPath();
+        ctx.moveTo(CANVAS_PADDING, height - CANVAS_PADDING);
+        ctx.lineTo(width - CANVAS_PADDING, height - CANVAS_PADDING);
+        ctx.closePath();
+        ctx.stroke();
+
+        //draw y axis
+        ctx.beginPath();
+        ctx.moveTo(CANVAS_PADDING, CANVAS_PADDING);
+        ctx.lineTo(CANVAS_PADDING, height - CANVAS_PADDING);
+        ctx.closePath();
+
+        ctx.stroke();
       }
 
       yPos = height - Math.exp(0.0012 * elapsedTime)
@@ -246,10 +274,11 @@ const GameView = () => {
       const planeExitSpeed = 5 + elapsedTime * accelerationFactor;
 
       const currentSprite = Math.floor(now / PLANE_FRAME_RATE) % planeSprites.length;
+      const planeSprite = planeSprites[currentSprite];
       switch (gameState) {
         case WAITING:
           ctx.globalAlpha = 0.5;
-          ctx.drawImage(planeSprites[currentSprite], CANVAS_PADDING, ctx.canvas.height - PLANE_HEIGHT - CANVAS_PADDING, PLANE_WIDTH, PLANE_HEIGHT);
+          ctx.drawImage(planeSprite, CANVAS_PADDING, ctx.canvas.height - planeSprite.height - CANVAS_PADDING, planeSprite.width, planeSprite.height);
           break;
         case PLAYING:
           if(elapsedTime >= timeToTop) {
@@ -259,25 +288,26 @@ const GameView = () => {
             xPos += (offset * 0.4);
           }
           ctx.globalAlpha = 1;
-          ctx.drawImage(planeSprites[currentSprite], xPos, yPos - PLANE_HEIGHT - CANVAS_PADDING, PLANE_WIDTH, PLANE_HEIGHT);
+          ctx.drawImage(planeSprite, xPos, yPos - planeSprite.height - CANVAS_PADDING, planeSprite.width, planeSprite.height);
           
           //draw line
           ctx.beginPath();
-          ctx.moveTo(CANVAS_PADDING, ctx.canvas.height - CANVAS_PADDING - 4);
+          ctx.moveTo(CANVAS_PADDING, ctx.canvas.height - CANVAS_PADDING);
           ctx.lineWidth = 5
-          ctx.strokeStyle = COLORS.error;
-          ctx.quadraticCurveTo(xPos / 2.5, ctx.canvas.height - CANVAS_PADDING, xPos + (CANVAS_PADDING * 1.5), yPos - (CANVAS_PADDING * 1.5));
+          ctx.strokeStyle = ERROR_COLOR;
+          ctx.quadraticCurveTo(xPos / 1.5, ctx.canvas.height - CANVAS_PADDING, xPos + (CANVAS_PADDING * 1.5), yPos - (CANVAS_PADDING * 1.5));
           ctx.stroke();
           ctx.lineWidth = 0.5;
           ctx.lineTo(xPos + (CANVAS_PADDING * 2), ctx.canvas.height - (CANVAS_PADDING + 4));
           ctx.closePath();
-          ctx.strokeStyle = COLORS.error;
+          ctx.strokeStyle = ERROR_COLOR;
           ctx.stroke();
-          ctx.fillStyle = COLORS.bgRed;
+          ctx.fillStyle = ERROR_COLOR;
           ctx.fill();
           //draw dots
           drawXDots(ctx);
           drawYDots(ctx);
+          drawAxis(ctx);
           break;
         case ENDED:
           // if(xPos > width * 1.5) return;
@@ -286,7 +316,7 @@ const GameView = () => {
             xPos = Math.exp(0.00117 * timeToTop);
             xPos += planeExitSpeed;
           }
-          ctx.drawImage(planeSprites[currentSprite], xPos, yPos, PLANE_WIDTH, PLANE_HEIGHT);
+          ctx.drawImage(planeSprite, xPos, yPos, planeSprite.width, planeSprite.height);
           
           break;
         default:
@@ -353,7 +383,7 @@ const GameView = () => {
       <audio ref={audioRef} src={AudioFile}/>
       <div ref={containerRef}
         style={{width: "100%", height: canvasHeight, borderRadius: 8, background: GRADIENTS.dark}}>
-        <canvas width={canvasWidth - 20} height={canvasHeight - 20} ref={bgCanvasRef}/>
+        <canvas className='bg-canvas' width={canvasWidth} height={canvasHeight} ref={bgCanvasRef}/>
         <canvas width={canvasWidth} height={canvasHeight} ref={canvasRef}/>
         <canvas width={canvasWidth} height={canvasHeight} ref={textCanvasRef}/>
       </div>

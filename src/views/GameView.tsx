@@ -202,8 +202,8 @@ const GameView = () => {
       // Draw spinner
       const spinnerWidth = width * 0.15;
       const spinnerHeight = spinnerWidth * (spinnerImage.height / spinnerImage.width);
-      const centerX = canvasWidth / 2 - spinnerWidth / 2;
-      const centerY = canvasHeight / 2 - spinnerHeight / 2;
+      const centerX = width / 2 - spinnerWidth / 2;
+      const centerY = height / 2 - spinnerHeight / 2;
       ctx.save();
       ctx.translate(centerX + spinnerWidth / 2, centerY + spinnerHeight / 2);
       ctx.rotate(angle);
@@ -216,10 +216,10 @@ const GameView = () => {
       ctx.font = "18px sans-serif";
       ctx.textAlign = "center";
       ctx.fillStyle = "#c9c9c9";
-      ctx.fillText("Waiting for next round", width / 2, height * 0.9);
+      ctx.fillText("Waiting for next round", width / 2, (height / 2) + (spinnerHeight * 1.5));
       ctx.canvas.style.background = "rgba(0,0,0,0.5)";
       ctx.fillStyle = "red";
-      ctx.fillRect(width / 2 - 100, height * 0.8, progress * 2, 7);
+      ctx.fillRect(width / 2 - 100, height / 2 + spinnerHeight, progress * 2, 7);
     }
 
     const drawMultiplier = () => {

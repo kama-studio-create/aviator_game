@@ -16,7 +16,7 @@ export const useImages = () => {
     Promise.all(promises)
       .then(() => setImagesLoaded(true))
       .catch(error => console.error('Error loading images:', error));
-  }, [allImages]);
+  }, []);
 
   return imagesLoaded;
 

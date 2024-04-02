@@ -1,8 +1,8 @@
 import {ComponentProps, FC} from "react";
 import {css} from "@emotion/react";
 import {TranscluscentBackgroundStyles} from "../../styles/common.ts";
-import {APP_NAME} from "../../common/strings.ts";
 import {PillButton} from "../buttons/PillButton.tsx";
+import {APP_NAME} from "../../common/constants.ts";
 
 const styles = {
   headerStyles: css([{

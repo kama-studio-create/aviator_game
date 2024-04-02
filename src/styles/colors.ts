@@ -1,5 +1,9 @@
-export const GRADIENTS = {
-  primary: 'linear-gradient(180deg, #FF5E3A 0%, #FF9966 100%)',
-  secondary: 'linear-gradient(180deg, #FF9966 0%, #FF5E3A 100%)',
-  dark: 'radial-gradient(circle, rgba(0,96,116,1) 0%, rgba(9,9,121,1) 52%, rgba(2,0,36,1) 100%)'
-}
+export const GRADIENT_DARK = 'radial-gradient(circle, rgba(0,96,116,1) 0%, rgba(9,9,121,1) 52%, rgba(2,0,36,1) 100%)';
+export const PRIMARY_COLOR = '#FF5E3A';
+export const SECONDARY_COLOR = '#FF9966';
+export const DARK_COLOR = '#222';
+export const LIGHT_COLOR = 'light-dark(rgba(255, 255, 255, 0.24), rgba(0, 0, 0, 0.2))';
+export const SUCCESS_COLOR = '#00de60';
+export const ERROR_COLOR = '#f00';
+export const WHITE_COLOR = '#fff';
+export const BLUE_COLOR = 'blue';

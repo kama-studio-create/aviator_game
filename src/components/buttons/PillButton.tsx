@@ -7,7 +7,7 @@ import {
   SECONDARY_COLOR,
   SUCCESS_COLOR,
   WHITE_COLOR
-} from "../../common/colors.ts";
+} from "../../styles/colors.ts";
 
 type Props = {
   variant?: 'primary' | 'secondary' | 'dark' | 'light' | 'success' | 'error',

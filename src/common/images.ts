@@ -21,6 +21,7 @@ export const backgroundImage = new Image();
 export const spinnerImage = new Image();
 
 backgroundImage.src = BgImage;
+backgroundImage.id = 'canvas-bg';
 spinnerImage.src = SpinnerImage;
 
 

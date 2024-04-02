@@ -1,4 +1,4 @@
-import {css} from "@emotion/react";
+import {css, keyframes} from "@emotion/react";
 import {
   BORDER_RADIUS,
   CANVAS_PADDING,
@@ -22,6 +22,11 @@ import {BLUE_COLOR, ERROR_COLOR, WHITE_COLOR} from "../styles/colors.ts";
 import {useImages} from "../hooks/images/useImages.ts";
 import {GRADIENT_DARK} from "../styles/colors.ts";
 
+const spin =  keyframes({
+  "0%": {transform: "rotate(0deg)"},
+  "100%": {transform: "rotate(360deg)"}
+})
+
 
 const gameStyles = {
   mainContainer: css({
@@ -37,6 +42,15 @@ const gameStyles = {
     borderRadius: 8,
     background: GRADIENT_DARK,
     position: 'relative',
+    '#canvas-bg': {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      width: '100%',
+      height: '100%',
+      transformOrigin: 'bottom left',
+      animation: `${spin} ${PLANE_FRAME_RATE}ms linear infinite`,
+    }
   }),
   loadingContainer: css({
     width: '100%',
@@ -76,8 +90,6 @@ const GameView = () => {
     };
   }, [audioRef, isPlaying]);
 
-
-
   useEffect(() => {
     if (!canvasRef.current || !containerRef.current) return;
     const ctx = canvasRef.current?.getContext("2d");
@@ -87,7 +99,7 @@ const GameView = () => {
       const currentHeight = currentWidth;
       if (ctx.canvas.width !== currentWidth || ctx.canvas.height !== currentHeight) {
         setCanvasWidth(currentWidth);
-        setCanvasHeight(currentHeight);
+        setCanvasHeight(currentHeight * 0.8);
         const desiredPlaneWidth = currentWidth * 0.2; // 10% of canvas width
         planeSprites.map(sprite => {
           const ratio = desiredPlaneWidth / sprite.width;
@@ -148,6 +160,7 @@ const GameView = () => {
       ctx.fill();
       ctx.closePath();
     }
+
     const drawYDots = () => {
       if(gameState!== PLAYING) return;
       ctx.beginPath();
@@ -160,31 +173,43 @@ const GameView = () => {
       ctx.fill();
       ctx.closePath();
     }
+
     const drawBackground = () => {
       if (gameState !== PLAYING || !startTime) return;
+
       const {width, height} = ctx.canvas;
-      ctx.save();
-      // Draw background image
-      ctx.translate(0, width)
+      const scaledImageWidth = width * 4;
+      const scaledImageHeight = width * 4;
+      const xOffset = (width - scaledImageWidth / 2) - width;
+      const yOffset = height - scaledImageHeight / 2;
+
       const angle = elapsedTime % 360 * 0.0005;
+      ctx.save();
       ctx.rotate(angle);
+      ctx.translate(0 , height );
       ctx.scale(1, -1);
       ctx.globalAlpha = 0.5;
-      ctx.drawImage(backgroundImage, -Math.floor(width * 4), -Math.floor(height * 4), width * 8, height * 8,);
+      ctx.drawImage(backgroundImage, xOffset, yOffset, scaledImageWidth, scaledImageHeight);
       ctx.fill();
       ctx.restore();
     }
+
     const drawWaiting = () => {
       if (gameState !== WAITING || !startTime) return;
       const {width, height} = ctx.canvas;
       const angle = elapsedTime % 360 * 0.01;
       const waitingTime = startTime - Date.now();
       // Draw spinner
+      const spinnerWidth = width * 0.15;
+      const spinnerHeight = spinnerWidth * (spinnerImage.height / spinnerImage.width);
+      const centerX = canvasWidth / 2 - spinnerWidth / 2;
+      const centerY = canvasHeight / 2 - spinnerHeight / 2;
       ctx.save();
-      ctx.translate(width / 2, width / 2);
+      ctx.translate(centerX + spinnerWidth / 2, centerY + spinnerHeight / 2);
       ctx.rotate(angle);
-      ctx.drawImage(spinnerImage, -spinnerImage.width / 2, -spinnerImage.height / 2,);
+      ctx.drawImage(spinnerImage, -spinnerWidth / 2, -spinnerHeight / 2, spinnerWidth, spinnerHeight);
       ctx.restore();
+
       // Draw progress bar
       const progress = waitingTime / WAITING_DURATION * 100 > 0 ? waitingTime / WAITING_DURATION * 100 : 0;
       // Draw text
@@ -196,6 +221,7 @@ const GameView = () => {
       ctx.fillStyle = "red";
       ctx.fillRect(width / 2 - 100, height * 0.8, progress * 2, 7);
     }
+
     const drawMultiplier = () => {
       if (gameState === WAITING || !startTime) return;
 
@@ -213,6 +239,7 @@ const GameView = () => {
       ctx.fillText(`${multiplier.toFixed(2)}x`, ctx.canvas.width / 2, ctx.canvas.height / 1.7);
       ctx.restore();
     }
+
     const drawPlane = () => {
       const ctx = canvasRef.current?.getContext("2d");
       if (!ctx || !startTime) return;
@@ -281,6 +308,7 @@ const GameView = () => {
     }
 
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
     drawBackground();
     drawWaiting();
     drawAxis();

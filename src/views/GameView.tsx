@@ -21,6 +21,7 @@ import {getRandomNumber} from "../utils/generators.ts";
 import {BLUE_COLOR, ERROR_COLOR, WHITE_COLOR} from "../styles/colors.ts";
 import {useImages} from "../hooks/images/useImages.ts";
 import {GRADIENT_DARK} from "../styles/colors.ts";
+import {UserInputView} from "./UserInputView.tsx";
 
 const spin =  keyframes({
   "0%": {transform: "rotate(0deg)"},
@@ -127,6 +128,7 @@ const GameView = () => {
     const elapsedTime = now - startTime;
     const planeHeight = planeSprites[0].height;
     const planeWidth = planeSprites[0].width;
+
     const drawAxis = () => {
       if(gameState!== PLAYING) return;
       ctx.strokeStyle = WHITE_COLOR;
@@ -177,10 +179,9 @@ const GameView = () => {
     const drawBackground = () => {
       if (gameState !== PLAYING || !startTime) return;
 
-      const {width, height} = ctx.canvas;
       const scaledImageWidth = width * 4;
       const scaledImageHeight = width * 4;
-      const xOffset = (width - scaledImageWidth / 2) - width;
+      const xOffset = -(width * 2);
       const yOffset = height - scaledImageHeight / 2;
 
       const angle = elapsedTime % 360 * 0.0005;
@@ -196,9 +197,8 @@ const GameView = () => {
 
     const drawWaiting = () => {
       if (gameState !== WAITING || !startTime) return;
-      const {width, height} = ctx.canvas;
-      const angle = elapsedTime % 360 * 0.01;
-      const waitingTime = startTime - Date.now();
+
+      const angle = elapsedTime % 360 * 0.0087;
       // Draw spinner
       const spinnerWidth = width * 0.15;
       const spinnerHeight = spinnerWidth * (spinnerImage.height / spinnerImage.width);
@@ -210,8 +210,10 @@ const GameView = () => {
       ctx.drawImage(spinnerImage, -spinnerWidth / 2, -spinnerHeight / 2, spinnerWidth, spinnerHeight);
       ctx.restore();
 
+
+
       // Draw progress bar
-      const progress = waitingTime / WAITING_DURATION * 100 > 0 ? waitingTime / WAITING_DURATION * 100 : 0;
+      const progress = -elapsedTime / WAITING_DURATION * 100 > 0 ? -elapsedTime / WAITING_DURATION * 100 : 0;
       // Draw text
       ctx.font = "18px sans-serif";
       ctx.textAlign = "center";
@@ -236,13 +238,12 @@ const GameView = () => {
       ctx.fillStyle = gameState === ENDED ? "red" : "white";
       ctx.font = "bold 72px Arial";
       ctx.textAlign = "center";
-      ctx.fillText(`${multiplier.toFixed(2)}x`, ctx.canvas.width / 2, ctx.canvas.height / 1.7);
+      ctx.fillText(`${multiplier.toFixed(2)}x`, ctx.canvas.width / 2, ctx.canvas.height / 1.6);
       ctx.restore();
     }
 
     const drawPlane = () => {
-      const ctx = canvasRef.current?.getContext("2d");
-      if (!ctx || !startTime) return;
+      if ( !startTime) return;
       let yPos;
       let xPos;
       const startX = 0;
@@ -372,6 +373,7 @@ const GameView = () => {
         {!imagesLoaded && <div css={gameStyles.loadingContainer}>Loading</div>}
         <canvas width={canvasWidth} height={canvasHeight} ref={canvasRef}/>
       </div>
+      <UserInputView />
     </div>
   )
 }

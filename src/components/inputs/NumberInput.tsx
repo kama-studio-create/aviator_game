@@ -6,7 +6,15 @@ type Props = {
 } & ComponentPropsWithRef<'input'>;
 
 const inputStyles = css({
-  paddingInline: 8, paddingBlock: 6, font: 'Inter', borderRadius: 8, border: 'none', width: '100%'
+  paddingInline: 8,
+  paddingBlock: 6,
+  font: 'Inter',
+  borderRadius: 8,
+  border: 'none',
+  width: '100%',
+  background: 'black',
+  textAlign: 'center',
+  color: 'white'
 })
 export const NumberInput: FC<Props> = forwardRef(({handleChange, ...props}, ref) => {
   const onChange = (e: ChangeEvent<HTMLInputElement>) => {

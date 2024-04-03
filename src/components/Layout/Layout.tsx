@@ -2,9 +2,8 @@ import {ComponentProps, FC} from "react";
 import {css} from "@emotion/react";
 import Sidebar from "./Sidebar.tsx";
 import Header from "./Header.tsx";
-import BetsContainer from "./BetsContainer.tsx";
 import BgImage from '../../assets/bg.jpg'
-import {breakpoints, MEDIA_QUERIES} from "../../styles/breakpoints.ts";
+import { MEDIA_QUERIES} from "../../styles/breakpoints.ts";
 import {TranscluscentBackgroundStyles} from "../../styles/common.ts";
 
 interface LayoutProps extends ComponentProps<"div"> {
@@ -42,7 +41,6 @@ const styles = {
     height: '100%',
     display: 'grid',
     gap: 8,
-    gridTemplateColumns: '1fr 2fr',
     [MEDIA_QUERIES[0]]: {
       gridTemplateColumns: '1fr',
       gap: 0,
@@ -59,7 +57,6 @@ const Layout: FC<LayoutProps>  = ({children, ...props}) => {
         <div css={styles.containerStyles} >
           <Header />
           <div css={styles.gameContainerStyles}>
-            {window.innerWidth > breakpoints[0] && <BetsContainer/>}
             {children}
           </div>
         </div>

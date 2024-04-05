@@ -6,11 +6,11 @@ import {
   DOT_SCROLL_SPEED,
   DOT_SPACING,
   ENDED,
-  IGameState,
+  TGameState,
   PLANE_FRAME_RATE,
   PLAYING, TIME_TO_TOP,
   WAITING,
-  WAITING_DURATION
+  WAITING_DURATION, FACTOR, WAITING_FOR_NEXT_ROUND
 } from "../common/constants.ts";
 import BgAudioFile from "../assets/audio/bg_music.mp3";
 import AudioFile from "../assets/audio/audio.mp3";
@@ -21,7 +21,8 @@ import {getRandomNumber} from "../utils/generators.ts";
 import {BLUE_COLOR, ERROR_COLOR, WHITE_COLOR} from "../styles/colors.ts";
 import {useImages} from "../hooks/images/useImages.ts";
 import {GRADIENT_DARK} from "../styles/colors.ts";
-import {UserInputView} from "./UserInputView.tsx";
+import {MEDIA_QUERIES} from "../styles/breakpoints.ts";
+import {BetInput} from "../components/inputs/BetInput.tsx";
 
 const spin =  keyframes({
   "0%": {transform: "rotate(0deg)"},
@@ -61,14 +62,25 @@ const gameStyles = {
     display: 'grid',
     placeContent: 'center',
     fontSize: 32
-  })
+  }),
+  userInputContainer: css({
+    display: 'flex',
+    flexDirection: 'row',
+    gap: 8,
+    position: 'relative',
+    [MEDIA_QUERIES[0]]: {
+      flexDirection: 'column',
+    }
+  }),
+
 }
+
 const GameView = () => {
 
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  const [gameState, setGameState] = useState<IGameState>(WAITING);
+  const [gameState, setGameState] = useState<TGameState>(WAITING);
   const [canvasWidth, setCanvasWidth] = useState(300);
   const [canvasHeight, setCanvasHeight] = useState(300);
 
@@ -177,7 +189,7 @@ const GameView = () => {
     }
 
     const drawBackground = () => {
-      if (gameState !== PLAYING || !startTime) return;
+      if (!startTime) return;
 
       const scaledImageWidth = width * 4;
       const scaledImageHeight = width * 4;
@@ -186,19 +198,20 @@ const GameView = () => {
 
       const angle = elapsedTime % 360 * 0.0005;
       ctx.save();
-      ctx.rotate(angle);
+      if(gameState === PLAYING) {
+        ctx.rotate(angle);
+      }
       ctx.translate(0 , height );
       ctx.scale(1, -1);
       ctx.globalAlpha = 0.5;
       ctx.drawImage(backgroundImage, xOffset, yOffset, scaledImageWidth, scaledImageHeight);
-      ctx.fill();
       ctx.restore();
     }
 
     const drawWaiting = () => {
       if (gameState !== WAITING || !startTime) return;
 
-      const angle = elapsedTime % 360 * 0.0087;
+      const angle = elapsedTime % 360 * 0.00875;
       // Draw spinner
       const spinnerWidth = width * 0.15;
       const spinnerHeight = spinnerWidth * (spinnerImage.height / spinnerImage.width);
@@ -210,15 +223,13 @@ const GameView = () => {
       ctx.drawImage(spinnerImage, -spinnerWidth / 2, -spinnerHeight / 2, spinnerWidth, spinnerHeight);
       ctx.restore();
 
-
-
       // Draw progress bar
       const progress = -elapsedTime / WAITING_DURATION * 100 > 0 ? -elapsedTime / WAITING_DURATION * 100 : 0;
       // Draw text
       ctx.font = "18px sans-serif";
       ctx.textAlign = "center";
       ctx.fillStyle = "#c9c9c9";
-      ctx.fillText("Waiting for next round", width / 2, (height / 2) + (spinnerHeight * 1.5));
+      ctx.fillText(WAITING_FOR_NEXT_ROUND, width / 2, (height / 2) + (spinnerHeight * 1.5));
       ctx.canvas.style.background = "rgba(0,0,0,0.5)";
       ctx.fillStyle = "red";
       ctx.fillRect(width / 2 - 100, height / 2 + spinnerHeight, progress * 2, 7);
@@ -227,7 +238,7 @@ const GameView = () => {
     const drawMultiplier = () => {
       if (gameState === WAITING || !startTime) return;
 
-      const multiplier = gameState === ENDED ? Math.exp(0.00006 * (endTime - startTime)): Math.exp(0.00006 * elapsedTime);
+      const multiplier = gameState === ENDED ? Math.exp(FACTOR * (endTime - startTime)): Math.exp(0.00006 * elapsedTime);
       ctx.save();
       if (gameState === ENDED) {
         ctx.fillStyle = "#f7f7f7";
@@ -373,7 +384,11 @@ const GameView = () => {
         {!imagesLoaded && <div css={gameStyles.loadingContainer}>Loading</div>}
         <canvas width={canvasWidth} height={canvasHeight} ref={canvasRef}/>
       </div>
-      <UserInputView />
+      <div css={gameStyles.userInputContainer}>
+
+        <BetInput now={now} startTime={startTime} gameState={gameState}/>
+        <BetInput now={now} startTime={startTime} gameState={gameState}/>
+      </div>
     </div>
   )
 }

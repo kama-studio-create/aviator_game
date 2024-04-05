@@ -9,3 +9,4 @@ export const WHITE_COLOR = '#fff';
 export const BLUE_COLOR = 'blue';
 export const GRAY_COLOR = '#1b1c1d';
 export const DARK_GRAY_COLOR = '#141516';
+export const COLOR_BLUE = '#358DF3FF';

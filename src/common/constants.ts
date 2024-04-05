@@ -18,5 +18,10 @@ export const DOT_RADIUS = 2;
 export const DOT_SPACING = 80;
 export const DOT_SCROLL_SPEED = 20;
 
+export const MINIMUM_BET = 10.00;
+export const FACTOR = 0.00006;
+
+export const WAITING_FOR_NEXT_ROUND= 'Waiting For Next Round';
+
 const GAME_STATES = [WAITING, PLAYING, ENDED] as const;
-export type IGameState = (typeof GAME_STATES)[number]
+export type TGameState = (typeof GAME_STATES)[number]

@@ -14,7 +14,10 @@ const inputStyles = css({
   width: '100%',
   background: 'black',
   textAlign: 'center',
-  color: 'white'
+  color: 'white',
+  ":disabled": {
+    background: 'gray'
+  }
 })
 export const NumberInput: FC<Props> = forwardRef(({handleChange, ...props}, ref) => {
   const onChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -22,5 +25,5 @@ export const NumberInput: FC<Props> = forwardRef(({handleChange, ...props}, ref)
     if (isNaN(value)) return;
     handleChange(value);
   }
-  return (<input onChange={onChange} css={inputStyles} ref={ref} {...props} />);
+  return (<input type={'number'} onChange={onChange} css={inputStyles} ref={ref} {...props} />);
 });

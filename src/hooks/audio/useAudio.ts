@@ -1,5 +1,5 @@
 import {useEffect, useRef, useState} from "react";
-import {AUDIO_FLY_AWAY, AUDIO_START, ENDED, IGameState, PLAYING} from "../../common/constants.ts";
+import {AUDIO_FLY_AWAY, AUDIO_START, ENDED, TGameState, PLAYING} from "../../common/constants.ts";
 
 export const audioSprite = {
   flyAway: [2000, 3000],
@@ -7,7 +7,7 @@ export const audioSprite = {
 } as const;
 
 type UseAudioProps = {
-  gameState: IGameState,
+  gameState: TGameState,
 }
 
 export const useAudio = ({gameState}: UseAudioProps) => {

@@ -43,6 +43,11 @@ const baseStyles = css({
     background: SUCCESS_COLOR,
     color: WHITE_COLOR,
   },
+  '& [data-size=sm]': {
+    paddingBlock: 4,
+    paddingInline: 8,
+    fontSize: 10,
+  },
   '[data-size]=md': {
     paddingBlock: 16,
     paddingInline: 32,
@@ -50,7 +55,12 @@ const baseStyles = css({
   '[data-size]=lg': {
     paddingBlock: 24,
     paddingInline: 40,
-  }
+  },
+  '[data-size]=xl': {
+    paddingBlock: 32,
+    paddingInline: 48,
+  },
+
 })
 
 export const PillButton: FC<Props> = ({variant = 'primary', size = 'md', children, ...props}) => {
@@ -58,9 +68,9 @@ export const PillButton: FC<Props> = ({variant = 'primary', size = 'md', childre
   return (
     <button
       css={baseStyles}
-      {...props}
       data-variant={variant}
       data-size={size}
+      {...props}
     >
       {children}
     </button>

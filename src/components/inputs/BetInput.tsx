@@ -19,11 +19,11 @@ import {
   FACTOR,
   MINIMUM_BET,
   PLAYING,
-  TGameState,
-  WAITING,
+  TGameState, WAITING,
   WAITING_FOR_NEXT_ROUND
 } from "../../common/constants.ts";
 import SwitchInput from "./SwitchInput.tsx";
+import {AutoPlayModal} from "../modals/AutoPlayModal.tsx";
 
 const betInputStyles = {
   row: css({
@@ -173,18 +173,18 @@ export const BetInput: FC<InputProps> = ({gameState, startTime, now}) => {
   const [exitMultiplier, setExitMultiplier] = useState(1);
   const [buttonColor, setButtonColor] = useState(SUCCESS_COLOR);
 
-  const [isAutoPlay, setAutoPlay] = useState(true);
+  const [isAutoPlay, setAutoPlay] = useState(false);
 
   const [buttonTitle, setButtonTitle] = useState('BET');
 
   const [isAutoCheckout, setAutoCheckout] = useState(false);
 
   const [autoPlayMultiplierLimit, setAutoPlayMultiplierLimit] = useState(1.10);
+  const [isAutoplayModalOpen, setIsAutoplayModalOpen] = useState(false);
+  
 
   const getWinAmount = () => {
-    if(isPlaying) {
-      return betAmount
-    }
+
     if (gameState === PLAYING && isPlaying) {
       const elapsedTime = Date.now() - startTime;
       const multiplier = Math.exp(FACTOR * elapsedTime);
@@ -221,7 +221,7 @@ export const BetInput: FC<InputProps> = ({gameState, startTime, now}) => {
       setExitTime(Date.now());
       return;
     }
-    if(!waitingForNext && !isPlaying) {
+    if( !isPlaying) {
       setWaitingForNext(true);
       setButtonColor(ERROR_COLOR);
       setButtonTitle('CANCEL');
@@ -245,7 +245,7 @@ export const BetInput: FC<InputProps> = ({gameState, startTime, now}) => {
 
   useEffect(() => {
     switch (gameState) {
-      case "WAITING":
+      case WAITING:
         setWaitingForNext(false);
         setExitTime(null);
         setExitMultiplier(0);
@@ -253,7 +253,7 @@ export const BetInput: FC<InputProps> = ({gameState, startTime, now}) => {
           setButtonTitle('CANCEL');
         }
         break;
-      case "PLAYING":
+      case PLAYING:
         if(exitTime && isPlaying){
           const multiplier = getMultiplier(Date.now(), exitTime);
           setExitMultiplier(multiplier);
@@ -271,7 +271,7 @@ export const BetInput: FC<InputProps> = ({gameState, startTime, now}) => {
           setButtonTitle('BET');
         }
         break;
-      case "ENDED":
+      case ENDED:
         if(!waitingForNext) {
           setButtonColor(SUCCESS_COLOR);
           setButtonTitle('BET');
@@ -286,10 +286,15 @@ export const BetInput: FC<InputProps> = ({gameState, startTime, now}) => {
 
   return (
     <div css={betInputStyles.inputContainer}>
+      <AutoPlayModal isOpen={isAutoplayModalOpen} onClose={setIsAutoplayModalOpen} />
       <div css={betInputStyles.tabContainer}>
-        <div onClick={() => setAutoPlay(false)} className={!isAutoPlay ? 'active' : ''} css={betInputStyles.tab}>Bet
+        <div onClick={() => {
+          setAutoPlay(false)
+        }} className={!isAutoPlay ? 'active' : ''} css={betInputStyles.tab}>Bet
         </div>
-        <div onClick={() => setAutoPlay(true)} className={isAutoPlay ? 'active' : ''} css={betInputStyles.tab}>Auto
+        <div onClick={() => {
+          setAutoPlay(true)
+        }} className={isAutoPlay ? 'active' : ''} css={betInputStyles.tab}>Auto
         </div>
       </div>
       <div css={betInputStyles.row}>
@@ -303,15 +308,15 @@ export const BetInput: FC<InputProps> = ({gameState, startTime, now}) => {
               <img src={IconMinus} width={16} height={16} alt='minus'/>
             </button>
             <NumberInput value={betAmount} name="amount" handleChange={handleChange}/>
-            <button onClick={() => setBetAmount(prev => prev + 1)} css={betInputStyles.smallBtn}>
+            <button onClick={() => { setBetAmount(prev => prev + 1); }} css={betInputStyles.smallBtn}>
               <img src={IconPlus} width={16} height={16} alt='plus'/>
             </button>
           </div>
           <div css={betInputStyles.buttonGrid}>
-            <button onClick={() => setBetAmount(1)} css={betInputStyles.selectAmountBtn}>1</button>
-            <button onClick={() => setBetAmount(2)} css={betInputStyles.selectAmountBtn}>2</button>
-            <button onClick={() => setBetAmount(5)} css={betInputStyles.selectAmountBtn}>5</button>
-            <button onClick={() => setBetAmount(10)} css={betInputStyles.selectAmountBtn}>10</button>
+            <button onClick={() => { setBetAmount(1); }} css={betInputStyles.selectAmountBtn}>1</button>
+            <button onClick={() => { setBetAmount(2); }} css={betInputStyles.selectAmountBtn}>2</button>
+            <button onClick={() => { setBetAmount(5); }} css={betInputStyles.selectAmountBtn}>5</button>
+            <button onClick={() => { setBetAmount(10); }} css={betInputStyles.selectAmountBtn}>10</button>
           </div>
         </div>
 
@@ -327,12 +332,12 @@ export const BetInput: FC<InputProps> = ({gameState, startTime, now}) => {
 
       </div>
       {isAutoPlay && <div css={betInputStyles.autoplayContainer}>
-        <button css={betInputStyles.autoplayButton}>Autoplay</button>
+        <button onClick={() => {setIsAutoplayModalOpen(true)}} css={betInputStyles.autoplayButton}>Autoplay</button>
         <div style={{display: 'flex', flexDirection: 'row', gap: 16, alignItems: 'center'}}>
                 Auto Cash Out
           <SwitchInput checked={isAutoCheckout} onChange={setAutoCheckout}/>
           <NumberInput style={{maxWidth: 80}} disabled={!isAutoCheckout}
-            handleChange={(value) => setAutoPlayMultiplierLimit(value)}
+            handleChange={(value) => { setAutoPlayMultiplierLimit(value); }}
             value={autoPlayMultiplierLimit}/>
         </div>
       </div>}

@@ -1,6 +1,6 @@
 import {css} from "@emotion/react";
 
-export const TranscluscentBackgroundStyles = css({
+export const translucentBackgroundStyles = css({
   background: 'rgba(0, 0, 0, 0.6)',
   borderRadius: 4,
   boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1)',
@@ -11,4 +11,11 @@ export const TranscluscentBackgroundStyles = css({
     color: '#000',
     fontWeight: 600
   }
+})
+
+export const rowStyles = css({
+  display: 'flex',
+  flexDirection: 'row',
+  gap: 16,
+  alignItems: 'center'
 })

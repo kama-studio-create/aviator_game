@@ -1,8 +1,8 @@
-import {TranscluscentBackgroundStyles} from "../../styles/common.ts";
+import {translucentBackgroundStyles} from "../../styles/common.ts";
 
 const BetsContainer = () => {
   return (
-    <div css={TranscluscentBackgroundStyles}>bets container</div>
+    <div css={translucentBackgroundStyles}>bets container</div>
   );
 };
 

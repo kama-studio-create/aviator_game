@@ -1,5 +1,5 @@
 import {css} from "@emotion/react";
-import {TranscluscentBackgroundStyles} from "../../styles/common.ts";
+import {translucentBackgroundStyles} from "../../styles/common.ts";
 import {ComponentProps, FC} from "react";
 import {MEDIA_QUERIES} from "../../styles/breakpoints.ts";
 
@@ -11,7 +11,7 @@ const GameContainerStyles = css([{
   [MEDIA_QUERIES[0]]: {
     marginBlock: 'auto',
   }
-}, TranscluscentBackgroundStyles]);
+}, translucentBackgroundStyles]);
 
 
 const GameContainer: FC<ComponentProps<'div'>> = ({children, ...props}) => {

@@ -4,7 +4,7 @@ import Sidebar from "./Sidebar.tsx";
 import Header from "./Header.tsx";
 import BgImage from '../../assets/bg.jpg'
 import { MEDIA_QUERIES} from "../../styles/breakpoints.ts";
-import {TranscluscentBackgroundStyles} from "../../styles/common.ts";
+import {translucentBackgroundStyles} from "../../styles/common.ts";
 
 interface LayoutProps extends ComponentProps<"div"> {
   isAuthenticated?: boolean
@@ -46,7 +46,7 @@ const styles = {
       gap: 0,
       height: 'auto',
     },
-  }, TranscluscentBackgroundStyles])
+  }, translucentBackgroundStyles])
 }
 
 

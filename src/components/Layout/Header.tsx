@@ -1,6 +1,6 @@
 import {ComponentProps, FC} from "react";
 import {css} from "@emotion/react";
-import {TranscluscentBackgroundStyles} from "../../styles/common.ts";
+import {translucentBackgroundStyles} from "../../styles/common.ts";
 import {PillButton} from "../buttons/PillButton.tsx";
 import {APP_NAME} from "../../common/constants.ts";
 
@@ -12,7 +12,7 @@ const styles = {
     paddingBlock: 8,
     paddingInline: 16,
     marginBottom: '1rem'
-  }, TranscluscentBackgroundStyles]),
+  }, translucentBackgroundStyles]),
   appNameStyles: css({
     fontSize: 14,
     fontWeight: 600,

@@ -93,6 +93,7 @@ const GameView = () => {
 
   const imagesLoaded = useImages();
 
+
   useEffect(() => {
     const ref = audioRef.current
     return () => {
@@ -105,7 +106,7 @@ const GameView = () => {
 
   useEffect(() => {
     if (!canvasRef.current || !containerRef.current) return;
-    const ctx = canvasRef.current?.getContext("2d");
+    const ctx = canvasRef.current.getContext("2d");
     const resizeAndStyleCanvases = () => {
       if (!containerRef.current || !ctx) return;
       const currentWidth = containerRef.current.clientWidth;
@@ -128,7 +129,9 @@ const GameView = () => {
     resizeAndStyleCanvases();
     const resizeObserver = new ResizeObserver(resizeAndStyleCanvases);
     resizeObserver.observe(containerRef.current);
-    return () => resizeObserver.disconnect();
+    return () => {
+      resizeObserver.disconnect()
+    };
   }, []);
 
   useEffect(() => {

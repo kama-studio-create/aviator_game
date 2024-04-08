@@ -21,7 +21,7 @@ import {getRandomNumber} from "../utils/generators.ts";
 import {BLUE_COLOR, ERROR_COLOR, WHITE_COLOR} from "../styles/colors.ts";
 import {GRADIENT_DARK} from "../styles/colors.ts";
 import {MEDIA_QUERIES} from "../styles/breakpoints.ts";
-import {BetInput} from "../components/inputs/BetInput.tsx";
+import {BetsView} from "./BetsView.tsx";
 
 const spin =  keyframes({
   "0%": {transform: "rotate(0deg)"},
@@ -400,8 +400,8 @@ const GameView = () => {
       </div>
       <div css={gameStyles.userInputContainer}>
 
-        <BetInput now={now} startTime={startTime} gameState={gameState}/>
-        <BetInput now={now} startTime={startTime} gameState={gameState}/>
+        <BetsView index={0} now={now} startTime={startTime} gameState={gameState}/>
+        <BetsView index={1} now={now} startTime={startTime} gameState={gameState}/>
       </div>
     </div>
   )

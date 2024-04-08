@@ -8,12 +8,12 @@ import {
   PRIMARY_COLOR,
   SUCCESS_COLOR,
   WHITE_COLOR
-} from "../../styles/colors.ts";
+} from "../styles/colors.ts";
 import {FC, useEffect, useState} from "react";
-import {NumberInput} from "./NumberInput.tsx";
+import {NumberInput} from "../components/inputs/NumberInput.tsx";
 
-import IconMinus from '../../assets/icons/minus.svg';
-import IconPlus from '../../assets/icons/plus.svg';
+import IconMinus from '../assets/icons/minus.svg';
+import IconPlus from '../assets/icons/plus.svg';
 import {
   ENDED,
   FACTOR,
@@ -21,9 +21,9 @@ import {
   PLAYING,
   TGameState, WAITING,
   WAITING_FOR_NEXT_ROUND
-} from "../../common/constants.ts";
-import SwitchInput from "./SwitchInput.tsx";
-import {AutoPlayModal} from "../modals/AutoPlayModal.tsx";
+} from "../common/constants.ts";
+import SwitchInput from "../components/inputs/SwitchInput.tsx";
+import {AutoPlayModal} from "../components/modals/AutoPlayModal.tsx";
 
 const betInputStyles = {
   row: css({
@@ -131,7 +131,7 @@ const betInputStyles = {
     justifyContent: 'space-between',
     width: '100%',
     height: '100%',
-    paddingBlock: 4,
+    paddingTop: 16,
     borderTop: '1px solid black'
   }),
   autoplayButton: css({
@@ -158,17 +158,17 @@ const betInputStyles = {
   })
 }
 
-
 type InputProps = {
   gameState: TGameState,
   startTime: number,
-  now: number
+  now: number,
+  index: number
 }
 
-export const BetInput: FC<InputProps> = ({gameState, startTime, now}) => {
+export const BetsView: FC<InputProps> = ({gameState, startTime, now,index}) => {
   const [betAmount, setBetAmount] = useState(MINIMUM_BET);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [waitingForNext, setWaitingForNext] = useState(false);
+  const [isWaitingForNext, setIsWaitingForNext] = useState(false);
   const [exitTime, setExitTime] = useState<number | null>(null);
   const [exitMultiplier, setExitMultiplier] = useState(1);
   const [buttonColor, setButtonColor] = useState(SUCCESS_COLOR);
@@ -184,6 +184,9 @@ export const BetInput: FC<InputProps> = ({gameState, startTime, now}) => {
   
 
   const getWinAmount = () => {
+    if(isWaitingForNext) {
+      return betAmount
+    }
 
     if (gameState === PLAYING && isPlaying) {
       const elapsedTime = Date.now() - startTime;
@@ -205,14 +208,14 @@ export const BetInput: FC<InputProps> = ({gameState, startTime, now}) => {
     setIsPlaying(false);
   }
 
-  const getMultiplier = (timeA: number, timeB: number) => {
-    const elapsedTime = timeA - timeB;
+  const getMultiplier = (endedAt: number, startedAt: number) => {
+    const elapsedTime = endedAt - startedAt;
     return Math.exp(FACTOR * elapsedTime);
   }
 
   const handleBetButtonClick = () => {
-    if(waitingForNext) {
-      setWaitingForNext(false);
+    if(isWaitingForNext) {
+      setIsWaitingForNext(false);
       setIsPlaying(false);
       return;
     }
@@ -222,31 +225,29 @@ export const BetInput: FC<InputProps> = ({gameState, startTime, now}) => {
       return;
     }
     if( !isPlaying) {
-      setWaitingForNext(true);
+      if(gameState === PLAYING) {
+        setIsWaitingForNext(true);
+      }
       setButtonColor(ERROR_COLOR);
       setButtonTitle('CANCEL');
       setIsPlaying(true);
       return;
     }
-
   }
   useEffect(() => {
-    if(gameState === PLAYING && isAutoCheckout && isPlaying) {
-      const elapsedTime = now - startTime;
-      const multiplier = Math.exp(FACTOR * elapsedTime);
+    if(gameState === PLAYING && isAutoCheckout && isPlaying && !isWaitingForNext) {
+      const multiplier = getMultiplier(now, startTime);
       if(multiplier >= autoPlayMultiplierLimit) {
         setExitTime(now);
         setExitMultiplier(multiplier);
-        console.log('ended at', multiplier);
       }
     }
-
   }, [autoPlayMultiplierLimit, gameState, isAutoCheckout, isPlaying, now, startTime]);
 
   useEffect(() => {
     switch (gameState) {
       case WAITING:
-        setWaitingForNext(false);
+        setIsWaitingForNext(false);
         setExitTime(null);
         setExitMultiplier(0);
         if(isPlaying) {
@@ -257,22 +258,23 @@ export const BetInput: FC<InputProps> = ({gameState, startTime, now}) => {
         if(exitTime && isPlaying){
           const multiplier = getMultiplier(Date.now(), exitTime);
           setExitMultiplier(multiplier);
-          setWaitingForNext(false);
+          setIsWaitingForNext(false);
           setButtonColor(SUCCESS_COLOR);
           setButtonTitle('BET');
           setIsPlaying(false);
+          console.log('exit data', {index: index, exitTime: exitTime, multiplier: exitMultiplier})
         }
-        if(isPlaying && !waitingForNext) {
+        if(isPlaying && !isWaitingForNext) {
           setButtonColor(PRIMARY_COLOR);
           setButtonTitle('EXIT');
         }
-        if(!isPlaying && !waitingForNext) {
+        if(!isPlaying && !isWaitingForNext) {
           setButtonColor(SUCCESS_COLOR);
           setButtonTitle('BET');
         }
         break;
       case ENDED:
-        if(!waitingForNext) {
+        if(!isWaitingForNext) {
           setButtonColor(SUCCESS_COLOR);
           setButtonTitle('BET');
           setIsPlaying(false);
@@ -281,20 +283,16 @@ export const BetInput: FC<InputProps> = ({gameState, startTime, now}) => {
       default:
         break;
     }
-  }, [gameState, exitTime, waitingForNext, isPlaying, isAutoCheckout, autoPlayMultiplierLimit]);
+  }, [gameState, exitTime, isWaitingForNext, isPlaying, isAutoCheckout, autoPlayMultiplierLimit]);
 
 
   return (
     <div css={betInputStyles.inputContainer}>
       <AutoPlayModal isOpen={isAutoplayModalOpen} onClose={setIsAutoplayModalOpen} />
       <div css={betInputStyles.tabContainer}>
-        <div onClick={() => {
-          setAutoPlay(false)
-        }} className={!isAutoPlay ? 'active' : ''} css={betInputStyles.tab}>Bet
+        <div onClick={() => { setAutoPlay(false)}} className={!isAutoPlay ? 'active' : ''} css={betInputStyles.tab}>Bet
         </div>
-        <div onClick={() => {
-          setAutoPlay(true)
-        }} className={isAutoPlay ? 'active' : ''} css={betInputStyles.tab}>Auto
+        <div onClick={() => { setAutoPlay(true); }} className={isAutoPlay ? 'active' : ''} css={betInputStyles.tab}>Auto
         </div>
       </div>
       <div css={betInputStyles.row}>
@@ -321,7 +319,7 @@ export const BetInput: FC<InputProps> = ({gameState, startTime, now}) => {
         </div>
 
         <div style={{width: '100%', textAlign: 'center', height: '100%'}}>
-          {waitingForNext && <div>{WAITING_FOR_NEXT_ROUND}</div>}
+          {isWaitingForNext && <div>{WAITING_FOR_NEXT_ROUND}</div>}
           <button style={{backgroundColor: buttonColor}} onClick={handleBetButtonClick}
             css={betInputStyles.betButton}>
             <div>{buttonTitle}</div>

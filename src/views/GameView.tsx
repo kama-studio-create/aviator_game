@@ -16,10 +16,9 @@ import BgAudioFile from "../assets/audio/bg_music.mp3";
 import AudioFile from "../assets/audio/audio.mp3";
 import {useAudio} from "../hooks/audio/useAudio.ts";
 import {useEffect, useRef, useState} from "react";
-import {backgroundImage, planeSprites, spinnerImage} from "../common/images.ts";
+import {allImages, backgroundImage, planeSprites, spinnerImage} from "../common/images.ts";
 import {getRandomNumber} from "../utils/generators.ts";
 import {BLUE_COLOR, ERROR_COLOR, WHITE_COLOR} from "../styles/colors.ts";
-import {useImages} from "../hooks/images/useImages.ts";
 import {GRADIENT_DARK} from "../styles/colors.ts";
 import {MEDIA_QUERIES} from "../styles/breakpoints.ts";
 import {BetInput} from "../components/inputs/BetInput.tsx";
@@ -75,6 +74,19 @@ const gameStyles = {
 
 }
 
+
+let allImagesLoaded = false;
+const imageLoadPromises = allImages.map(image => {
+  return new Promise((resolve, reject) => {
+    image.onload = resolve;
+    image.onerror = reject;
+  });
+});
+
+Promise.all(imageLoadPromises)
+  .then(() => allImagesLoaded = true)
+  .catch(error => { console.error('Error loading images:', error); });
+
 const GameView = () => {
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -91,7 +103,6 @@ const GameView = () => {
 
   const [now, setNow] = useState(Date.now());
 
-  const imagesLoaded = useImages();
 
 
   useEffect(() => {
@@ -136,7 +147,7 @@ const GameView = () => {
 
   useEffect(() => {
     const ctx = canvasRef.current?.getContext("2d");
-    if(!ctx) return;
+    if(!ctx || !allImagesLoaded) return;
 
     const {width, height} = ctx.canvas;
     const moveY = DOT_RADIUS;
@@ -384,7 +395,7 @@ const GameView = () => {
       <audio ref={bgAudioRef} src={BgAudioFile} loop/>
       <audio ref={audioRef} src={AudioFile}/>
       <div ref={containerRef} css={gameStyles.canvasContainer}>
-        {!imagesLoaded && <div css={gameStyles.loadingContainer}>Loading</div>}
+        {!allImagesLoaded && <div css={gameStyles.loadingContainer}>Loading</div>}
         <canvas width={canvasWidth} height={canvasHeight} ref={canvasRef}/>
       </div>
       <div css={gameStyles.userInputContainer}>

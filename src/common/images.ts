@@ -28,3 +28,6 @@ spinnerImage.src = SpinnerImage;
 export const planeSprites = [plane1, plane2, plane3, plane4];
 
 export const allImages = [backgroundImage, spinnerImage,...planeSprites];
+
+
+

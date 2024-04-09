@@ -7,12 +7,12 @@ export const APP_NAME = 'Aviator';
 export const WAITING_DURATION = 6000;
 
 export const WAITING = 'WAITING';
-export const PLAYING  = 'PLAYING';
+export const PLAYING = 'PLAYING';
 export const ENDED = 'ENDED';
 
 export const AUDIO_START = "start";
 export const AUDIO_FLY_AWAY = "flyAway";
-export const TIME_TO_TOP = 1500;
+export const TIME_TO_TOP = 2000;
 
 export const DOT_RADIUS = 2;
 export const DOT_SPACING = 80;
@@ -21,7 +21,7 @@ export const DOT_SCROLL_SPEED = 20;
 export const MINIMUM_BET = 10.00;
 export const FACTOR = 0.00006;
 
-export const WAITING_FOR_NEXT_ROUND= 'Waiting For Next Round';
+export const WAITING_FOR_NEXT_ROUND = 'Waiting For Next Round';
 export const DEFAULT_CURRENCY = 'KSH';
 
 export const STOP_IF_CASH_DECREASES = 'Stop If Cash Decreases';

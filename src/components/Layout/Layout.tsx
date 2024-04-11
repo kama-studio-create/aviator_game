@@ -3,7 +3,7 @@ import {css} from "@emotion/react";
 import Sidebar from "./Sidebar.tsx";
 import Header from "./Header.tsx";
 import BgImage from '../../assets/bg.jpg'
-import { MEDIA_QUERIES} from "../../styles/breakpoints.ts";
+import {MEDIA_QUERIES} from "../../styles/breakpoints.ts";
 import {translucentBackgroundStyles} from "../../styles/common.ts";
 
 interface LayoutProps extends ComponentProps<"div"> {
@@ -11,7 +11,7 @@ interface LayoutProps extends ComponentProps<"div"> {
 }
 
 const styles = {
-  layoutStyles : css({
+  layoutStyles: css({
     width: '100%',
     minHeight: '100vh',
     padding: 4,
@@ -21,14 +21,14 @@ const styles = {
     flexDirection: 'column',
     gap: 8
   }),
-  containerStyles : css({
+  containerStyles: css({
     width: '100%',
     height: '100%',
     padding: 4,
   }),
-  mainContainerStyles : css({
+  mainContainerStyles: css({
     display: 'grid',
-    gridTemplateColumns: '9fr 3fr',
+    gridTemplateColumns: '8fr 4fr',
     gap: 4,
     minHeight: '100vh',
     [MEDIA_QUERIES[0]]: {
@@ -36,7 +36,7 @@ const styles = {
       minHeight: 'auto',
     }
   }),
-  gameContainerStyles : css([{
+  gameContainerStyles: css([{
     width: '100%',
     height: '100%',
     display: 'grid',
@@ -50,17 +50,17 @@ const styles = {
 }
 
 
-const Layout: FC<LayoutProps>  = ({children, ...props}) => {
+const Layout: FC<LayoutProps> = ({children, ...props}) => {
   return (
     <div css={styles.layoutStyles} {...props}>
       <div css={styles.mainContainerStyles}>
-        <div css={styles.containerStyles} >
-          <Header />
+        <div css={styles.containerStyles}>
+          <Header/>
           <div css={styles.gameContainerStyles}>
             {children}
           </div>
         </div>
-        <Sidebar />
+        <Sidebar/>
       </div>
     </div>
   )

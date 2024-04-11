@@ -1,15 +1,14 @@
 import {css} from "@emotion/react";
-import {translucentBackgroundStyles} from "../../styles/common.ts";
 
 const sideBarStyles = css([{
   width: '100%',
   height: '100%',
-
-}, translucentBackgroundStyles])
+  borderRadius: 16,
+}])
 const Sidebar = () => {
   return (
     <div css={sideBarStyles}>
-     Sidebar
+      {/*<BetSlips/>*/}
     </div>
   )
 }

@@ -40,6 +40,7 @@ const tabStyles = css({
 
 const childContainer = css({
   width: '100%',
+
 })
 
 export type Tab = {

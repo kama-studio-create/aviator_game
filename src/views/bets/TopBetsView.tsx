@@ -4,6 +4,7 @@ import {Tab, Tabs} from "../../components/tabs/Tabs.tsx";
 import {rowStyles} from "../../styles/common.ts";
 import {DEFAULT_CURRENCY} from "../../common/constants.ts";
 import {DARK_GRAY_COLOR, LIGHT_GRAY_COLOR} from "../../styles/colors.ts";
+import {censor} from "../../utils/censor.ts";
 
 const containerStyles = css({
   display: 'flex',
@@ -45,7 +46,8 @@ const cardFooterStyles = css([
     p: {
       opacity: 0.7,
       '&.multiplier': {
-        opacity: 1
+        opacity: 1,
+        fontWeight: 600
       }
     },
     '& .pill': {
@@ -54,7 +56,8 @@ const cardFooterStyles = css([
       background: DARK_GRAY_COLOR,
       border: `1px solid ${LIGHT_GRAY_COLOR}`,
       height: '100%',
-      color: DARK_GRAY_COLOR
+      color: DARK_GRAY_COLOR,
+
     }
   }
 ])
@@ -94,7 +97,7 @@ const TopBetSlips: FC = () => {
       <div css={cardStyles}>
         <div style={{display: 'grid', placeContent: 'center'}}>
           <div className='avatar'></div>
-          <p style={{opacity: 0.7, textAlign: 'center'}}>b***a</p>
+          <p style={{opacity: 0.7, textAlign: 'center'}}>{censor('daniel')}</p>
         </div>
         <div css={betDetails}>
           <p className='title'>Bet {DEFAULT_CURRENCY}: </p>

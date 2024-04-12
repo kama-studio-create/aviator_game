@@ -6,24 +6,27 @@ import {
   DOT_SCROLL_SPEED,
   DOT_SPACING,
   ENDED,
-  TGameState,
+  FACTOR,
   PLANE_FRAME_RATE,
-  PLAYING, TIME_TO_TOP,
+  PLAYING,
+  TGameState,
+  TIME_TO_TOP,
   WAITING,
-  WAITING_DURATION, FACTOR, WAITING_FOR_NEXT_ROUND
+  WAITING_DURATION,
+  WAITING_FOR_NEXT_ROUND
 } from "../common/constants.ts";
 import BgAudioFile from "../assets/audio/bg_music.mp3";
 import AudioFile from "../assets/audio/audio.mp3";
 import {useAudio} from "../hooks/audio/useAudio.ts";
 import {useEffect, useRef, useState} from "react";
 import {allImages, backgroundImage, planeSprites, spinnerImage} from "../common/images.ts";
-import {getRandomNumber} from "../utils/generators.ts";
-import {BLUE_COLOR, ERROR_COLOR, WHITE_COLOR} from "../styles/colors.ts";
-import {GRADIENT_DARK} from "../styles/colors.ts";
+import {generateBetSlip, getRandomNumber, uuidGenerator} from "../utils/generators.ts";
+import {BLUE_COLOR, ERROR_COLOR, GRADIENT_DARK, WHITE_COLOR} from "../styles/colors.ts";
 import {MEDIA_QUERIES} from "../styles/breakpoints.ts";
 import {BetsView} from "./BetsView.tsx";
+import {TBetSlip, useBetSlipStore} from "../store/bets.store.ts";
 
-const spin =  keyframes({
+const spin = keyframes({
   "0%": {transform: "rotate(0deg)"},
   "100%": {transform: "rotate(360deg)"}
 })
@@ -85,7 +88,9 @@ const imageLoadPromises = allImages.map(image => {
 
 Promise.all(imageLoadPromises)
   .then(() => allImagesLoaded = true)
-  .catch(error => { console.error('Error loading images:', error); });
+  .catch(error => {
+    console.error('Error loading images:', error);
+  });
 
 const GameView = () => {
 
@@ -103,6 +108,9 @@ const GameView = () => {
 
   const [now, setNow] = useState(Date.now());
 
+  const currentGameID = useBetSlipStore(state => state.currentGameID);
+  const betSlipStore = useBetSlipStore;
+  const allBetSlips = useBetSlipStore(state => state.allBetSlips);
 
 
   useEffect(() => {
@@ -147,7 +155,7 @@ const GameView = () => {
 
   useEffect(() => {
     const ctx = canvasRef.current?.getContext("2d");
-    if(!ctx || !allImagesLoaded) return;
+    if (!ctx || !allImagesLoaded) return;
 
     const {width, height} = ctx.canvas;
     const moveY = DOT_RADIUS;
@@ -156,7 +164,7 @@ const GameView = () => {
     const planeWidth = planeSprites[0].width;
 
     const drawAxis = () => {
-      if(gameState!== PLAYING) return;
+      if (gameState !== PLAYING) return;
       ctx.strokeStyle = WHITE_COLOR;
       ctx.lineWidth = 1;
       //draw x axis
@@ -176,11 +184,11 @@ const GameView = () => {
     }
 
     const drawXDots = () => {
-      if(gameState!== PLAYING) return;
+      if (gameState !== PLAYING) return;
       const moveX = 0;
       ctx.beginPath();
       const timeOffset = (elapsedTime / 1000) * DOT_SCROLL_SPEED; // Seconds * speed
-      const scrollOffset = elapsedTime > TIME_TO_TOP ? timeOffset % (DOT_SPACING + (DOT_RADIUS * 2)): 0;
+      const scrollOffset = elapsedTime > TIME_TO_TOP ? timeOffset % (DOT_SPACING + (DOT_RADIUS * 2)) : 0;
       for (let dotX = width - moveX - scrollOffset; dotX >= 0; dotX -= DOT_SPACING) {
         ctx.arc(dotX, height - DOT_RADIUS, DOT_RADIUS, 0, 2 * Math.PI, false);
       }
@@ -190,7 +198,7 @@ const GameView = () => {
     }
 
     const drawYDots = () => {
-      if(gameState!== PLAYING) return;
+      if (gameState !== PLAYING) return;
       ctx.beginPath();
       const timeOffset = (elapsedTime / 1000) * DOT_SCROLL_SPEED; // Seconds * speed
       const scrollOffset = elapsedTime > TIME_TO_TOP ? timeOffset % (DOT_SPACING + (DOT_RADIUS * 2)) : 0;
@@ -212,10 +220,10 @@ const GameView = () => {
 
       const angle = elapsedTime % 360 * 0.0005;
       ctx.save();
-      if(gameState === PLAYING) {
+      if (gameState === PLAYING) {
         ctx.rotate(angle);
       }
-      ctx.translate(0 , height );
+      ctx.translate(0, height);
       ctx.scale(1, -1);
       ctx.globalAlpha = 0.5;
       ctx.drawImage(backgroundImage, xOffset, yOffset, scaledImageWidth, scaledImageHeight);
@@ -252,7 +260,7 @@ const GameView = () => {
     const drawMultiplier = () => {
       if (gameState === WAITING || !startTime) return;
 
-      const multiplier = gameState === ENDED ? Math.exp(FACTOR * (endTime - startTime)): Math.exp(0.00006 * elapsedTime);
+      const multiplier = gameState === ENDED ? Math.exp(FACTOR * (endTime - startTime)) : Math.exp(0.00006 * elapsedTime);
       ctx.save();
       if (gameState === ENDED) {
         ctx.fillStyle = "#f7f7f7";
@@ -268,16 +276,16 @@ const GameView = () => {
     }
 
     const drawPlane = () => {
-      if ( !startTime) return;
+      if (!startTime) return;
       let yPos;
       let xPos;
       const startX = 0;
-      const startY = height -planeHeight;
+      const startY = height - planeHeight;
       const endX = width - (planeWidth * 1.5);
       const endY = planeHeight * 3;
-      const progress = elapsedTime >= TIME_TO_TOP ? 1:  elapsedTime / TIME_TO_TOP;
+      const progress = elapsedTime >= TIME_TO_TOP ? 1 : elapsedTime / TIME_TO_TOP;
 
-      const hoverOffset = elapsedTime >= TIME_TO_TOP ? Math.sin(elapsedTime * 0.002) * 32: 0;
+      const hoverOffset = elapsedTime >= TIME_TO_TOP ? Math.sin(elapsedTime * 0.002) * 32 : 0;
 
       const calculatePlaneProgress = (start: number, end: number, progress: number): number => {
         return (end - start) * progress + start;
@@ -349,6 +357,7 @@ const GameView = () => {
   useEffect(() => {
     switch (gameState) {
       case WAITING:
+        betSlipStore.setState({currentGameID: uuidGenerator()})
         if (now > startTime) {
           setGameState(PLAYING)
         }
@@ -358,8 +367,10 @@ const GameView = () => {
         break;
       case ENDED:
         if (now > (endTime + WAITING_DURATION)) {
+          betSlipStore.setState({allBetSlips: []})
           setStartTime(Date.now() + WAITING_DURATION);
           setGameState(WAITING);
+          betSlipStore.setState({previousGameID: currentGameID});
         }
         break;
       default:
@@ -374,6 +385,37 @@ const GameView = () => {
       setEndTime(end);
     }
   }, [gameState]);
+
+  // handle bet generation
+  useEffect(() => {
+    if (!currentGameID) return;
+    const generateBetslips = (): TBetSlip[] => {
+      const slips: TBetSlip[] = [];
+      for (let i = 0; i < 10; i++) {
+        const amount = getRandomNumber(100, 5000);
+        const slip = generateBetSlip(amount, currentGameID, startTime);
+        slips.push(slip);
+      }
+      return slips;
+    }
+    if (gameState === WAITING) {
+
+      const slips = generateBetslips();
+      betSlipStore.setState({allBetSlips: slips})
+
+
+    } else if (gameState === PLAYING) {
+      const currentSlips = betSlipStore.getState().allBetSlips;
+      const i = Math.floor(Math.random() * currentSlips.length)
+      currentSlips[i].exitTime = Date.now() + 6000;
+      betSlipStore.setState({allBetSlips: currentSlips});
+      // allBetSlips[betIndex].exitTime = Date.now();
+      // console.log(allBetSlips[betIndex]);
+      // betSlipStore.setState({allBetSlips: slips});
+    }
+
+
+  }, [betSlipStore, gameState]);
 
 
   useEffect(() => {

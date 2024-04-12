@@ -84,7 +84,10 @@ const betInputStyles = {
     gridTemplateColumns: 'repeat(2, 1fr)',
     gap: 4,
     marginInline: 'auto',
-    width: '100%'
+    width: '100%',
+    button: {
+      color: WHITE_COLOR
+    }
   }),
   selectAmountBtn: css({
     width: '100%',
@@ -103,6 +106,7 @@ const betInputStyles = {
     paddingInline: 16,
     textAlign: 'center',
     backgroundColor: SUCCESS_COLOR,
+    color: WHITE_COLOR,
     border: '1px solid white',
     borderRadius: 16,
     fontSize: 14,
@@ -294,7 +298,7 @@ export const BetsView: FC<InputProps> = ({gameState, startTime, now, index}) => 
 
     switch (gameState) {
       case WAITING:
-        if (currentBetID && isPlaying) {
+        if (currentBetID && isPlaying && now >= startTime) {
           const bet: TBetSlip = {
             amount: betAmount,
             gameId: currentBetID,
@@ -309,7 +313,7 @@ export const BetsView: FC<InputProps> = ({gameState, startTime, now, index}) => 
         }
         break;
       case PLAYING:
-        if (exitTime && mySlip) {
+        if (exitTime && mySlip && !mySlip.exitTime) {
           mySlip.exitTime = exitTime;
           useBetSlipStore.setState((state) => ({
             myBetSlips: state.myBetSlips.map((s) => {
@@ -339,7 +343,7 @@ export const BetsView: FC<InputProps> = ({gameState, startTime, now, index}) => 
       default:
         break;
     }
-  }, [betAmount, currentBetID, exitTime, gameState, isPlaying, startTime]);
+  }, [now, betAmount, currentBetID, exitTime, gameState, isPlaying, startTime]);
 
   return (
     <div css={betInputStyles.inputContainer}>
@@ -386,7 +390,8 @@ export const BetsView: FC<InputProps> = ({gameState, startTime, now, index}) => 
           {/*{isWaitingForNext && <div>{WAITING_FOR_NEXT_ROUND}</div>}*/}
           <div style={{
             flexGrow: isWaitingForNext ? 1 : 0,
-            height: isWaitingForNext ? 12 : 0
+            height: isWaitingForNext ? 12 : 0,
+            opacity: isWaitingForNext ? 1 : 0
           }}>{WAITING_FOR_NEXT_ROUND}</div>
           <button style={{backgroundColor: buttonColor, flexGrow: 1, flex: 1}} onClick={handleBetButtonClick}
             css={betInputStyles.betButton}>

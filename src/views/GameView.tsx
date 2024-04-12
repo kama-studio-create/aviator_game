@@ -365,20 +365,28 @@ const GameView = () => {
         break;
       case ENDED:
         if (now > (endTime + WAITING_DURATION)) {
-          betSlipStore.setState({allBetSlips: []})
+
           setStartTime(Date.now() + WAITING_DURATION);
           setGameState(WAITING);
-          betSlipStore.setState({previousGameID: currentGameID});
         }
         break;
       default:
         break;
     }
-  }, [endTime, gameState, now, startTime]);
+  }, [betSlipStore, currentGameID, endTime, gameState, now, startTime]);
+
+  useEffect(() => {
+    if (gameState === ENDED) {
+      betSlipStore.setState({allBetSlips: []})
+    }
+    if (gameState === WAITING) {
+      betSlipStore.setState({currentGameID: uuidGenerator()})
+    }
+
+  }, [gameState, betSlipStore]);
 
   useEffect(() => {
     if (gameState === WAITING) {
-      betSlipStore.setState({currentGameID: uuidGenerator()})
       const start = Date.now() + WAITING_DURATION;
       const end = start + getRandomNumber(3000, 25000);
       setEndTime(end);

@@ -110,7 +110,6 @@ const GameView = () => {
 
   const currentGameID = useBetSlipStore(state => state.currentGameID);
   const betSlipStore = useBetSlipStore;
-  const allBetSlips = useBetSlipStore(state => state.allBetSlips);
 
 
   useEffect(() => {

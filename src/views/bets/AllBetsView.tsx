@@ -37,23 +37,6 @@ const headerStyles = css({
   }
 })
 
-const betTableStyles = css({
-  display: 'grid',
-  gridTemplateColumns: 'repeat(3, 1fr)',
-  width: '100%',
-  justifyContent: 'space-between',
-  paddingBlock: 8,
-  '&.border-top': {
-    borderBlock: `1px solid black`,
-  },
-  '& .title': {
-    fontWeight: 500,
-    fontSize: 12,
-    color: LIGHT_GRAY_COLOR
-  }
-
-})
-
 const tableItem = css({
   width: '100%',
   fontSize: 12,

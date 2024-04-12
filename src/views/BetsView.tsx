@@ -16,6 +16,7 @@ import {ENDED, FACTOR, MINIMUM_BET, PLAYING, TGameState, WAITING, WAITING_FOR_NE
 import SwitchInput from "../components/inputs/SwitchInput.tsx";
 import {AutoPlayModal} from "../components/modals/AutoPlayModal.tsx";
 import {NumberInputWithButtons} from "../components/inputs/NumberInputWithButtons.tsx";
+import {TBetSlip, useBetSlipStore} from "../store/bets.store.ts";
 
 const betInputStyles = {
   row: css({
@@ -182,6 +183,7 @@ export const BetsView: FC<InputProps> = ({gameState, startTime, now, index}) => 
   const [autoPlayMultiplierLimit, setAutoPlayMultiplierLimit] = useState(1.10);
   const [isAutoplayModalOpen, setIsAutoplayModalOpen] = useState(false);
 
+  const currentBetID = useBetSlipStore(state => state.currentGameID)
 
   const getWinAmount = () => {
     if (isWaitingForNext) {
@@ -210,6 +212,7 @@ export const BetsView: FC<InputProps> = ({gameState, startTime, now, index}) => 
     return Math.exp(FACTOR * elapsedTime);
   }
 
+
   const handleBetButtonClick = () => {
     if (isWaitingForNext) {
       setIsWaitingForNext(false);
@@ -219,10 +222,11 @@ export const BetsView: FC<InputProps> = ({gameState, startTime, now, index}) => 
 
     if (gameState === PLAYING && isPlaying) {
       setExitTime(Date.now());
+      setIsPlaying(false);
       return;
     }
     if (!isPlaying) {
-      if (gameState === PLAYING) {
+      if (gameState !== WAITING) {
         setIsWaitingForNext(true);
       }
       setButtonColor(ERROR_COLOR);
@@ -231,6 +235,7 @@ export const BetsView: FC<InputProps> = ({gameState, startTime, now, index}) => 
       return;
     }
   }
+
   useEffect(() => {
     if (gameState === PLAYING && isAutoCheckout && isPlaying && !isWaitingForNext) {
       const multiplier = getMultiplier(now, startTime);
@@ -282,6 +287,59 @@ export const BetsView: FC<InputProps> = ({gameState, startTime, now, index}) => 
     }
   }, [gameState, exitTime, isWaitingForNext, isPlaying, isAutoCheckout, autoPlayMultiplierLimit]);
 
+  // handle setBet
+  useEffect(() => {
+    const mySlips = useBetSlipStore.getState().myBetSlips;
+    const mySlip = mySlips.find(s => s.gameId === currentBetID);
+
+    switch (gameState) {
+      case WAITING:
+        if (currentBetID && isPlaying) {
+          const bet: TBetSlip = {
+            amount: betAmount,
+            gameId: currentBetID,
+            startTime: startTime,
+          }
+
+          if (!mySlip) {
+            useBetSlipStore.setState((state) => ({
+              myBetSlips: [...state.myBetSlips, bet]
+            }))
+          }
+        }
+        break;
+      case PLAYING:
+        if (exitTime && mySlip) {
+          mySlip.exitTime = exitTime;
+          useBetSlipStore.setState((state) => ({
+            myBetSlips: state.myBetSlips.map((s) => {
+              if (s.gameId === currentBetID) {
+                return mySlip;
+              } else {
+                return s;
+              }
+            })
+          }))
+        }
+        break;
+      case ENDED:
+        if (mySlip) {
+          mySlip.endTime = Date.now();
+          useBetSlipStore.setState((state) => ({
+            myBetSlips: state.myBetSlips.map((s) => {
+              if (s.gameId === currentBetID) {
+                return mySlip;
+              } else {
+                return s;
+              }
+            })
+          }))
+        }
+        break;
+      default:
+        break;
+    }
+  }, [betAmount, currentBetID, exitTime, gameState, isPlaying, startTime]);
 
   return (
     <div css={betInputStyles.inputContainer}>
@@ -343,7 +401,7 @@ export const BetsView: FC<InputProps> = ({gameState, startTime, now, index}) => 
         <button onClick={() => {
           setIsAutoplayModalOpen(true);
         }} css={betInputStyles.autoplayButton}>
-					Autoplay
+              Autoplay
         </button>
         <div style={{
           display: 'flex',

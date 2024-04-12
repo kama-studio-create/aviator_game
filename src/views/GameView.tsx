@@ -357,7 +357,6 @@ const GameView = () => {
   useEffect(() => {
     switch (gameState) {
       case WAITING:
-        betSlipStore.setState({currentGameID: uuidGenerator()})
         if (now > startTime) {
           setGameState(PLAYING)
         }
@@ -380,11 +379,12 @@ const GameView = () => {
 
   useEffect(() => {
     if (gameState === WAITING) {
+      betSlipStore.setState({currentGameID: uuidGenerator()})
       const start = Date.now() + WAITING_DURATION;
       const end = start + getRandomNumber(3000, 25000);
       setEndTime(end);
     }
-  }, [gameState]);
+  }, [betSlipStore, gameState]);
 
   // handle bet generation
   useEffect(() => {
@@ -404,7 +404,7 @@ const GameView = () => {
       betSlipStore.setState({allBetSlips: slips})
 
 
-    } else if (gameState === PLAYING) {
+    } else if (gameState === PLAYING && betSlipStore.getState().allBetSlips.length > 0) {
       const currentSlips = betSlipStore.getState().allBetSlips;
       const i = Math.floor(Math.random() * currentSlips.length)
       currentSlips[i].exitTime = Date.now() + 6000;
@@ -415,7 +415,7 @@ const GameView = () => {
     }
 
 
-  }, [betSlipStore, gameState]);
+  }, [betSlipStore, currentGameID, gameState, startTime]);
 
 
   useEffect(() => {

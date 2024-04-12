@@ -3,6 +3,9 @@ import {rowStyles} from "../../styles/common.ts";
 import {DEFAULT_CURRENCY} from "../../common/constants.ts";
 import {css} from "@emotion/react";
 import messageIcon from '../../assets/icons/message.svg'
+import {TBetSlip, useBetSlipStore} from "../../store/bets.store.ts";
+import {getMultiplier} from "../../utils/getMultiplier.ts";
+import {SUCCESS_COLOR, SUCCESS_COLOR_LIGHT} from "../../styles/colors.ts";
 
 const betTableStyles = css({
   display: 'flex',
@@ -16,7 +19,8 @@ const betTableStyles = css({
     width: '100%',
     display: 'grid',
     gridTemplateColumns: 'repeat(3, 1fr)',
-    justifyContent: 'space-between'
+    justifyContent: 'space-between',
+    transition: 'all 0.2s ease-in-out',
   },
   th: {
     fontSize: 12,
@@ -29,6 +33,8 @@ const betTableStyles = css({
     flexDirection: 'column',
     width: '100%',
     gap: 4,
+    maxHeight: '50vh',
+    overflowY: 'scroll',
     tr: {
       background: 'black',
       padding: 8,
@@ -41,6 +47,28 @@ const betTableStyles = css({
 })
 
 export const MyBetsView: FC = () => {
+
+  const myBetSlips = useBetSlipStore(state => state.myBetSlips);
+
+  const getBetTime = (slip: TBetSlip) => {
+    if (!slip.startTime) return '';
+    const date = new Date(slip.startTime);
+    return date.toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: 'numeric'
+    })
+  }
+
+  const getSlipMultiplier = (slip: TBetSlip): string => {
+    if (slip.exitTime && slip.startTime) {
+      return getMultiplier(slip.startTime, slip.exitTime).toFixed(2);
+    }
+    if (slip.endTime && slip.startTime) {
+      return getMultiplier(slip.startTime, slip.endTime).toFixed(2);
+    } else {
+      return "";
+    }
+  }
 
   return (
     <div>
@@ -58,20 +86,27 @@ export const MyBetsView: FC = () => {
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>16:15</td>
-            <td>
-              <div style={{textAlign: 'left'}} css={rowStyles}>
-                <p>5.00</p>
-                <p>1.81x</p>
-              </div>
-            </td>
-            <td>
-              <div style={{justifyContent: 'end'}} css={rowStyles}>
-                <img width={16} height={16} src={messageIcon} alt='history'/>
-              </div>
-            </td>
-          </tr>
+          {myBetSlips.map((slip, index) => (
+            <tr style={{
+              backgroundColor: slip.exitTime ? SUCCESS_COLOR_LIGHT : 'black',
+              border: `1px solid ${slip.exitTime ? SUCCESS_COLOR : 'black'}`,
+              backgroundBlendMode: slip.exitTime ? 'color' : 'normal'
+            }} key={index}>
+              <td>{getBetTime(slip)}</td>
+              <td>
+                <div style={{textAlign: 'left'}} css={rowStyles}>
+                  <p>{slip.amount.toFixed(2)}</p>
+                  {slip.exitTime && <p>{getSlipMultiplier(slip)}x</p>}
+                </div>
+              </td>
+              <td>
+                <div style={{justifyContent: 'end'}} css={rowStyles}>
+                  {slip.exitTime && <p>{(slip.amount * Number(getSlipMultiplier(slip))).toFixed(2)}</p>}
+                  <img width={16} height={16} src={messageIcon} alt='history'/>
+                </div>
+              </td>
+            </tr>
+          ))}
         </tbody>
       </table>
     </div>

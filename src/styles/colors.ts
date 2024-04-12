@@ -4,6 +4,7 @@ export const SECONDARY_COLOR = '#FF9966';
 export const DARK_COLOR = '#222';
 export const LIGHT_COLOR = 'light-dark(rgba(255, 255, 255, 0.24), rgba(0, 0, 0, 0.2))';
 export const SUCCESS_COLOR = '#28a909';
+export const SUCCESS_COLOR_LIGHT = 'rgba(40,169,9,0.24)'
 export const ERROR_COLOR = '#f00';
 export const WHITE_COLOR = '#fff';
 export const BLUE_COLOR = 'blue';

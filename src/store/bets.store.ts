@@ -1,5 +1,5 @@
 import {create} from "zustand";
-import {devtools, persist} from "zustand/middleware";
+import {devtools} from "zustand/middleware";
 
 export type TBetSlip = {
   amount: number;
@@ -11,28 +11,28 @@ export type TBetSlip = {
   round?: number;
 }
 
-type TBetSlipStore = {
+interface IBetSlipStore {
   myBetSlips: TBetSlip[];
   allBetSlips: TBetSlip[];
   topBetSlips: TBetSlip[];
-  currentGameID: string | undefined;
-  previousGameID: string | undefined;
+  currentGameID: string;
+  previousGameID: string;
+  addNewSlip: (bet: TBetSlip) => void;
 }
 
 
-export const useBetSlipStore = create<TBetSlipStore>()(
+export const useBetSlipStore = create<IBetSlipStore>()(
   devtools(
-    persist(
-      (set, get) => ({
-        myBetSlips: [],
-        allBetSlips: [],
-        topBetSlips: [],
-        currentGameID: undefined,
-        previousGameID: undefined
-      }),
-      {
-        name: 'bets'
+    (set) => ({
+      myBetSlips: [] as TBetSlip[],
+      allBetSlips: [] as TBetSlip[],
+      topBetSlips: [] as TBetSlip[],
+      currentGameID: '',
+      previousGameID: '',
+      addNewSlip: (bet) => {
+        console.log(bet);
+        set((state) => ({myBetSlips: [...state.myBetSlips, bet]}));
       }
-    )
+    })
   )
 );

@@ -15,9 +15,6 @@ import {
   WAITING_DURATION,
   WAITING_FOR_NEXT_ROUND
 } from "../common/constants.ts";
-import BgAudioFile from "../assets/audio/bg_music.mp3";
-import AudioFile from "../assets/audio/audio.mp3";
-import {useAudio} from "../hooks/audio/useAudio.ts";
 import {useEffect, useRef, useState} from "react";
 import {allImages, backgroundImage, planeSprites, spinnerImage} from "../common/images.ts";
 import {generateBetSlip, getRandomNumber, uuidGenerator} from "../utils/generators.ts";
@@ -104,7 +101,7 @@ const GameView = () => {
   const [startTime, setStartTime] = useState<number>(Date.now() + WAITING_DURATION);
   const [endTime, setEndTime] = useState(0);
 
-  const {audioRef, isPlaying, bgAudioRef} = useAudio({gameState});
+  // const {audioRef, isPlaying, bgAudioRef} = useAudio({gameState});
 
   const [now, setNow] = useState(Date.now());
 
@@ -112,15 +109,15 @@ const GameView = () => {
   const betSlipStore = useBetSlipStore;
 
 
-  useEffect(() => {
-    const ref = audioRef.current
-    return () => {
-      if (isPlaying && ref) {
-        ref.pause();
-        ref.currentTime = 0;
-      }
-    };
-  }, [audioRef, isPlaying]);
+  // useEffect(() => {
+  //   const ref = audioRef.current
+  //   return () => {
+  //     if (isPlaying && ref) {
+  //       ref.pause();
+  //       ref.currentTime = 0;
+  //     }
+  //   };
+  // }, [audioRef, isPlaying]);
 
   useEffect(() => {
     if (!canvasRef.current || !containerRef.current) return;
@@ -439,8 +436,8 @@ const GameView = () => {
 
   return (
     <div css={gameStyles.mainContainer}>
-      <audio ref={bgAudioRef} src={BgAudioFile} loop/>
-      <audio ref={audioRef} src={AudioFile}/>
+      {/*<audio ref={bgAudioRef} src={BgAudioFile} loop/>*/}
+      {/*<audio ref={audioRef} src={AudioFile}/>*/}
       <div ref={containerRef} css={gameStyles.canvasContainer}>
         {!allImagesLoaded && <div css={gameStyles.loadingContainer}>Loading</div>}
         <canvas width={canvasWidth} height={canvasHeight} ref={canvasRef}/>

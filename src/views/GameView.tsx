@@ -16,7 +16,7 @@ import {
   WAITING_FOR_NEXT_ROUND
 } from "../common/constants.ts";
 import {useEffect, useRef, useState} from "react";
-import {allImages, backgroundImage, planeSprites, spinnerImage} from "../common/images.ts";
+import {backgroundImage, imageLoadPromises, planeSprites, spinnerImage} from "../common/images.ts";
 import {generateBetSlip, getRandomNumber, uuidGenerator} from "../utils/generators.ts";
 import {BLUE_COLOR, ERROR_COLOR, GRADIENT_DARK, WHITE_COLOR} from "../styles/colors.ts";
 import {MEDIA_QUERIES} from "../styles/breakpoints.ts";
@@ -79,15 +79,11 @@ const gameStyles = {
 
 
 let allImagesLoaded = false;
-const imageLoadPromises = allImages.map(image => {
-  return new Promise((resolve, reject) => {
-    image.onload = resolve;
-    image.onerror = reject;
-  });
-});
 
 Promise.all(imageLoadPromises)
-  .then(() => allImagesLoaded = true)
+  .then(() => {
+    allImagesLoaded = true
+  })
   .catch(error => {
     console.error('Error loading images:', error);
   });
@@ -132,14 +128,6 @@ const GameView = () => {
       if (ctx.canvas.width !== currentWidth || ctx.canvas.height !== currentHeight) {
         setCanvasWidth(currentWidth);
         setCanvasHeight(currentHeight * 0.8);
-        const desiredPlaneWidth = currentWidth * 0.2; // 10% of canvas width
-        planeSprites.map(sprite => {
-          const ratio = desiredPlaneWidth / sprite.width;
-          const newHeight = sprite.height * ratio;
-          sprite.width = desiredPlaneWidth;
-          sprite.height = newHeight;
-          return sprite;
-        });
       }
       ctx.canvas.style.borderRadius = BORDER_RADIUS;
     }
@@ -159,8 +147,7 @@ const GameView = () => {
     const {width, height} = ctx.canvas;
     const moveY = DOT_RADIUS;
     const elapsedTime = now - startTime;
-    const planeHeight = planeSprites[0].height;
-    const planeWidth = planeSprites[0].width;
+
 
     const drawAxis = () => {
       if (gameState !== PLAYING) return;
@@ -276,10 +263,18 @@ const GameView = () => {
 
     const drawPlane = () => {
       if (!startTime) return;
+
       let yPos;
       let xPos;
+
+      const currentSprite = Math.floor(Date.now() / PLANE_FRAME_RATE) % planeSprites.length;
+      const planeSprite = planeSprites[currentSprite];
+      const planeWidth = Math.floor(width * 0.28);
+      const ratio = planeWidth / planeSprite.width;
+      const planeHeight = Math.floor(planeSprite.height * ratio);
+
       const startX = 0;
-      const startY = height - planeHeight;
+      const startY = height;
       const endX = width - (planeWidth * 1.5);
       const endY = planeHeight * 3;
       const progress = elapsedTime >= TIME_TO_TOP ? 1 : elapsedTime / TIME_TO_TOP;
@@ -293,13 +288,12 @@ const GameView = () => {
       yPos = calculatePlaneProgress(startY, endY, progress);
       xPos = calculatePlaneProgress(startX, endX, progress);
 
-      const currentSprite = Math.floor(Date.now() / PLANE_FRAME_RATE) % planeSprites.length;
-      const planeSprite = planeSprites[currentSprite];
+
 
       switch (gameState) {
         case WAITING:
           ctx.globalAlpha = 0.5;
-          ctx.drawImage(planeSprite, CANVAS_PADDING, ctx.canvas.height - planeSprite.height - CANVAS_PADDING, planeSprite.width, planeSprite.height);
+          ctx.drawImage(planeSprite, CANVAS_PADDING, height - planeHeight, planeWidth, planeHeight);
           break;
         case PLAYING:
           if (elapsedTime >= TIME_TO_TOP) {
@@ -307,20 +301,14 @@ const GameView = () => {
             xPos += (hoverOffset * 0.4);
           }
           ctx.globalAlpha = 1;
-          ctx.drawImage(
-            planeSprite,
-            xPos,
-            yPos - planeSprite.height - CANVAS_PADDING,
-            planeSprite.width,
-            planeSprite.height
-          );
+          ctx.drawImage(planeSprite, xPos, yPos - planeHeight - CANVAS_PADDING, planeWidth, planeHeight);
 
           //draw line
           ctx.beginPath();
           ctx.moveTo(CANVAS_PADDING, ctx.canvas.height - CANVAS_PADDING);
           ctx.lineWidth = 5
           ctx.strokeStyle = ERROR_COLOR;
-          ctx.quadraticCurveTo(xPos / 1.5, ctx.canvas.height - CANVAS_PADDING, xPos + (CANVAS_PADDING * 1.5), yPos - (CANVAS_PADDING * 1.5));
+          ctx.quadraticCurveTo(xPos / 1.5, height - CANVAS_PADDING, xPos + (CANVAS_PADDING * 1.5), yPos - (CANVAS_PADDING * 1.5));
           ctx.stroke();
           ctx.lineWidth = 0.5;
           ctx.lineTo(xPos + (CANVAS_PADDING * 2), ctx.canvas.height - (CANVAS_PADDING + 4));
@@ -333,7 +321,7 @@ const GameView = () => {
         case ENDED:
           yPos -= Math.exp(0.012 * (Date.now() - endTime)) / 2;
           xPos += Math.exp(0.012 * (Date.now() - endTime));
-          ctx.drawImage(planeSprite, xPos, yPos, planeSprite.width, planeSprite.height);
+          ctx.drawImage(planeSprite, xPos, yPos, planeWidth, planeHeight);
           break;
       }
     }

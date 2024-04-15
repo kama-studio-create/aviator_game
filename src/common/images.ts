@@ -23,11 +23,13 @@ export const spinnerImage = new Image();
 backgroundImage.src = BgImage;
 backgroundImage.id = 'canvas-bg';
 spinnerImage.src = SpinnerImage;
-
-
-export const planeSprites = [plane1, plane2, plane3, plane4];
-
+export   const planeSprites = [plane1, plane2, plane3, plane4];
 export const allImages = [backgroundImage, spinnerImage,...planeSprites];
 
-
+export const imageLoadPromises = allImages.map(image => {
+  return new Promise((resolve, reject) => {
+    image.onload = resolve;
+    image.onerror = reject;
+  });
+});
 

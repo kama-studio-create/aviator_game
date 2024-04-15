@@ -22,6 +22,9 @@ import {BLUE_COLOR, ERROR_COLOR, GRADIENT_DARK, WHITE_COLOR} from "../styles/col
 import {MEDIA_QUERIES} from "../styles/breakpoints.ts";
 import {BetsView} from "./BetsView.tsx";
 import {TBetSlip, useBetSlipStore} from "../store/bets.store.ts";
+import {useAudio} from "../hooks/audio/useAudio.ts";
+import BGAudioFile from "../assets/audio/bg_music.mp3"
+import PlaneAudio from "../assets/audio/audio.mp3"
 
 const spin = keyframes({
   "0%": {transform: "rotate(0deg)"},
@@ -101,7 +104,7 @@ const GameView = () => {
   const [startTime, setStartTime] = useState<number>(Date.now() + WAITING_DURATION);
   const [endTime, setEndTime] = useState(0);
 
-  // const {audioRef, isPlaying, bgAudioRef} = useAudio({gameState});
+  const {audioRef, isPlaying, bgAudioRef} = useAudio({gameState});
 
   const [now, setNow] = useState(Date.now());
 
@@ -109,15 +112,15 @@ const GameView = () => {
   const betSlipStore = useBetSlipStore;
 
 
-  // useEffect(() => {
-  //   const ref = audioRef.current
-  //   return () => {
-  //     if (isPlaying && ref) {
-  //       ref.pause();
-  //       ref.currentTime = 0;
-  //     }
-  //   };
-  // }, [audioRef, isPlaying]);
+  useEffect(() => {
+    const ref = audioRef.current
+    return () => {
+      if (isPlaying && ref) {
+        ref.pause();
+        ref.currentTime = 0;
+      }
+    };
+  }, [audioRef, isPlaying]);
 
   useEffect(() => {
     if (!canvasRef.current || !containerRef.current) return;
@@ -411,9 +414,6 @@ const GameView = () => {
       const i = Math.floor(Math.random() * currentSlips.length)
       currentSlips[i].exitTime = Date.now() + 6000;
       betSlipStore.setState({allBetSlips: currentSlips});
-      // allBetSlips[betIndex].exitTime = Date.now();
-      // console.log(allBetSlips[betIndex]);
-      // betSlipStore.setState({allBetSlips: slips});
     }
 
 
@@ -436,8 +436,8 @@ const GameView = () => {
 
   return (
     <div css={gameStyles.mainContainer}>
-      {/*<audio ref={bgAudioRef} src={BgAudioFile} loop/>*/}
-      {/*<audio ref={audioRef} src={AudioFile}/>*/}
+      <audio ref={bgAudioRef} src={BGAudioFile} loop/>
+      <audio ref={audioRef} src={PlaneAudio}/>
       <div ref={containerRef} css={gameStyles.canvasContainer}>
         {!allImagesLoaded && <div css={gameStyles.loadingContainer}>Loading</div>}
         <canvas width={canvasWidth} height={canvasHeight} ref={canvasRef}/>

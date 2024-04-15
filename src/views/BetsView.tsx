@@ -10,7 +10,7 @@ import {
   SUCCESS_COLOR,
   WHITE_COLOR
 } from "../styles/colors.ts";
-import {FC, useEffect, useState} from "react";
+import {FC, useCallback, useEffect, useState} from "react";
 import {NumberInput} from "../components/inputs/NumberInput.tsx";
 import {ENDED, FACTOR, MINIMUM_BET, PLAYING, TGameState, WAITING, WAITING_FOR_NEXT_ROUND} from "../common/constants.ts";
 import SwitchInput from "../components/inputs/SwitchInput.tsx";
@@ -229,7 +229,7 @@ export const BetsView: FC<InputProps> = ({gameState, startTime, now, index}) => 
   }
 
 
-  const handleSetBet = () => {
+  const handleSetBet = useCallback(() => {
     if (isWaitingForNext) {
       setIsWaitingForNext(false);
       setIsPlaying(false);
@@ -250,7 +250,7 @@ export const BetsView: FC<InputProps> = ({gameState, startTime, now, index}) => 
       setIsPlaying(true);
       return;
     }
-  }
+  }, [gameState, isPlaying, isWaitingForNext])
 
   useEffect(() => {
     if (gameState === PLAYING && isAutoCashOut && isPlaying && !isWaitingForNext) {
@@ -268,8 +268,9 @@ export const BetsView: FC<InputProps> = ({gameState, startTime, now, index}) => 
       setAutoPlay(true);
       setIsAutoCashOut(true);
       setIsPlaying(true);
+      console.log(amountLost, amountWon);
     }
-  }, [autoPlayConfig]);
+  }, [amountLost, amountWon, autoPlayConfig]);
 
   useEffect(() => {
     switch (gameState) {

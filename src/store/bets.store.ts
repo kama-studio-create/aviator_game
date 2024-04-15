@@ -9,6 +9,7 @@ export type TBetSlip = {
   exitTime?: number;
   username?: string;
   round?: number;
+  index?: number;
 }
 
 interface IBetSlipStore {

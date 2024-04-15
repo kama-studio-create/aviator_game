@@ -248,7 +248,7 @@ export const BetsView: FC<InputProps> = ({gameState, startTime, now, index}) => 
         setExitMultiplier(multiplier);
       }
     }
-  }, [autoPlayMultiplierLimit, gameState, isAutoCheckout, isPlaying, now, startTime]);
+  }, [autoPlayMultiplierLimit, gameState, isAutoCheckout, isPlaying, isWaitingForNext, now, startTime]);
 
   useEffect(() => {
     switch (gameState) {
@@ -268,7 +268,6 @@ export const BetsView: FC<InputProps> = ({gameState, startTime, now, index}) => 
           setButtonColor(SUCCESS_COLOR);
           setButtonTitle('BET');
           setIsPlaying(false);
-          console.log('exit data', {index: index, exitTime: exitTime, multiplier: exitMultiplier})
         }
         if (isPlaying && !isWaitingForNext) {
           setButtonColor(PRIMARY_COLOR);
@@ -294,7 +293,7 @@ export const BetsView: FC<InputProps> = ({gameState, startTime, now, index}) => 
   // handle setBet
   useEffect(() => {
     const mySlips = useBetSlipStore.getState().myBetSlips;
-    const mySlip = mySlips.find(s => s.gameId === currentBetID);
+    const mySlip = mySlips.find(s => s.gameId === currentBetID && index === s.index);
 
     switch (gameState) {
       case WAITING:
@@ -303,6 +302,7 @@ export const BetsView: FC<InputProps> = ({gameState, startTime, now, index}) => 
             amount: betAmount,
             gameId: currentBetID,
             startTime: startTime,
+            index
           }
 
           if (!mySlip) {
@@ -317,7 +317,7 @@ export const BetsView: FC<InputProps> = ({gameState, startTime, now, index}) => 
           mySlip.exitTime = exitTime;
           useBetSlipStore.setState((state) => ({
             myBetSlips: state.myBetSlips.map((s) => {
-              if (s.gameId === currentBetID) {
+              if (s.gameId === currentBetID && index === s.index) {
                 return mySlip;
               } else {
                 return s;
@@ -331,7 +331,7 @@ export const BetsView: FC<InputProps> = ({gameState, startTime, now, index}) => 
           mySlip.endTime = Date.now();
           useBetSlipStore.setState((state) => ({
             myBetSlips: state.myBetSlips.map((s) => {
-              if (s.gameId === currentBetID) {
+              if (s.gameId === currentBetID && index === s.index) {
                 return mySlip;
               } else {
                 return s;

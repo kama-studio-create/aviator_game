@@ -335,8 +335,6 @@ const GameView = () => {
           xPos += Math.exp(0.012 * (Date.now() - endTime));
           ctx.drawImage(planeSprite, xPos, yPos, planeSprite.width, planeSprite.height);
           break;
-        default:
-          break;
       }
     }
 

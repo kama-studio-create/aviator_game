@@ -268,9 +268,8 @@ export const BetsView: FC<InputProps> = ({gameState, startTime, now, index}) => 
       setAutoPlay(true);
       setIsAutoCashOut(true);
       setIsPlaying(true);
-      console.log(amountLost, amountWon);
     }
-  }, [amountLost, amountWon, autoPlayConfig]);
+  }, [autoPlayConfig]);
 
   useEffect(() => {
     switch (gameState) {
@@ -302,13 +301,16 @@ export const BetsView: FC<InputProps> = ({gameState, startTime, now, index}) => 
         break;
       case ENDED:
         if (!isWaitingForNext) {
-          setButtonColor(SUCCESS_COLOR);
-          setButtonTitle('BET');
+
           if(autoplayRounds > 0 && isAutoPlay ) {
             setIsPlaying(true);
-            setIsAutoCashOut(true)
+            setIsAutoCashOut(true);
+            setButtonColor(ERROR_COLOR);
+            setButtonTitle('CANCEL')
           } else {
             setIsPlaying(false);
+            setButtonColor(SUCCESS_COLOR);
+            setButtonTitle('BET');
           }
         }
         break;

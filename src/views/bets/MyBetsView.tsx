@@ -5,7 +5,7 @@ import {css} from "@emotion/react";
 import messageIcon from '../../assets/icons/message.svg'
 import {TBetSlip, useBetSlipStore} from "../../store/bets.store.ts";
 import {getMultiplier} from "../../utils/getMultiplier.ts";
-import {SUCCESS_COLOR, SUCCESS_COLOR_LIGHT} from "../../styles/colors.ts";
+import {DARK_GRAY_COLOR, SUCCESS_COLOR, SUCCESS_COLOR_LIGHT} from "../../styles/colors.ts";
 
 const betTableStyles = css({
   display: 'flex',
@@ -96,7 +96,14 @@ export const MyBetsView: FC = () => {
               <td>
                 <div style={{textAlign: 'left'}} css={rowStyles}>
                   <p>{slip.amount.toFixed(2)}</p>
-                  {slip.exitTime && <p>{getSlipMultiplier(slip)}x</p>}
+                  {slip.exitTime && <div style={{
+                    paddingInline: 8,
+                    background: DARK_GRAY_COLOR,
+                    borderRadius: 8,
+                    textAlign: 'center',
+                    color: 'purple',
+                    fontWeight: 600
+                  }}>{getSlipMultiplier(slip)}x</div>}
                 </div>
               </td>
               <td>

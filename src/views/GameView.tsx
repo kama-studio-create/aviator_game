@@ -46,6 +46,7 @@ const gameStyles = {
     borderRadius: 8,
     background: GRADIENT_DARK,
     position: 'relative',
+    transition: 'all 2s ease-in-out',
     '#canvas-bg': {
       position: 'absolute',
       top: 0,

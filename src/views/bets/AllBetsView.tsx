@@ -1,7 +1,7 @@
 import {FC} from "react";
 import {css} from "@emotion/react";
 import {PillButton} from "../../components/buttons/PillButton.tsx";
-import {LIGHT_GRAY_COLOR, SUCCESS_COLOR, WHITE_COLOR} from "../../styles/colors.ts";
+import {DARK_GRAY_COLOR, LIGHT_GRAY_COLOR, SUCCESS_COLOR, WHITE_COLOR} from "../../styles/colors.ts";
 import {rowStyles} from "../../styles/common.ts";
 import {DEFAULT_CURRENCY} from "../../common/constants.ts";
 import historyIcon from "../../assets/icons/history.svg";
@@ -114,10 +114,11 @@ export const AllBetsView: FC = () => {
                 <div style={{textAlign: 'right'}}>{betSlip.amount.toFixed(2)}</div>
                 <div style={{
                   paddingInline: 8,
-                  background: LIGHT_GRAY_COLOR,
+                  background: DARK_GRAY_COLOR,
                   borderRadius: 8,
                   textAlign: 'center',
-                  color: 'purple'
+                  color: 'purple',
+                  fontWeight: 600
                 }}>1.24
                 </div>
               </td>

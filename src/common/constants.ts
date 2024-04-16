@@ -12,7 +12,8 @@ export const ENDED = 'ENDED';
 
 export const AUDIO_START = "start";
 export const AUDIO_FLY_AWAY = "flyAway";
-export const TIME_TO_TOP = 2000;
+export const TIME_TO_TOP = 1600;
+export const HOVER_OFFSET_CONST = 96;
 
 export const DOT_RADIUS = 2;
 export const DOT_SPACING = 80;
@@ -24,9 +25,16 @@ export const FACTOR = 0.00006;
 export const WAITING_FOR_NEXT_ROUND = 'Waiting For Next Round';
 export const DEFAULT_CURRENCY = 'KSH';
 
-export const STOP_IF_CASH_DECREASES = 'Stop If Cash Decreases';
-export const STOP_IF_CASH_INCREASES = 'Stop If Cash Increases';
+export const STOP_IF_CASH_DECREASES = 'Stop If Cash Decreases by';
+export const STOP_IF_CASH_INCREASES = 'Stop If Cash Increases by';
 export const STOP_IF_SINGLE_WIN_EXCEEDS = 'Stop If Single Win Exceeds';
+
+export const ERROR = 'error';
+export const SUCCESS ='success';
+export const NOTIFICATION_VISIBILITY = 5000;
 
 const GAME_STATES = [WAITING, PLAYING, ENDED] as const;
 export type TGameState = (typeof GAME_STATES)[number]
+
+const NOTIFICATION_STATES = [ERROR, SUCCESS] as const;
+export type TNotificationState = (typeof NOTIFICATION_STATES)[number]

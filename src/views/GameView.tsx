@@ -7,6 +7,7 @@ import {
   DOT_SPACING,
   ENDED,
   FACTOR,
+  HOVER_OFFSET_CONST,
   PLANE_FRAME_RATE,
   PLAYING,
   TGameState,
@@ -25,6 +26,7 @@ import {TBetSlip, useBetSlipStore} from "../store/bets.store.ts";
 import {useAudio} from "../hooks/audio/useAudio.ts";
 import BGAudioFile from "../assets/audio/bg_music.mp3"
 import PlaneAudio from "../assets/audio/audio.mp3"
+import {NotificationsView} from "./NotificationsView.tsx";
 
 const spin = keyframes({
   "0%": {transform: "rotate(0deg)"},
@@ -280,7 +282,7 @@ const GameView = () => {
       const endY = planeHeight * 3;
       const progress = elapsedTime >= TIME_TO_TOP ? 1 : elapsedTime / TIME_TO_TOP;
 
-      const hoverOffset = elapsedTime >= TIME_TO_TOP ? Math.sin(elapsedTime * 0.002) * 32 : 0;
+      const hoverOffset = elapsedTime >= TIME_TO_TOP ? Math.sin(elapsedTime * 0.002) * HOVER_OFFSET_CONST : 0;
 
       const calculatePlaneProgress = (start: number, end: number, progress: number): number => {
         return (end - start) * progress + start;
@@ -432,10 +434,11 @@ const GameView = () => {
         <canvas width={canvasWidth} height={canvasHeight} ref={canvasRef}/>
       </div>
       <div css={gameStyles.userInputContainer}>
-
         <BetsView index={0} now={now} startTime={startTime} gameState={gameState}/>
         <BetsView index={1} now={now} startTime={startTime} gameState={gameState}/>
       </div>
+      <NotificationsView />
+
     </div>
   )
 }

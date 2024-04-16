@@ -12,11 +12,22 @@ import {
 } from "../styles/colors.ts";
 import {FC, useCallback, useEffect, useState} from "react";
 import {NumberInput} from "../components/inputs/NumberInput.tsx";
-import {ENDED, FACTOR, MINIMUM_BET, PLAYING, TGameState, WAITING, WAITING_FOR_NEXT_ROUND} from "../common/constants.ts";
+import {
+  DEFAULT_CURRENCY,
+  ENDED,
+  FACTOR,
+  MINIMUM_BET,
+  PLAYING,
+  SUCCESS,
+  TGameState,
+  WAITING,
+  WAITING_FOR_NEXT_ROUND
+} from "../common/constants.ts";
 import SwitchInput from "../components/inputs/SwitchInput.tsx";
 import {AutoPlayModal} from "../components/modals/AutoPlayModal.tsx";
 import {NumberInputWithButtons} from "../components/inputs/NumberInputWithButtons.tsx";
 import {TBetSlip, useBetSlipStore} from "../store/bets.store.ts";
+import {useNotificationStore} from "../store/notifications.store.ts";
 
 const betInputStyles = {
   row: css({
@@ -327,7 +338,7 @@ export const BetsView: FC<InputProps> = ({gameState, startTime, now, index}) => 
     }
   }, [gameState, exitTime, isWaitingForNext, isPlaying, isAutoCashOut, autoPlayMultiplierLimit, autoplayRounds, isAutoPlay]);
 
-  // handle amount
+  // handle amount limits on autoplay
 
   useEffect(() => {
     if(gameState === ENDED && isAutoPlay) {
@@ -338,6 +349,7 @@ export const BetsView: FC<InputProps> = ({gameState, startTime, now, index}) => 
         const multiplier = getMultiplier(mySlip.exitTime, mySlip.startTime);
         const amountWon = Math.floor (multiplier * mySlip.amount);
         setAmountWon(prev => prev + amountWon);
+        
         if(autoPlayConfig && autoPlayConfig.singleWinLimit && amountWon > autoPlayConfig.singleWinLimit) {
           handleEndAutobetSession();
         }
@@ -414,15 +426,41 @@ export const BetsView: FC<InputProps> = ({gameState, startTime, now, index}) => 
               }
             })
           }))
-          
-
         }
-
         break;
       default:
         break;
     }
   }, [index, now, betAmount, currentBetID, exitTime, gameState, isPlaying, startTime, isAutoPlay, autoplayRounds, handleSetBet]);
+  
+  //handle notifications
+  useEffect(() => {
+    const mySlips = useBetSlipStore.getState().myBetSlips;
+    const mySlip = mySlips.find(s => s.gameId === currentBetID && index === s.index);
+    
+    if(gameState !== PLAYING || !exitTime || !startTime || !mySlip) return;
+
+    const notifications = useNotificationStore.getState().notifications;
+    const winNotification = notifications.find(n => n.gameId === currentBetID);
+    if(!winNotification) {
+
+      const multiplier = getMultiplier(exitTime, startTime);
+      const winAmount = multiplier * mySlip.amount;
+
+      useNotificationStore.setState((state) => {
+        return ({
+          notifications: [
+            {
+              type: SUCCESS,
+              header: "CONGRATULATIONS!!!!",
+              message: `You have cashed out ${DEFAULT_CURRENCY} ${winAmount.toFixed(2)}`,
+            },
+            ...state.notifications,
+          ]
+        });
+      })
+    }
+  }, [currentBetID, exitTime, gameState, index, startTime]);
 
   return (
     <div css={betInputStyles.inputContainer}>

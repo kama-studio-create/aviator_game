@@ -18,7 +18,7 @@ const styles = {
     backgroundSize: 'cover',
     display: 'flex',
     flexDirection: 'column',
-    gap: 8
+    gap: 4
   }),
   containerStyles: css({
     width: '100%',

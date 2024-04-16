@@ -218,10 +218,10 @@ export const BetsView: FC<InputProps> = ({gameState, startTime, now, index}) => 
   }
 
 
-  const handleChange = (value: number) => {
+  const handleChange = useCallback((value: number) => {
     setBetAmount(value);
     setIsPlaying(false);
-  }
+  }, [setBetAmount, setIsPlaying]);
 
   const getMultiplier = (endedAt: number, startedAt: number) => {
     const elapsedTime = endedAt - startedAt;
@@ -250,7 +250,15 @@ export const BetsView: FC<InputProps> = ({gameState, startTime, now, index}) => 
       setIsPlaying(true);
       return;
     }
-  }, [gameState, isPlaying, isWaitingForNext])
+  }, [gameState, isPlaying, isWaitingForNext]);
+
+  const handleEndAutobetSession = useCallback(() => {
+    setAutoPlay(false);
+    setAutoPlayRounds(0);
+    setAmountLost(0);
+    setAmountWon(0);
+    setIsAutoCashOut(false);
+  }, [])
 
   useEffect(() => {
     if (gameState === PLAYING && isAutoCashOut && isPlaying && !isWaitingForNext) {
@@ -319,6 +327,40 @@ export const BetsView: FC<InputProps> = ({gameState, startTime, now, index}) => 
     }
   }, [gameState, exitTime, isWaitingForNext, isPlaying, isAutoCashOut, autoPlayMultiplierLimit, autoplayRounds, isAutoPlay]);
 
+  // handle amount
+
+  useEffect(() => {
+    if(gameState === ENDED && isAutoPlay) {
+      const mySlips = useBetSlipStore.getState().myBetSlips;
+      const mySlip = mySlips.find(s => s.gameId === currentBetID && index === s.index);
+      if(!mySlip) return;
+      if (mySlip.exitTime && mySlip.startTime) {
+        const multiplier = getMultiplier(mySlip.exitTime, mySlip.startTime);
+        const amountWon = Math.floor (multiplier * mySlip.amount);
+        setAmountWon(prev => prev + amountWon);
+        if(autoPlayConfig && autoPlayConfig.singleWinLimit && amountWon > autoPlayConfig.singleWinLimit) {
+          handleEndAutobetSession();
+        }
+      } else  {
+        setAmountLost(prev => prev + mySlip.amount);
+      }
+    }
+    
+  }, [autoPlayConfig, currentBetID, gameState, handleEndAutobetSession, index, isAutoPlay]);
+  
+  //handle end autoplay if limit exceeded
+
+  useEffect(() => {
+    if(gameState !== ENDED && !isAutoPlay) return;
+    if(autoPlayConfig && autoPlayConfig.lossAmountLimit && amountLost > autoPlayConfig.lossAmountLimit) {
+      handleEndAutobetSession();
+    }
+
+    if(autoPlayConfig && autoPlayConfig.winAmountLimit && amountWon > autoPlayConfig.winAmountLimit) {
+      handleEndAutobetSession();
+    }
+  }, [amountLost, amountWon, autoPlayConfig, gameState, handleEndAutobetSession, isAutoPlay]);
+
   // handle bet slips
   useEffect(() => {
     const mySlips = useBetSlipStore.getState().myBetSlips;
@@ -329,7 +371,6 @@ export const BetsView: FC<InputProps> = ({gameState, startTime, now, index}) => 
 
         if (currentBetID && isPlaying && now >= startTime) {
           if(isAutoPlay && autoplayRounds > 0) {
-            console.log('playing')
             setAutoPlayRounds(prev => prev - 1);
             handleSetBet();
           }
@@ -373,16 +414,7 @@ export const BetsView: FC<InputProps> = ({gameState, startTime, now, index}) => 
               }
             })
           }))
-          if (mySlip.exitTime) {
-            const multiplier = getMultiplier(Date.now(), mySlip.exitTime);
-            const amount = (multiplier * betAmount);
-            setAmountWon(prev => prev+ amount);
-          }
-          else if(mySlip.endTime) {
-            const multiplier = getMultiplier(Date.now(), mySlip.endTime);
-            const amount = (multiplier * betAmount);
-            setAmountLost(prev => prev+ amount);
-          }
+          
 
         }
 

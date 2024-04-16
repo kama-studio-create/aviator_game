@@ -1,5 +1,5 @@
 import {useEffect, useRef, useState} from "react";
-import {AUDIO_FLY_AWAY, AUDIO_START, ENDED, TGameState, PLAYING} from "../../common/constants.ts";
+import {AUDIO_FLY_AWAY, AUDIO_START, ENDED, PLAYING, TGameState} from "../../common/constants.ts";
 
 export const audioSprite = {
   flyAway: [2000, 3000],
@@ -46,11 +46,13 @@ export const useAudio = ({gameState}: UseAudioProps) => {
   useEffect(() => {
     const bgAudio = bgAudioRef.current;
     if (!hasInteracted || !bgAudio) return;
-    if(!bgAudio) return;
-    bgAudio.play().catch((e) => {
+    bgAudio.play().then(() => {
+      bgAudio.volume = 0.5;
+    }).catch(e => {
       throw Error(e);
-    });
-    bgAudio.volume = 0.5;
+    })
+      
+      
   }, [hasInteracted]);
 
   useEffect(() => {

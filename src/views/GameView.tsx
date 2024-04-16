@@ -19,7 +19,7 @@ import {
 import {useEffect, useRef, useState} from "react";
 import {backgroundImage, imageLoadPromises, planeSprites, spinnerImage} from "../common/images.ts";
 import {generateBetSlip, getRandomNumber, uuidGenerator} from "../utils/generators.ts";
-import {BLUE_COLOR, ERROR_COLOR, GRADIENT_DARK, WHITE_COLOR} from "../styles/colors.ts";
+import {BLUE_COLOR, ERROR_COLOR, GRADIENT_DARK, TRANSPARENT_RED_COLOR, WHITE_COLOR} from "../styles/colors.ts";
 import {MEDIA_QUERIES} from "../styles/breakpoints.ts";
 import {BetsView} from "./BetsView.tsx";
 import {TBetSlip, useBetSlipStore} from "../store/bets.store.ts";
@@ -27,6 +27,7 @@ import {useAudio} from "../hooks/audio/useAudio.ts";
 import BGAudioFile from "../assets/audio/bg_music.mp3"
 import PlaneAudio from "../assets/audio/audio.mp3"
 import {NotificationsView} from "./NotificationsView.tsx";
+import {BetSlips} from "./BetSlips.tsx";
 
 const spin = keyframes({
   "0%": {transform: "rotate(0deg)"},
@@ -37,27 +38,16 @@ const spin = keyframes({
 const gameStyles = {
   mainContainer: css({
     width: "100%",
-    padding: 8,
     backgroundSize: "cover",
     display: "flex",
     flexDirection: "column",
-    gap: 16,
+    gap: 8,
   }),
   canvasContainer: css({
     width: "100%",
-    borderRadius: 8,
     background: GRADIENT_DARK,
     position: 'relative',
     transition: 'all 2s ease-in-out',
-    '#canvas-bg': {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      width: '100%',
-      height: '100%',
-      transformOrigin: 'bottom left',
-      animation: `${spin} ${PLANE_FRAME_RATE}ms linear infinite`,
-    }
   }),
   loadingContainer: css({
     width: '100%',
@@ -130,7 +120,7 @@ const GameView = () => {
       const currentHeight = currentWidth;
       if (ctx.canvas.width !== currentWidth || ctx.canvas.height !== currentHeight) {
         setCanvasWidth(currentWidth);
-        setCanvasHeight(currentHeight * 0.8);
+        setCanvasHeight(currentHeight);
       }
       ctx.canvas.style.borderRadius = BORDER_RADIUS;
     }
@@ -177,7 +167,7 @@ const GameView = () => {
       const moveX = 0;
       ctx.beginPath();
       const timeOffset = (elapsedTime / 1000) * DOT_SCROLL_SPEED; // Seconds * speed
-      const scrollOffset = elapsedTime > TIME_TO_TOP ? timeOffset % (DOT_SPACING + (DOT_RADIUS * 2)) : 0;
+      const scrollOffset = elapsedTime > TIME_TO_TOP ? timeOffset % (DOT_SPACING + (DOT_RADIUS)) : 0;
       for (let dotX = width - moveX - scrollOffset; dotX >= 0; dotX -= DOT_SPACING) {
         ctx.arc(dotX, height - DOT_RADIUS, DOT_RADIUS, 0, 2 * Math.PI, false);
       }
@@ -199,23 +189,21 @@ const GameView = () => {
       ctx.closePath();
     }
 
+
+
     const drawBackground = () => {
-      if (!startTime) return;
-
-      const scaledImageWidth = width * 4;
-      const scaledImageHeight = width * 4;
-      const xOffset = -(width * 2);
-      const yOffset = height - scaledImageHeight / 2;
-
-      const angle = elapsedTime % 360 * 0.0005;
+      // const angle = (elapsedTime % 360) / 3;
+      const angle = (elapsedTime * 0.02 * Math.PI) / 180;
+      // Draw spinner
+      const spinnerWidth = width * 4;
+      const spinnerHeight = spinnerWidth * (backgroundImage.height / backgroundImage.width);
       ctx.save();
-      if (gameState === PLAYING) {
+      ctx.translate(-spinnerWidth / 16, spinnerHeight / 4);
+      if(gameState === PLAYING){
         ctx.rotate(angle);
       }
-      ctx.translate(0, height);
-      ctx.scale(1, -1);
       ctx.globalAlpha = 0.5;
-      ctx.drawImage(backgroundImage, xOffset, yOffset, scaledImageWidth, scaledImageHeight);
+      ctx.drawImage(backgroundImage, -spinnerWidth / 2, -spinnerHeight / 2, spinnerWidth, spinnerHeight);
       ctx.restore();
     }
 
@@ -282,7 +270,7 @@ const GameView = () => {
       const endY = planeHeight * 3;
       const progress = elapsedTime >= TIME_TO_TOP ? 1 : elapsedTime / TIME_TO_TOP;
 
-      const hoverOffset = elapsedTime >= TIME_TO_TOP ? Math.sin(elapsedTime * 0.002) * HOVER_OFFSET_CONST : 0;
+      const hoverOffset = elapsedTime >= TIME_TO_TOP ? Math.sin(elapsedTime * 0.001) * HOVER_OFFSET_CONST : 0;
 
       const calculatePlaneProgress = (start: number, end: number, progress: number): number => {
         return (end - start) * progress + start;
@@ -318,7 +306,7 @@ const GameView = () => {
           ctx.closePath();
           ctx.strokeStyle = ERROR_COLOR;
           ctx.stroke();
-          ctx.fillStyle = ERROR_COLOR;
+          ctx.fillStyle = TRANSPARENT_RED_COLOR;
           ctx.fill();
           break;
         case ENDED:
@@ -437,6 +425,7 @@ const GameView = () => {
         <BetsView index={0} now={now} startTime={startTime} gameState={gameState}/>
         <BetsView index={1} now={now} startTime={startTime} gameState={gameState}/>
       </div>
+      <BetSlips/>
       <NotificationsView />
 
     </div>

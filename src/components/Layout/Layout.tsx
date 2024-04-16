@@ -14,7 +14,6 @@ const styles = {
   layoutStyles: css({
     width: '100%',
     minHeight: '100vh',
-    padding: 4,
     background: `url(${BgImage})`,
     backgroundSize: 'cover',
     display: 'flex',
@@ -24,7 +23,6 @@ const styles = {
   containerStyles: css({
     width: '100%',
     height: '100%',
-    padding: 4,
   }),
   mainContainerStyles: css({
     display: 'grid',
@@ -43,7 +41,7 @@ const styles = {
     gap: 8,
     [MEDIA_QUERIES[0]]: {
       gridTemplateColumns: '1fr',
-      gap: 0,
+      gap: 8,
       height: 'auto',
     },
   }, translucentBackgroundStyles])

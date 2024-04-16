@@ -12,12 +12,12 @@ export const ENDED = 'ENDED';
 
 export const AUDIO_START = "start";
 export const AUDIO_FLY_AWAY = "flyAway";
-export const TIME_TO_TOP = 1600;
+export const TIME_TO_TOP = 3200;
 export const HOVER_OFFSET_CONST = 96;
 
 export const DOT_RADIUS = 2;
-export const DOT_SPACING = 80;
-export const DOT_SCROLL_SPEED = 20;
+export const DOT_SPACING = 30;
+export const DOT_SCROLL_SPEED = 10;
 
 export const MINIMUM_BET = 10.00;
 export const FACTOR = 0.00006;

@@ -6,6 +6,7 @@ export const LIGHT_COLOR = 'light-dark(rgba(255, 255, 255, 0.24), rgba(0, 0, 0, 
 export const SUCCESS_COLOR = '#28a909';
 export const SUCCESS_COLOR_LIGHT = 'rgba(40,169,9,0.24)'
 export const ERROR_COLOR = '#f00';
+export const TRANSPARENT_RED_COLOR = 'rgba(255,0,0,0.26)';
 export const WHITE_COLOR = '#fff';
 export const BLUE_COLOR = 'blue';
 export const GRAY_COLOR = '#1b1c1d';

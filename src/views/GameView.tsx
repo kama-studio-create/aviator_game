@@ -1,7 +1,7 @@
 import {css} from "@emotion/react";
 import {
-  BORDER_RADIUS,
   CANVAS_PADDING,
+  CANVAS_START_POSITION,
   DOT_RADIUS,
   DOT_SCROLL_SPEED,
   DOT_SPACING,
@@ -19,15 +19,22 @@ import {
 import {useEffect, useRef, useState} from "react";
 import {backgroundImage, imageLoadPromises, planeSprites, spinnerImage} from "../common/images.ts";
 import {generateBetSlip, getRandomNumber, uuidGenerator} from "../utils/generators.ts";
-import {BLUE_COLOR, ERROR_COLOR, GRADIENT_DARK, TRANSPARENT_RED_COLOR, WHITE_COLOR} from "../styles/colors.ts";
+import {
+  BLUE_COLOR,
+  BORDER_GRAY,
+  ERROR_COLOR,
+  GRADIENT_DARK,
+  TRANSPARENT_RED_COLOR,
+  WHITE_COLOR
+} from "../styles/colors.ts";
 import {MEDIA_QUERIES} from "../styles/breakpoints.ts";
-import {BetsView} from "./BetsView.tsx";
+import {BetsView} from "./bets/BetsView.tsx";
 import {TBetSlip, useBetSlipStore} from "../store/bets.store.ts";
 import {useAudio} from "../hooks/audio/useAudio.ts";
 import BGAudioFile from "../assets/audio/bg_music.mp3"
 import PlaneAudio from "../assets/audio/audio.mp3"
 import {NotificationsView} from "./NotificationsView.tsx";
-import {BetSlips} from "./BetSlips.tsx";
+import {BetSlips} from "./bets/BetSlips.tsx";
 
 
 const gameStyles = {
@@ -41,8 +48,14 @@ const gameStyles = {
   canvasContainer: css({
     width: "100%",
     background: GRADIENT_DARK,
-    position: 'relative',
+    display: 'grid',
+    placeContent: 'center',
     transition: 'all 2s ease-in-out',
+    border: `1px solid ${BORDER_GRAY}`,
+    borderRadius: 20,
+    canvas: {
+      borderRadius: 32,
+    }
   }),
   loadingContainer: css({
     width: '100%',
@@ -117,7 +130,6 @@ const GameView = () => {
         setCanvasWidth(currentWidth);
         setCanvasHeight(currentHeight);
       }
-      ctx.canvas.style.borderRadius = BORDER_RADIUS;
     }
 
     resizeAndStyleCanvases();
@@ -139,19 +151,19 @@ const GameView = () => {
 
     const drawAxis = () => {
       if (gameState !== PLAYING) return;
-      ctx.strokeStyle = WHITE_COLOR;
-      ctx.lineWidth = 1;
+      ctx.strokeStyle = BORDER_GRAY;
+      ctx.lineWidth = 0.8;
       //draw x axis
       ctx.beginPath();
-      ctx.moveTo(CANVAS_PADDING, height - CANVAS_PADDING);
-      ctx.lineTo(width - CANVAS_PADDING, height - CANVAS_PADDING);
+      ctx.moveTo(CANVAS_START_POSITION, height - CANVAS_START_POSITION);
+      ctx.lineTo(width - CANVAS_PADDING, height - CANVAS_START_POSITION);
       ctx.closePath();
       ctx.stroke();
 
       //draw y axis
       ctx.beginPath();
-      ctx.moveTo(CANVAS_PADDING, CANVAS_PADDING);
-      ctx.lineTo(CANVAS_PADDING, height - CANVAS_PADDING);
+      ctx.moveTo(CANVAS_START_POSITION, CANVAS_PADDING);
+      ctx.lineTo(CANVAS_START_POSITION, height - CANVAS_START_POSITION);
       ctx.closePath();
 
       ctx.stroke();
@@ -163,8 +175,8 @@ const GameView = () => {
       ctx.beginPath();
       const timeOffset = (elapsedTime / 1000) * DOT_SCROLL_SPEED; // Seconds * speed
       const scrollOffset = elapsedTime > TIME_TO_TOP ? timeOffset % (DOT_SPACING + (DOT_RADIUS)) : 0;
-      for (let dotX = width - moveX - scrollOffset; dotX >= 0; dotX -= DOT_SPACING) {
-        ctx.arc(dotX, height - DOT_RADIUS, DOT_RADIUS, 0, 2 * Math.PI, false);
+      for (let dotX = width - CANVAS_START_POSITION - moveX - scrollOffset; dotX >= 0; dotX -= DOT_SPACING) {
+        ctx.arc(dotX, height - CANVAS_PADDING - DOT_RADIUS, DOT_RADIUS, 0, 2 * Math.PI, false);
       }
       ctx.fillStyle = WHITE_COLOR;
       ctx.fill();
@@ -175,9 +187,9 @@ const GameView = () => {
       if (gameState !== PLAYING) return;
       ctx.beginPath();
       const timeOffset = (elapsedTime / 1000) * DOT_SCROLL_SPEED; // Seconds * speed
-      const scrollOffset = elapsedTime > TIME_TO_TOP ? timeOffset % (DOT_SPACING + (DOT_RADIUS * 2)) : 0;
-      for (let dotY = moveY - scrollOffset; dotY < height; dotY += DOT_SPACING) {
-        ctx.arc(DOT_RADIUS, height - dotY, DOT_RADIUS, 0, 2 * Math.PI, false);
+      const scrollOffset = elapsedTime > TIME_TO_TOP ? timeOffset % (DOT_SPACING + CANVAS_START_POSITION) : 0;
+      for (let dotY = moveY - scrollOffset; dotY < height - CANVAS_START_POSITION; dotY += DOT_SPACING) {
+        ctx.arc(DOT_RADIUS + CANVAS_PADDING, height - dotY, DOT_RADIUS, 0, 2 * Math.PI, false);
       }
       ctx.fillStyle = BLUE_COLOR;
       ctx.fill();
@@ -193,7 +205,7 @@ const GameView = () => {
       const spinnerWidth = width * 4;
       const spinnerHeight = spinnerWidth * (backgroundImage.height / backgroundImage.width);
       ctx.save();
-      ctx.translate(-spinnerWidth / 16, spinnerHeight / 4);
+      ctx.translate(-spinnerWidth / 16, spinnerHeight / 3);
       if(gameState === PLAYING){
         ctx.rotate(angle);
       }
@@ -279,7 +291,7 @@ const GameView = () => {
       switch (gameState) {
         case WAITING:
           ctx.globalAlpha = 0.5;
-          ctx.drawImage(planeSprite, CANVAS_PADDING, height - planeHeight, planeWidth, planeHeight);
+          ctx.drawImage(planeSprite, CANVAS_START_POSITION, height - planeHeight - CANVAS_START_POSITION, planeWidth, planeHeight);
           break;
         case PLAYING:
           if (elapsedTime >= TIME_TO_TOP) {
@@ -287,17 +299,17 @@ const GameView = () => {
             xPos += (hoverOffset * 0.4);
           }
           ctx.globalAlpha = 1;
-          ctx.drawImage(planeSprite, xPos, yPos - planeHeight - CANVAS_PADDING, planeWidth, planeHeight);
+          ctx.drawImage(planeSprite, xPos + CANVAS_START_POSITION, yPos - planeHeight - CANVAS_PADDING, planeWidth, planeHeight);
 
           //draw line
           ctx.beginPath();
-          ctx.moveTo(CANVAS_PADDING, ctx.canvas.height - CANVAS_PADDING);
+          ctx.moveTo(CANVAS_START_POSITION, height - CANVAS_START_POSITION);
           ctx.lineWidth = 5
           ctx.strokeStyle = ERROR_COLOR;
-          ctx.quadraticCurveTo(xPos / 1.5, height - CANVAS_PADDING, xPos + (CANVAS_PADDING * 1.5), yPos - (CANVAS_PADDING * 1.5));
+          ctx.quadraticCurveTo(xPos / 1.5, height - CANVAS_START_POSITION, xPos + (CANVAS_START_POSITION * 1.5), yPos - (CANVAS_PADDING * 1.5));
           ctx.stroke();
           ctx.lineWidth = 0.5;
-          ctx.lineTo(xPos + (CANVAS_PADDING * 2), ctx.canvas.height - (CANVAS_PADDING + 4));
+          ctx.lineTo(xPos + (CANVAS_START_POSITION * 1.5), height - (CANVAS_START_POSITION));
           ctx.closePath();
           ctx.strokeStyle = ERROR_COLOR;
           ctx.stroke();

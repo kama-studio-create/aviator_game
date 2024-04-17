@@ -1,10 +1,12 @@
-export const GRADIENT_DARK = 'radial-gradient(circle, rgba(0,96,116,1) 0%, rgba(9,9,121,1) 52%, rgba(2,0,36,1) 100%)';
+export const GRADIENT_DARK = 'radial-gradient(circle, rgba(0,96,116,1) 0%, rgba(9,9,121,1) 22%, rgba(2,0,36,1) 80%)';
 export const PRIMARY_COLOR = '#FF5E3A';
 export const SECONDARY_COLOR = '#FF9966';
 export const DARK_COLOR = '#222';
+export const BLACK_COLOR = '#0e0e0e';
 export const LIGHT_COLOR = 'light-dark(rgba(255, 255, 255, 0.24), rgba(0, 0, 0, 0.2))';
 export const SUCCESS_COLOR = '#28a909';
-export const SUCCESS_COLOR_LIGHT = 'rgba(40,169,9,0.24)'
+export const SUCCESS_COLOR_LIGHT = 'rgba(40,169,9,0.24)';
+export const BORDER_SUCCESS_COLOR = '#b2f2a3';
 export const ERROR_COLOR = '#f00';
 export const TRANSPARENT_RED_COLOR = 'rgba(255,0,0,0.26)';
 export const WHITE_COLOR = '#fff';
@@ -12,5 +14,5 @@ export const BLUE_COLOR = 'blue';
 export const GRAY_COLOR = '#1b1c1d';
 export const DARK_GRAY_COLOR = '#141516';
 export const COLOR_BLUE = '#358DF3FF';
-
+export const BORDER_GRAY = '#2a2b2e';
 export const LIGHT_GRAY_COLOR = '#5b5b61'

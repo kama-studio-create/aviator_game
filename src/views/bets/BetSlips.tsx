@@ -1,10 +1,10 @@
 import {FC} from "react";
-import {Tab, Tabs} from "../components/tabs/Tabs.tsx";
+import {Tab, Tabs} from "../../components/tabs/Tabs.tsx";
 import {css} from "@emotion/react";
-import {GRAY_COLOR} from "../styles/colors.ts";
-import {AllBetsView} from "./bets/AllBetsView.tsx";
-import {MyBetsView} from "./bets/MyBetsView.tsx";
-import {TopBetsView} from "./bets/TopBetsView.tsx";
+import {GRAY_COLOR} from "../../styles/colors.ts";
+import {AllBetsView} from "./AllBetsView.tsx";
+import {MyBetsView} from "./MyBetsView.tsx";
+import {TopBetsView} from "./TopBetsView.tsx";
 
 const container = css({
   display: 'flex',

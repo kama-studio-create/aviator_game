@@ -13,7 +13,7 @@ import iconClose from "../../assets/icons/close.svg";
 import {PillButton} from "../buttons/PillButton.tsx";
 import {STOP_IF_CASH_DECREASES, STOP_IF_CASH_INCREASES, STOP_IF_SINGLE_WIN_EXCEEDS} from "../../common/constants.ts";
 import {ModalToggleCard} from "../cards/ModalToggleCard.tsx";
-import {TAutoPlaySettings} from "../../views/BetsView.tsx";
+import {TAutoPlaySettings} from "../../views/bets/BetsView.tsx";
 
 type ModalProps = {
   isOpen: boolean,

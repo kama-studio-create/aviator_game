@@ -1,6 +1,7 @@
 import {css} from "@emotion/react";
 import {
   BLUE_COLOR,
+  BORDER_SUCCESS_COLOR,
   COLOR_BLUE,
   DARK_GRAY_COLOR,
   ERROR_COLOR,
@@ -9,9 +10,9 @@ import {
   PRIMARY_COLOR,
   SUCCESS_COLOR,
   WHITE_COLOR
-} from "../styles/colors.ts";
+} from "../../styles/colors.ts";
 import {FC, useCallback, useEffect, useState} from "react";
-import {NumberInput} from "../components/inputs/NumberInput.tsx";
+import {NumberInput} from "../../components/inputs/NumberInput.tsx";
 import {
   DEFAULT_CURRENCY,
   ENDED,
@@ -22,12 +23,12 @@ import {
   TGameState,
   WAITING,
   WAITING_FOR_NEXT_ROUND
-} from "../common/constants.ts";
-import SwitchInput from "../components/inputs/SwitchInput.tsx";
-import {AutoPlayModal} from "../components/modals/AutoPlayModal.tsx";
-import {NumberInputWithButtons} from "../components/inputs/NumberInputWithButtons.tsx";
-import {TBetSlip, useBetSlipStore} from "../store/bets.store.ts";
-import {useNotificationStore} from "../store/notifications.store.ts";
+} from "../../common/constants.ts";
+import SwitchInput from "../../components/inputs/SwitchInput.tsx";
+import {AutoPlayModal} from "../../components/modals/AutoPlayModal.tsx";
+import {NumberInputWithButtons} from "../../components/inputs/NumberInputWithButtons.tsx";
+import {TBetSlip, useBetSlipStore} from "../../store/bets.store.ts";
+import {useNotificationStore} from "../../store/notifications.store.ts";
 
 const betInputStyles = {
   row: css({
@@ -107,18 +108,23 @@ const betInputStyles = {
     backgroundColor: DARK_GRAY_COLOR,
     border: 'none',
     borderRadius: 8,
-    fontSize: 12
+    fontSize: 12,
+    p: {
+      opacity: 0.6
+    }
+
+
   }),
   betButton: css({
     width: '100%',
     height: '100%',
     flex: 1,
-    paddingBlock: 8,
+    paddingBlock: 12,
     paddingInline: 16,
     textAlign: 'center',
     backgroundColor: SUCCESS_COLOR,
     color: WHITE_COLOR,
-    border: '1px solid white',
+    border: `1px solid ${BORDER_SUCCESS_COLOR}`,
     borderRadius: 16,
     fontSize: 14,
     textTransform: 'uppercase',
@@ -128,6 +134,17 @@ const betInputStyles = {
     justifyContent: 'center',
     alignItems: 'center',
     transition: 'background-color 0.4s ease-in-out',
+    textShadow: '0 1px 2px rgba(0,0,0,.5)',
+    '& .amount': {
+      fontSize: 20
+    },
+    '&.success': {
+      backgroundColor: SUCCESS_COLOR,
+      color: WHITE_COLOR
+    },
+    '&.danger': {
+
+    },
     ':hover': {
       backgroundColor: WHITE_COLOR,
     }
@@ -492,7 +509,7 @@ export const BetsView: FC<InputProps> = ({gameState, startTime, now, index}) => 
                 onClick={() => {
                   setBetAmount(option.value);
                 }}
-                css={betInputStyles.selectAmountBtn}>{option.label}</button>
+                css={betInputStyles.selectAmountBtn}><p>{option.label}</p></button>
             ))}
           </div>
         </div>
@@ -515,7 +532,7 @@ export const BetsView: FC<InputProps> = ({gameState, startTime, now, index}) => 
           <button style={{backgroundColor: buttonColor, flexGrow: 1, flex: 1}} onClick={handleSetBet}
             css={betInputStyles.betButton}>
             <div>{buttonTitle}</div>
-            <div>ksh. {getWinAmount()} </div>
+            <div className='amount'>ksh. {getWinAmount()} </div>
           </button>
         </div>
 

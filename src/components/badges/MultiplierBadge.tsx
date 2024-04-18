@@ -21,6 +21,6 @@ export const MultiplierBadge: FC<TBadgeProps> = ({multiplier}) => {
     color: multiplier < 2.5 ? BADGE_BLUE_COLOR : multiplier < 7 ? BADGE_PURPLE_COLOR: BADGE_INDIGO_COLOR,
   }
   return (
-    <span style={styles} css={badgeStyles}>{multiplier}</span>
+    <span style={styles} css={badgeStyles}>{multiplier.toFixed(2)}</span>
   )
 }

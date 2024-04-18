@@ -48,6 +48,7 @@ const gameStyles = {
     display: "flex",
     flexDirection: "column",
     gap: 8,
+    transition: 'all 1s ease-in-out',
   }),
   canvasContainer: css({
     width: "100%",
@@ -367,7 +368,13 @@ const GameView = () => {
         }
         break;
       case PLAYING:
-        if (now > endTime) setGameState(ENDED);
+        if (now > endTime) {
+          const multiplier = Math.exp(FACTOR * (endTime - startTime));
+          useBetSlipStore.setState((state) => ({
+            previousRounds: [multiplier,...state.previousRounds],
+          }))
+          setGameState(ENDED);
+        }
         break;
       case ENDED:
         if (now > (endTime + WAITING_DURATION)) {

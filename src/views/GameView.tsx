@@ -20,10 +20,13 @@ import {useEffect, useRef, useState} from "react";
 import {backgroundImage, imageLoadPromises, planeSprites, spinnerImage} from "../common/images.ts";
 import {generateBetSlip, getRandomNumber, uuidGenerator} from "../utils/generators.ts";
 import {
+  BG_GRAY_COLOR,
   BLUE_COLOR,
   BORDER_GRAY,
   ERROR_COLOR,
   GRADIENT_DARK,
+  GRADIENT_INDIGO,
+  GRADIENT_PURPLE,
   TRANSPARENT_RED_COLOR,
   WHITE_COLOR
 } from "../styles/colors.ts";
@@ -50,12 +53,13 @@ const gameStyles = {
     width: "100%",
     display: 'grid',
     placeContent: 'center',
-    transition: 'all 2s ease-in-out',
     borderRadius: 20,
     border: `1px solid ${BORDER_GRAY}`,
+    transition: 'all 1s ease-in-out',
     canvas: {
       borderRadius: 32,
     },
+
   }),
   loadingContainer: css({
     width: '100%',
@@ -108,6 +112,8 @@ const GameView = () => {
   const currentGameID = useBetSlipStore(state => state.currentGameID);
   const betSlipStore = useBetSlipStore;
 
+  const [bgColor, setBgColor] = useState(BG_GRAY_COLOR);
+
 
   useEffect(() => {
     const ref = audioRef.current
@@ -147,6 +153,7 @@ const GameView = () => {
     const {width, height} = ctx.canvas;
     const moveY = DOT_RADIUS;
     const elapsedTime = now - startTime;
+    const multiplier = gameState === ENDED ? Math.exp(FACTOR * (endTime - startTime)) : Math.exp(FACTOR * elapsedTime);
 
 
     const drawAxis = () => {
@@ -213,7 +220,22 @@ const GameView = () => {
       }
       ctx.drawImage(backgroundImage, -spinnerWidth / 2, (-spinnerHeight / 2), spinnerWidth, spinnerHeight);
       ctx.restore();
+
+      // handle gradient changes
+      if(gameState !== PLAYING) {
+        setBgColor(BG_GRAY_COLOR)
+      }else {
+        if(multiplier > 8) {
+          setBgColor(GRADIENT_INDIGO);
+        } else if(multiplier > 1.8) {
+          setBgColor(GRADIENT_PURPLE);
+        } else {
+          setBgColor(GRADIENT_DARK);
+        }
+      }
     }
+
+
 
     const drawWaiting = () => {
       if (gameState !== WAITING || !startTime) return;
@@ -245,7 +267,6 @@ const GameView = () => {
     const drawMultiplier = () => {
       if (gameState === WAITING || !startTime) return;
 
-      const multiplier = gameState === ENDED ? Math.exp(FACTOR * (endTime - startTime)) : Math.exp(FACTOR * elapsedTime);
       ctx.save();
       if (gameState === ENDED) {
         ctx.fillStyle = "#f7f7f7";
@@ -361,10 +382,8 @@ const GameView = () => {
   }, [betSlipStore, currentGameID, endTime, gameState, now, startTime]);
 
   useEffect(() => {
-    if (gameState === ENDED) {
-      betSlipStore.setState({allBetSlips: []})
-    }
     if (gameState === WAITING) {
+      betSlipStore.setState({allBetSlips: []})
       betSlipStore.setState({currentGameID: uuidGenerator()})
     }
 
@@ -426,7 +445,7 @@ const GameView = () => {
       <audio ref={bgAudioRef} src={BGAudioFile} loop/>
       <audio ref={audioRef} src={PlaneAudio}/>
       <PreviousRoundsView />
-      <div style={{background: gameState != PLAYING ? '#0c0c0c': GRADIENT_DARK}} ref={containerRef} css={gameStyles.canvasContainer}>
+      <div className={'bg-gray'} style={{background: bgColor}} ref={containerRef} css={gameStyles.canvasContainer}>
         {!allImagesLoaded && <div css={gameStyles.loadingContainer}>Loading</div>}
         <canvas width={canvasWidth} height={canvasHeight} ref={canvasRef}/>
       </div>

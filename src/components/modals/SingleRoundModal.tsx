@@ -23,7 +23,7 @@ const slideIn = keyframes({
 });
 
 const modalStyles = css({
-  position: 'absolute',
+  position: 'fixed',
   top: -40,
   left: 0,
   width: '100%',

@@ -26,6 +26,7 @@ const buttonStyles = css({
     height: 16,
     display: 'block',
     maxWidth: '100%',
+    transition: 'all 0.2s ease-in-out'
   },
 })
 
@@ -38,7 +39,10 @@ export const PreviousHandButton: FC<props> = ({ isActive, onClick}) => {
   return (
     <button onClick={onClick} style={{color: isActive ? ERROR_COLOR: LIGHT_GRAY_COLOR}} css={buttonStyles}>
       <img style={{color: isActive ? ERROR_COLOR: LIGHT_GRAY_COLOR}} src={historyIcon} alt='history'/>
-      <img style={{color: isActive ? ERROR_COLOR: LIGHT_GRAY_COLOR}} src={caretDown} alt='down'/>
+      <img style={{
+        color: isActive ? ERROR_COLOR: LIGHT_GRAY_COLOR,
+        transform: isActive? 'rotate(180deg)' : 'rotate(0deg)',
+      }} src={caretDown} alt='down'/>
     </button>
   )
 }

@@ -33,8 +33,15 @@ const roundsContainerStyles = css({
   padding: 8,
 })
 
-export const PreviousRoundsModal: FC = () => {
+type props = {
+  onSelect: (round: number) => void
+}
+
+export const PreviousRoundsModal: FC<props> = ({onSelect}) => {
   const previousRounds = useBetSlipStore(state => state.previousRounds);
+  const handleSelect = (round: number) => {
+    onSelect(round);
+  }
   return (
     <div css={modalStyles}>
       <div css={headerStyles} >
@@ -42,7 +49,7 @@ export const PreviousRoundsModal: FC = () => {
       </div>
       <div css={roundsContainerStyles}>
         {previousRounds.slice(0, 60).map((round) => (
-          <MultiplierBadge key={round} multiplier={round} />
+          <MultiplierBadge onClick={() => {handleSelect(round)}} key={round} multiplier={round} />
         ))}
       </div>
     </div>

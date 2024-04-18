@@ -13,14 +13,15 @@ const badgeStyles = css({
 })
 
 type TBadgeProps = {
-  multiplier: number
+  multiplier: number,
+  onClick: () => void
 }
 
-export const MultiplierBadge: FC<TBadgeProps> = ({multiplier}) => {
+export const MultiplierBadge: FC<TBadgeProps> = ({multiplier, onClick}) => {
   const styles: CSSProperties = {
     color: multiplier < 2.5 ? BADGE_BLUE_COLOR : multiplier < 7 ? BADGE_PURPLE_COLOR: BADGE_INDIGO_COLOR,
   }
   return (
-    <span style={styles} css={badgeStyles}>{multiplier.toFixed(2)}</span>
+    <span onClick={onClick} style={styles} css={badgeStyles}>{multiplier.toFixed(2)}</span>
   )
 }

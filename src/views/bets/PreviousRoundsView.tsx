@@ -4,6 +4,7 @@ import {MultiplierBadge} from "../../components/badges/MultiplierBadge.tsx";
 import {PreviousHandButton} from "../../components/buttons/PreviousHandButton.tsx";
 import {PreviousRoundsModal} from "../../components/modals/PreviousRoundsModal.tsx";
 import {useBetSlipStore} from "../../store/bets.store.ts";
+import {SingleRoundModal} from "../../components/modals/SingleRoundModal.tsx";
 
 const containerStyles = css({
   display: 'flex',
@@ -28,17 +29,28 @@ const multiplierStyles = css({
 export const PreviousRoundsView: FC = () => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isRoundModalOpen, setIsRoundModalOpen] = useState(false);
+  const [selectedRound, setSelectedRound] = useState(0);
   const previousRounds = useBetSlipStore(state => state.previousRounds);
 
   const handleModalOpen = () => {
     setIsModalOpen(!isModalOpen);
   }
+
+  const handleSelectRound = (round: number) => {
+    setSelectedRound(round);
+    setIsRoundModalOpen(true);
+    if(isModalOpen) {
+      handleModalOpen();
+    }
+  }
   return (
     <div css={containerStyles}>
-      {isModalOpen && <PreviousRoundsModal/>}
+      {isModalOpen && <PreviousRoundsModal onSelect={handleSelectRound}/>}
+      {isRoundModalOpen && <SingleRoundModal multiplier={selectedRound} close={() => { setIsRoundModalOpen(false)}}/>}
       <div css={multiplierStyles}>
         {previousRounds.slice(0, 9).map((round) => (
-          <MultiplierBadge key={round} multiplier={round} />
+          <MultiplierBadge onClick={() => { handleSelectRound(round)}} key={round} multiplier={round} />
         ))}
       </div>
       <PreviousHandButton onClick={handleModalOpen} isActive={isModalOpen} />

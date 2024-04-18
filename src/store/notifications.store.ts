@@ -6,6 +6,8 @@ type TNotification = {
   message: string;
   header: string;
   gameId?: string;
+  slipIndex?: number;
+  viewed: boolean
 }
 
 type TNotificationStore = {

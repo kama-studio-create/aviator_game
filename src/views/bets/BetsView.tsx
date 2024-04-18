@@ -476,7 +476,7 @@ export const BetsView: FC<InputProps> = ({gameState, startTime, now, index}) => 
     if(gameState !== PLAYING || !exitTime || !startTime || !mySlip) return;
 
     const notifications = useNotificationStore.getState().notifications;
-    const winNotification = notifications.find(n => n.gameId === currentBetID);
+    const winNotification = notifications.find(n => n.gameId === currentBetID && n.slipIndex === index);
     if(!winNotification) {
 
       const multiplier = getMultiplier(exitTime, startTime);
@@ -489,6 +489,9 @@ export const BetsView: FC<InputProps> = ({gameState, startTime, now, index}) => 
               type: SUCCESS,
               header: "CONGRATULATIONS!!!!",
               message: `You have cashed out ${DEFAULT_CURRENCY} ${winAmount.toFixed(2)}`,
+              gameId: currentBetID,
+              slipIndex: index,
+              viewed: false
             },
             ...state.notifications,
           ]

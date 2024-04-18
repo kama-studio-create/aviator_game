@@ -90,16 +90,17 @@ const NotificationItem: FC<NotificationProps> = ({header, message, type, onClose
 }
 
 export const NotificationsView : FC = () => {
-  const notifications = useNotificationStore(state => state.notifications);
+  const myNotifications = useNotificationStore(state => state.notifications).filter((n) => !n.viewed)
 
   const handleCloseNotification = useCallback((index: number) => {
+    myNotifications[index].viewed = true;
     useNotificationStore.setState({
-      notifications: notifications.filter((_, i) => i!== index)
+      notifications: myNotifications
     })
-  }, [notifications])
+  }, [myNotifications])
   return (
     <div css={containerStyles}>
-      {notifications.map((notification, index) => (
+      {myNotifications.map((notification, index) => (
         <NotificationItem
           key={index}
           message={notification.message} type={notification.type}

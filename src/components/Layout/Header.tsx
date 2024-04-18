@@ -11,7 +11,6 @@ const styles = {
     alignItems: 'center',
     paddingBlock: 8,
     paddingInline: 16,
-    marginBottom: '1rem'
   }, translucentBackgroundStyles]),
   appNameStyles: css({
     fontSize: 14,

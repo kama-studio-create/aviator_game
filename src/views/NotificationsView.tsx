@@ -9,7 +9,7 @@ const containerStyles = css({
   display: 'flex',
   flexDirection: 'column',
   position: 'absolute',
-  top: 0,
+  top: 48,
   left: 0,
   width: '100%',
   padding: 16,

@@ -1,6 +1,6 @@
 import {ComponentProps, FC, ReactNode, useState} from "react";
 import {css} from "@emotion/react";
-import {DARK_GRAY_COLOR, LIGHT_GRAY_COLOR} from "../../styles/colors.ts";
+import {DARK_GRAY_COLOR, LIGHT_GRAY_COLOR, WHITE_COLOR} from "../../styles/colors.ts";
 
 const mainContainer = css({
   display: 'flex',
@@ -30,9 +30,12 @@ const tabStyles = css({
   borderRadius: 16,
   textAlign: 'center',
   fontSize: 12,
+  color: '#9ea0a3',
   '&.active': {
     backgroundColor: LIGHT_GRAY_COLOR,
     border: `1px solid ${DARK_GRAY_COLOR}`,
+    opacity: 1,
+    color: WHITE_COLOR
   },
   transition: 'background-color 0.2s ease-in-out'
 

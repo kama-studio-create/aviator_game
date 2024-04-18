@@ -16,3 +16,7 @@ export const DARK_GRAY_COLOR = '#141516';
 export const COLOR_BLUE = '#358DF3FF';
 export const BORDER_GRAY = '#2a2b2e';
 export const LIGHT_GRAY_COLOR = '#5b5b61'
+
+export const BADGE_PURPLE_COLOR = 'rgb(145, 62, 248)';
+export const BADGE_BLUE_COLOR = '#34b4ff';
+export const BADGE_INDIGO_COLOR = '#c017b4'

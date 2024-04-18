@@ -35,6 +35,7 @@ import BGAudioFile from "../assets/audio/bg_music.mp3"
 import PlaneAudio from "../assets/audio/audio.mp3"
 import {NotificationsView} from "./NotificationsView.tsx";
 import {BetSlips} from "./bets/BetSlips.tsx";
+import {PreviousRoundsView} from "./bets/PreviousRoundsView.tsx";
 
 
 const gameStyles = {
@@ -51,10 +52,11 @@ const gameStyles = {
     display: 'grid',
     placeContent: 'center',
     transition: 'all 2s ease-in-out',
-    border: `1px solid ${BORDER_GRAY}`,
     borderRadius: 20,
+    border: `1px solid ${BORDER_GRAY}`,
     canvas: {
       borderRadius: 32,
+
     }
   }),
   loadingContainer: css({
@@ -125,7 +127,7 @@ const GameView = () => {
     const resizeAndStyleCanvases = () => {
       if (!containerRef.current || !ctx) return;
       const currentWidth = containerRef.current.clientWidth;
-      const currentHeight = currentWidth;
+      const currentHeight = currentWidth * 0.8;
       if (ctx.canvas.width !== currentWidth || ctx.canvas.height !== currentHeight) {
         setCanvasWidth(currentWidth);
         setCanvasHeight(currentHeight);
@@ -176,7 +178,7 @@ const GameView = () => {
       const timeOffset = (elapsedTime / 1000) * DOT_SCROLL_SPEED; // Seconds * speed
       const scrollOffset = elapsedTime > TIME_TO_TOP ? timeOffset % (DOT_SPACING + (DOT_RADIUS)) : 0;
       for (let dotX = width - CANVAS_START_POSITION - moveX - scrollOffset; dotX >= 0; dotX -= DOT_SPACING) {
-        ctx.arc(dotX, height - CANVAS_PADDING - DOT_RADIUS, DOT_RADIUS, 0, 2 * Math.PI, false);
+        ctx.arc(dotX + CANVAS_START_POSITION, height - CANVAS_PADDING - DOT_RADIUS, DOT_RADIUS, 0, 2 * Math.PI, false);
       }
       ctx.fillStyle = WHITE_COLOR;
       ctx.fill();
@@ -188,8 +190,8 @@ const GameView = () => {
       ctx.beginPath();
       const timeOffset = (elapsedTime / 1000) * DOT_SCROLL_SPEED; // Seconds * speed
       const scrollOffset = elapsedTime > TIME_TO_TOP ? timeOffset % (DOT_SPACING + CANVAS_START_POSITION) : 0;
-      for (let dotY = moveY - scrollOffset; dotY < height - CANVAS_START_POSITION; dotY += DOT_SPACING) {
-        ctx.arc(DOT_RADIUS + CANVAS_PADDING, height - dotY, DOT_RADIUS, 0, 2 * Math.PI, false);
+      for (let dotY = moveY - scrollOffset + CANVAS_START_POSITION; dotY < height - CANVAS_START_POSITION; dotY += DOT_SPACING) {
+        ctx.arc(DOT_RADIUS + CANVAS_PADDING, height - dotY - CANVAS_START_POSITION, DOT_RADIUS, 0, 2 * Math.PI, false);
       }
       ctx.fillStyle = BLUE_COLOR;
       ctx.fill();
@@ -202,15 +204,15 @@ const GameView = () => {
       // const angle = (elapsedTime % 360) / 3;
       const angle = (elapsedTime * 0.02 * Math.PI) / 180;
       // Draw spinner
-      const spinnerWidth = width * 4;
+      const spinnerWidth = width * 3;
       const spinnerHeight = spinnerWidth * (backgroundImage.height / backgroundImage.width);
       ctx.save();
-      ctx.translate(-spinnerWidth / 16, spinnerHeight / 3);
+      ctx.translate(-spinnerWidth /16 , spinnerHeight / 3);
       if(gameState === PLAYING){
         ctx.rotate(angle);
       }
       ctx.globalAlpha = 0.5;
-      ctx.drawImage(backgroundImage, -spinnerWidth / 2, -spinnerHeight / 2, spinnerWidth, spinnerHeight);
+      ctx.drawImage(backgroundImage, -spinnerWidth / 2, (-spinnerHeight / 2), spinnerWidth, spinnerHeight);
       ctx.restore();
     }
 
@@ -424,6 +426,7 @@ const GameView = () => {
     <div css={gameStyles.mainContainer}>
       <audio ref={bgAudioRef} src={BGAudioFile} loop/>
       <audio ref={audioRef} src={PlaneAudio}/>
+      <PreviousRoundsView />
       <div ref={containerRef} css={gameStyles.canvasContainer}>
         {!allImagesLoaded && <div css={gameStyles.loadingContainer}>Loading</div>}
         <canvas width={canvasWidth} height={canvasHeight} ref={canvasRef}/>

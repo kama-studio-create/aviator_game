@@ -68,9 +68,11 @@ const betInputStyles = {
     borderRadius: 16,
     textAlign: 'center',
     fontSize: 12,
+    opacity: 0.6,
     '&.active': {
       backgroundColor: GRAY_COLOR,
       border: `1px solid ${DARK_GRAY_COLOR}`,
+      opacity: 1
     },
     transition: 'background-color 0.2s ease-in-out'
 

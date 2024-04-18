@@ -1,14 +1,16 @@
 import {css} from "@emotion/react";
 import {
   BLUE_COLOR,
+  BORDER_ERROR_COLOR,
   BORDER_SUCCESS_COLOR,
+  BORDER_WARNING_COLOR,
   COLOR_BLUE,
   DARK_GRAY_COLOR,
   ERROR_COLOR,
   GRAY_COLOR,
   LIGHT_GRAY_COLOR,
-  PRIMARY_COLOR,
   SUCCESS_COLOR,
+  WARNING_COLOR,
   WHITE_COLOR
 } from "../../styles/colors.ts";
 import {FC, useCallback, useEffect, useState} from "react";
@@ -140,12 +142,20 @@ const betInputStyles = {
     '& .amount': {
       fontSize: 20
     },
-    '&.success': {
+    '.success': {
       backgroundColor: SUCCESS_COLOR,
-      color: WHITE_COLOR
+      color: WHITE_COLOR,
+      border: `1px solid ${BORDER_SUCCESS_COLOR}`,
     },
-    '&.danger': {
-
+    '.error': {
+      backgroundColor: ERROR_COLOR,
+      color: WHITE_COLOR,
+      border: `1px solid ${BORDER_ERROR_COLOR}`,
+    },
+    '&.warning': {
+      backgroundColor: WARNING_COLOR,
+      color: WHITE_COLOR,
+      border: `1px solid ${BORDER_ERROR_COLOR}`,
     },
     ':hover': {
       backgroundColor: WHITE_COLOR,
@@ -214,7 +224,7 @@ export const BetsView: FC<InputProps> = ({gameState, startTime, now, index}) => 
   const [exitTime, setExitTime] = useState<number | null>(null);
   const [exitMultiplier, setExitMultiplier] = useState(1);
   const [buttonColor, setButtonColor] = useState(SUCCESS_COLOR);
-
+  const [buttonBorder, setButtonBorder] = useState(BORDER_SUCCESS_COLOR);
   const [isAutoPlay, setAutoPlay] = useState(false);
 
   const [buttonTitle, setButtonTitle] = useState('BET');
@@ -276,6 +286,7 @@ export const BetsView: FC<InputProps> = ({gameState, startTime, now, index}) => 
         setIsWaitingForNext(true);
       }
       setButtonColor(ERROR_COLOR);
+      setButtonBorder(BORDER_ERROR_COLOR);
       setButtonTitle('CANCEL');
       setIsPlaying(true);
       return;
@@ -325,15 +336,18 @@ export const BetsView: FC<InputProps> = ({gameState, startTime, now, index}) => 
           setExitMultiplier(multiplier);
           setIsWaitingForNext(false);
           setButtonColor(SUCCESS_COLOR);
+          setButtonBorder(BORDER_SUCCESS_COLOR);
           setButtonTitle('BET');
           setIsPlaying(false);
         }
         if (isPlaying && !isWaitingForNext) {
-          setButtonColor(PRIMARY_COLOR);
+          setButtonColor(WARNING_COLOR);
+          setButtonBorder(BORDER_WARNING_COLOR)
           setButtonTitle('EXIT');
         }
         if (!isPlaying && !isWaitingForNext) {
           setButtonColor(SUCCESS_COLOR);
+          setButtonBorder(BORDER_SUCCESS_COLOR);
           setButtonTitle('BET');
         }
         break;
@@ -344,10 +358,12 @@ export const BetsView: FC<InputProps> = ({gameState, startTime, now, index}) => 
             setIsPlaying(true);
             setIsAutoCashOut(true);
             setButtonColor(ERROR_COLOR);
+            setButtonBorder(BORDER_ERROR_COLOR);
             setButtonTitle('CANCEL')
           } else {
             setIsPlaying(false);
             setButtonColor(SUCCESS_COLOR);
+            setButtonBorder(BORDER_SUCCESS_COLOR);
             setButtonTitle('BET');
           }
         }
@@ -525,13 +541,19 @@ export const BetsView: FC<InputProps> = ({gameState, startTime, now, index}) => 
           flexDirection: 'column',
           gap: 6,
         }}>
-          {/*{isWaitingForNext && <div>{WAITING_FOR_NEXT_ROUND}</div>}*/}
           <div style={{
             flexGrow: isWaitingForNext ? 1 : 0,
             height: isWaitingForNext ? 12 : 0,
             opacity: isWaitingForNext ? 1 : 0
           }}>{WAITING_FOR_NEXT_ROUND}</div>
-          <button style={{backgroundColor: buttonColor, flexGrow: 1, flex: 1}} onClick={handleSetBet}
+          <button
+            style={{
+              backgroundColor: buttonColor,
+              border: `1px solid ${buttonBorder}`,
+              flexGrow: 1,
+              flex: 1
+            }}
+            onClick={handleSetBet}
             css={betInputStyles.betButton}>
             <div>{buttonTitle}</div>
             <div className='amount'>ksh. {getWinAmount()} </div>

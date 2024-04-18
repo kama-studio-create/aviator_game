@@ -1,4 +1,6 @@
-export const GRADIENT_DARK = 'radial-gradient(circle, rgba(0,96,116,1) 0%, rgba(9,9,121,1) 22%, rgba(2,0,36,1) 80%)';
+export const GRADIENT_DARK = 'radial-gradient(circle, rgba(52,180,255,1) 0%, rgba(9,9,121,1) 47%, rgba(2,0,36,1) 100%)';
+export const GRADIENT_PURPLE = 'radial-gradient(circle, rgba(145,62,248,1) 0%, rgba(69,7,147,1) 47%, rgba(2,0,36,1) 100%)';
+export const GRADIENT_INDIGO = 'radial-gradient(circle, rgba(192,23,180,1) 0%, rgba(83,5,77,1) 47%, rgba(2,0,36,1) 100%)';
 export const PRIMARY_COLOR = '#FF5E3A';
 export const SECONDARY_COLOR = '#FF9966';
 export const DARK_COLOR = '#222';
@@ -8,6 +10,9 @@ export const SUCCESS_COLOR = '#28a909';
 export const SUCCESS_COLOR_LIGHT = 'rgba(40,169,9,0.24)';
 export const BORDER_SUCCESS_COLOR = '#b2f2a3';
 export const ERROR_COLOR = '#f00';
+export const BORDER_ERROR_COLOR = '#ff7171';
+export const WARNING_COLOR = '#d07206';
+export const BORDER_WARNING_COLOR = '#ffbd71';
 export const TRANSPARENT_RED_COLOR = 'rgba(255,0,0,0.26)';
 export const WHITE_COLOR = '#fff';
 export const BLUE_COLOR = 'blue';
@@ -17,6 +22,6 @@ export const COLOR_BLUE = '#358DF3FF';
 export const BORDER_GRAY = '#2a2b2e';
 export const LIGHT_GRAY_COLOR = '#5b5b61'
 
-export const BADGE_PURPLE_COLOR = 'rgb(145, 62, 248)';
+export const BADGE_PURPLE_COLOR = '#913EF8';
 export const BADGE_BLUE_COLOR = '#34b4ff';
 export const BADGE_INDIGO_COLOR = '#c017b4'

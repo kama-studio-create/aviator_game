@@ -203,12 +203,14 @@ const GameView = () => {
       // Draw spinner
       const spinnerWidth = width * 3;
       const spinnerHeight = spinnerWidth * (backgroundImage.height / backgroundImage.width);
+
       ctx.save();
+      ctx.globalAlpha = 1;
       ctx.translate(-spinnerWidth /16 , spinnerHeight / 3);
       if(gameState === PLAYING){
         ctx.rotate(angle);
+        ctx.globalAlpha = 0.7;
       }
-      ctx.globalAlpha = 0.9;
       ctx.drawImage(backgroundImage, -spinnerWidth / 2, (-spinnerHeight / 2), spinnerWidth, spinnerHeight);
       ctx.restore();
     }
@@ -243,7 +245,7 @@ const GameView = () => {
     const drawMultiplier = () => {
       if (gameState === WAITING || !startTime) return;
 
-      const multiplier = gameState === ENDED ? Math.exp(FACTOR * (endTime - startTime)) : Math.exp(0.00006 * elapsedTime);
+      const multiplier = gameState === ENDED ? Math.exp(FACTOR * (endTime - startTime)) : Math.exp(FACTOR * elapsedTime);
       ctx.save();
       if (gameState === ENDED) {
         ctx.fillStyle = "#f7f7f7";

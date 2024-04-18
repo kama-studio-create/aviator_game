@@ -132,7 +132,7 @@ const GameView = () => {
     const resizeAndStyleCanvases = () => {
       if (!containerRef.current || !ctx) return;
       const currentWidth = containerRef.current.clientWidth;
-      const currentHeight = currentWidth * 0.8;
+      const currentHeight = currentWidth * 0.9;
       if (ctx.canvas.width !== currentWidth || ctx.canvas.height !== currentHeight) {
         setCanvasWidth(currentWidth);
         setCanvasHeight(currentHeight);
@@ -207,18 +207,22 @@ const GameView = () => {
 
 
     const drawBackground = () => {
-      const angle = (elapsedTime * 0.02 * Math.PI) / 180;
+      const angle = (elapsedTime * 0.01 * Math.PI) / 180;
       // Draw spinner
       const spinnerWidth = width * 3;
       const spinnerHeight = spinnerWidth * (backgroundImage.height / backgroundImage.width);
 
       ctx.save();
       ctx.globalAlpha = 1;
-      ctx.translate(-spinnerWidth /16 , spinnerHeight / 3);
-      if(gameState === PLAYING){
-        ctx.rotate(angle);
-        ctx.globalAlpha = 0.7;
-      }
+      ctx.translate(width / 2, height / 2);
+      ctx.translate(-width / 2, height/2);
+      ctx.rotate(angle);
+
+      // ctx.translate(-spinnerWidth /16 , spinnerHeight / 3);
+      // if(gameState === PLAYING){
+      //   ctx.rotate(angle);
+      //   ctx.globalAlpha = 0.4;
+      // }
       ctx.drawImage(backgroundImage, -spinnerWidth / 2, (-spinnerHeight / 2), spinnerWidth, spinnerHeight);
       ctx.restore();
 

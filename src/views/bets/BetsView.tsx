@@ -112,7 +112,7 @@ const betInputStyles = {
     backgroundColor: DARK_GRAY_COLOR,
     border: 'none',
     borderRadius: 8,
-    fontSize: 12,
+    fontSize: 14,
     p: {
       opacity: 0.6
     }
@@ -530,7 +530,9 @@ export const BetsView: FC<InputProps> = ({gameState, startTime, now, index}) => 
                 onClick={() => {
                   setBetAmount(option.value);
                 }}
-                css={betInputStyles.selectAmountBtn}><p>{option.label}</p></button>
+                css={betInputStyles.selectAmountBtn}>
+                <p>{option.label}</p>
+              </button>
             ))}
           </div>
         </div>

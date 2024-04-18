@@ -41,7 +41,7 @@ export const PreviousRoundsModal: FC = () => {
         <h1>ROUND HISTORY</h1>
       </div>
       <div css={roundsContainerStyles}>
-        {previousRounds.slice(0, 56).map((round) => (
+        {previousRounds.slice(0, 60).map((round) => (
           <MultiplierBadge key={round} multiplier={round} />
         ))}
       </div>

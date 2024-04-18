@@ -216,13 +216,10 @@ const GameView = () => {
       ctx.globalAlpha = 1;
       ctx.translate(width / 2, height / 2);
       ctx.translate(-width / 2, height/2);
-      ctx.rotate(angle);
-
-      // ctx.translate(-spinnerWidth /16 , spinnerHeight / 3);
-      // if(gameState === PLAYING){
-      //   ctx.rotate(angle);
-      //   ctx.globalAlpha = 0.4;
-      // }
+      if(gameState === PLAYING){
+        ctx.rotate(angle);
+        ctx.globalAlpha = 0.4;
+      }
       ctx.drawImage(backgroundImage, -spinnerWidth / 2, (-spinnerHeight / 2), spinnerWidth, spinnerHeight);
       ctx.restore();
 

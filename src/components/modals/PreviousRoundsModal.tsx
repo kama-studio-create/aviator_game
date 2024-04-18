@@ -1,6 +1,7 @@
 import {FC} from "react";
 import {css} from "@emotion/react";
 import {MultiplierBadge} from "../badges/MultiplierBadge.tsx";
+import {useBetSlipStore} from "../../store/bets.store.ts";
 
 const modalStyles = css({
   position: 'absolute',
@@ -33,48 +34,16 @@ const roundsContainerStyles = css({
 })
 
 export const PreviousRoundsModal: FC = () => {
+  const previousRounds = useBetSlipStore(state => state.previousRounds);
   return (
     <div css={modalStyles}>
       <div css={headerStyles} >
         <h1>ROUND HISTORY</h1>
       </div>
       <div css={roundsContainerStyles}>
-        <MultiplierBadge multiplier={1.35} />
-        <MultiplierBadge multiplier={2.6} />
-        <MultiplierBadge multiplier={8.33} />
-        <MultiplierBadge multiplier={1.35} />
-        <MultiplierBadge multiplier={2.6} />
-        <MultiplierBadge multiplier={8.33} />
-        <MultiplierBadge multiplier={8.33} />
-        <MultiplierBadge multiplier={8.33} />
-        <MultiplierBadge multiplier={8.33} />
-        <MultiplierBadge multiplier={1.35} />
-        <MultiplierBadge multiplier={2.6} />
-        <MultiplierBadge multiplier={8.33} />
-        <MultiplierBadge multiplier={1.35} />
-        <MultiplierBadge multiplier={2.6} />
-        <MultiplierBadge multiplier={8.33} />
-        <MultiplierBadge multiplier={8.33} />
-        <MultiplierBadge multiplier={8.33} />
-        <MultiplierBadge multiplier={8.33} />
-        <MultiplierBadge multiplier={1.35} />
-        <MultiplierBadge multiplier={2.6} />
-        <MultiplierBadge multiplier={8.33} />
-        <MultiplierBadge multiplier={1.35} />
-        <MultiplierBadge multiplier={2.6} />
-        <MultiplierBadge multiplier={8.33} />
-        <MultiplierBadge multiplier={8.33} />
-        <MultiplierBadge multiplier={8.33} />
-        <MultiplierBadge multiplier={8.33} />
-        <MultiplierBadge multiplier={1.35} />
-        <MultiplierBadge multiplier={2.6} />
-        <MultiplierBadge multiplier={8.33} />
-        <MultiplierBadge multiplier={1.35} />
-        <MultiplierBadge multiplier={2.6} />
-        <MultiplierBadge multiplier={8.33} />
-        <MultiplierBadge multiplier={8.33} />
-        <MultiplierBadge multiplier={8.33} />
-        <MultiplierBadge multiplier={8.33} />
+        {previousRounds.slice(0, 56).map((round) => (
+          <MultiplierBadge key={round} multiplier={round} />
+        ))}
       </div>
     </div>
   )

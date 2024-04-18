@@ -1,5 +1,5 @@
 import {create} from "zustand";
-import {devtools} from "zustand/middleware";
+import {getTestData} from "../common/getTestData.ts";
 
 export type TBetSlip = {
   amount: number;
@@ -18,22 +18,19 @@ interface IBetSlipStore {
   topBetSlips: TBetSlip[];
   currentGameID: string;
   previousGameID: string;
-  addNewSlip: (bet: TBetSlip) => void;
+
+  previousRounds: number[]
 }
 
+const testRoundsData = getTestData();
 
 export const useBetSlipStore = create<IBetSlipStore>()(
-  devtools(
-    (set) => ({
-      myBetSlips: [] as TBetSlip[],
-      allBetSlips: [] as TBetSlip[],
-      topBetSlips: [] as TBetSlip[],
-      currentGameID: '',
-      previousGameID: '',
-      addNewSlip: (bet) => {
-        console.log(bet);
-        set((state) => ({myBetSlips: [...state.myBetSlips, bet]}));
-      }
-    })
-  )
+  () => ({
+    myBetSlips: [] as TBetSlip[],
+    allBetSlips: [] as TBetSlip[],
+    topBetSlips: [] as TBetSlip[],
+    currentGameID: '',
+    previousGameID: '',
+    previousRounds: testRoundsData,
+  })
 );

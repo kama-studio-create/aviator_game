@@ -48,7 +48,6 @@ const gameStyles = {
   }),
   canvasContainer: css({
     width: "100%",
-    background: GRADIENT_DARK,
     display: 'grid',
     placeContent: 'center',
     transition: 'all 2s ease-in-out',
@@ -56,8 +55,7 @@ const gameStyles = {
     border: `1px solid ${BORDER_GRAY}`,
     canvas: {
       borderRadius: 32,
-
-    }
+    },
   }),
   loadingContainer: css({
     width: '100%',
@@ -201,7 +199,6 @@ const GameView = () => {
 
 
     const drawBackground = () => {
-      // const angle = (elapsedTime % 360) / 3;
       const angle = (elapsedTime * 0.02 * Math.PI) / 180;
       // Draw spinner
       const spinnerWidth = width * 3;
@@ -211,7 +208,7 @@ const GameView = () => {
       if(gameState === PLAYING){
         ctx.rotate(angle);
       }
-      ctx.globalAlpha = 0.5;
+      ctx.globalAlpha = 0.9;
       ctx.drawImage(backgroundImage, -spinnerWidth / 2, (-spinnerHeight / 2), spinnerWidth, spinnerHeight);
       ctx.restore();
     }
@@ -250,9 +247,9 @@ const GameView = () => {
       ctx.save();
       if (gameState === ENDED) {
         ctx.fillStyle = "#f7f7f7";
-        ctx.font = "bold 32px Arial";
+        ctx.font = "bold 24px Arial";
         ctx.textAlign = "center";
-        ctx.fillText(`FLEW AT`, ctx.canvas.width / 2, ctx.canvas.height / 2.3);
+        ctx.fillText(`FLEW AWAY`, ctx.canvas.width / 2, ctx.canvas.height / 2.3);
       }
       ctx.fillStyle = gameState === ENDED ? "red" : "white";
       ctx.font = "bold 72px Arial";
@@ -427,7 +424,7 @@ const GameView = () => {
       <audio ref={bgAudioRef} src={BGAudioFile} loop/>
       <audio ref={audioRef} src={PlaneAudio}/>
       <PreviousRoundsView />
-      <div ref={containerRef} css={gameStyles.canvasContainer}>
+      <div style={{background: gameState != PLAYING ? '#0c0c0c': GRADIENT_DARK}} ref={containerRef} css={gameStyles.canvasContainer}>
         {!allImagesLoaded && <div css={gameStyles.loadingContainer}>Loading</div>}
         <canvas width={canvasWidth} height={canvasHeight} ref={canvasRef}/>
       </div>

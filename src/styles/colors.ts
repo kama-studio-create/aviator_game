@@ -19,6 +19,7 @@ export const BLUE_COLOR = 'blue';
 export const GRAY_COLOR = '#1b1c1d';
 export const BG_GRAY_COLOR = '#0c0c0c';
 export const DARK_GRAY_COLOR = '#141516';
+export const TAB_BACKGROUND_COLOR = '#2c2d30';
 export const COLOR_BLUE = '#358DF3FF';
 export const BORDER_GRAY = '#2a2b2e';
 export const LIGHT_GRAY_COLOR = '#5b5b61'

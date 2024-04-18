@@ -7,9 +7,9 @@ import {
   COLOR_BLUE,
   DARK_GRAY_COLOR,
   ERROR_COLOR,
-  GRAY_COLOR,
   LIGHT_GRAY_COLOR,
   SUCCESS_COLOR,
+  TAB_BACKGROUND_COLOR,
   WARNING_COLOR,
   WHITE_COLOR
 } from "../../styles/colors.ts";
@@ -66,14 +66,14 @@ const betInputStyles = {
     flexDirection: 'column',
     gap: 8,
     flex: 1,
-    backgroundColor: DARK_GRAY_COLOR,
+    backgroundColor: 'transparent',
     borderRadius: 16,
     textAlign: 'center',
     fontSize: 12,
     opacity: 0.6,
     '&.active': {
-      backgroundColor: GRAY_COLOR,
-      border: `1px solid ${DARK_GRAY_COLOR}`,
+      backgroundColor: TAB_BACKGROUND_COLOR,
+      // border: `1px solid ${DARK_GRAY_COLOR}`,
       opacity: 1
     },
     transition: 'background-color 0.2s ease-in-out'
@@ -130,17 +130,20 @@ const betInputStyles = {
     color: WHITE_COLOR,
     border: `1px solid ${BORDER_SUCCESS_COLOR}`,
     borderRadius: 16,
-    fontSize: 14,
+    fontSize: 20,
     textTransform: 'uppercase',
     display: 'flex',
     flexDirection: 'column',
-    gap: 8,
+    gap: 2,
     justifyContent: 'center',
     alignItems: 'center',
     transition: 'background-color 0.4s ease-in-out',
     textShadow: '0 1px 2px rgba(0,0,0,.5)',
+    span: {
+      fontSize: 16
+    },
     '& .amount': {
-      fontSize: 20
+      fontSize: 24,
     },
     '.success': {
       backgroundColor: SUCCESS_COLOR,
@@ -157,9 +160,6 @@ const betInputStyles = {
       color: WHITE_COLOR,
       border: `1px solid ${BORDER_ERROR_COLOR}`,
     },
-    ':hover': {
-      backgroundColor: WHITE_COLOR,
-    }
   }),
   autoplayContainer: css({
     display: 'flex',
@@ -253,7 +253,7 @@ export const BetsView: FC<InputProps> = ({gameState, startTime, now, index}) => 
     } else if (gameState === ENDED && isPlaying) {
       return (exitMultiplier * betAmount).toFixed(2);
     } else {
-      return betAmount;
+      return betAmount.toFixed(2);
     }
   }
 
@@ -514,7 +514,7 @@ export const BetsView: FC<InputProps> = ({gameState, startTime, now, index}) => 
         </div>
       </div>
       <div css={betInputStyles.row}>
-        <div style={{display: 'flex', flexDirection: 'column', gap: 4, flex: 1}}>
+        <div style={{display: 'flex', flexDirection: 'column', gap: 4, flex: 3}}>
           <div style={{display: 'flex', width: '100%'}}>
             <NumberInputWithButtons
               style={{width: '100%'}}
@@ -539,7 +539,7 @@ export const BetsView: FC<InputProps> = ({gameState, startTime, now, index}) => 
           width: '100%',
           textAlign: 'center',
           height: '100%',
-          flex: 1,
+          flex: 5,
           display: 'flex',
           flexDirection: 'column',
           gap: 6,
@@ -559,7 +559,7 @@ export const BetsView: FC<InputProps> = ({gameState, startTime, now, index}) => 
             onClick={handleSetBet}
             css={betInputStyles.betButton}>
             <div>{buttonTitle}</div>
-            <div className='amount'>ksh. {getWinAmount()} </div>
+            <div className='amount'>{getWinAmount()} <span>{DEFAULT_CURRENCY}</span> </div>
           </button>
         </div>
 

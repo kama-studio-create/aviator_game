@@ -39,6 +39,7 @@ import PlaneAudio from "../assets/audio/audio.mp3"
 import {NotificationsView} from "./NotificationsView.tsx";
 import {BetSlips} from "./bets/BetSlips.tsx";
 import {PreviousRoundsView} from "./bets/PreviousRoundsView.tsx";
+import {usePreferenceStore} from "../store/preferences.store.ts";
 
 
 const gameStyles = {
@@ -114,6 +115,8 @@ const GameView = () => {
   const betSlipStore = useBetSlipStore;
 
   const [bgColor, setBgColor] = useState(BG_GRAY_COLOR);
+  
+  const isAnimationEnabled = usePreferenceStore(state => state.isAnimationEnabled);
 
 
   useEffect(() => {
@@ -355,11 +358,13 @@ const GameView = () => {
     drawAxis();
     drawXDots();
     drawYDots();
-    drawPlane();
+    if(isAnimationEnabled) {
+      drawPlane();
+    }
     drawWaiting();
     drawMultiplier();
 
-  }, [gameState, startTime, endTime, now]);
+  }, [gameState, startTime, endTime, now, isAnimationEnabled]);
 
   useEffect(() => {
     switch (gameState) {

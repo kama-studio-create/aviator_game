@@ -1,5 +1,6 @@
 import {useEffect, useRef, useState} from "react";
 import {AUDIO_FLY_AWAY, AUDIO_START, ENDED, PLAYING, TGameState} from "../../common/constants.ts";
+import {usePreferenceStore} from "../../store/preferences.store.ts";
 
 export const audioSprite = {
   flyAway: [2000, 3000],
@@ -16,10 +17,13 @@ export const useAudio = ({gameState}: UseAudioProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [hasInteracted, setHasInteracted] = useState(false);
   
+  const isMusicEnabled = usePreferenceStore(state => state.isMusicEnabled);
+  const isSoundEnabled = usePreferenceStore(state => state.isSoundEnabled);
+  
   useEffect(() => {
     const playSegment = (segmentName: keyof typeof audioSprite) => {
       const [startTime, duration] = audioSprite[segmentName];
-      if (!hasInteracted || !audioRef.current) return;
+      if (!hasInteracted || !audioRef.current || !isSoundEnabled) return;
       audioRef.current.currentTime = startTime / 1000;
       audioRef.current.play().catch((e) => {
         throw Error(e);
@@ -45,15 +49,18 @@ export const useAudio = ({gameState}: UseAudioProps) => {
 
   useEffect(() => {
     const bgAudio = bgAudioRef.current;
-    if (!hasInteracted || !bgAudio) return;
-    bgAudio.play().then(() => {
-      bgAudio.volume = 0.5;
-    }).catch(e => {
-      throw Error(e);
-    })
-      
-      
-  }, [hasInteracted]);
+    if (!hasInteracted || !bgAudio ) return;
+    if(isMusicEnabled) {
+      bgAudio.play().then(() => {
+        bgAudio.volume = 0.5;
+      }).catch(e => {
+        throw Error(e);
+      })
+    } else {
+      bgAudio.pause();
+      bgAudio.currentTime = 0;
+    }
+  }, [hasInteracted, isMusicEnabled]);
 
   useEffect(() => {
     const handlePlayBgAudio = () => {

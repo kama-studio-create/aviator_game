@@ -410,7 +410,7 @@ const GameView = () => {
     if (!currentGameID) return;
     const generateBetslips = (): TBetSlip[] => {
       const slips: TBetSlip[] = [];
-      for (let i = 0; i < 10; i++) {
+      for (let i = 0; i < 40; i++) {
         const amount = getRandomNumber(100, 5000);
         const slip = generateBetSlip(amount, currentGameID, startTime);
         slips.push(slip);

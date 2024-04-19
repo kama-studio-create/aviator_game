@@ -25,6 +25,7 @@ backgroundImage.id = 'canvas-bg';
 spinnerImage.src = SpinnerImage;
 export   const planeSprites = [plane1, plane2, plane3, plane4];
 export const allImages = [backgroundImage, spinnerImage,...planeSprites];
+export const allImageUrls = allImages.map(image => image.src);
 
 export const imageLoadPromises = allImages.map(image => {
   return new Promise((resolve, reject) => {

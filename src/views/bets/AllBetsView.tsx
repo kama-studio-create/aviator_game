@@ -7,6 +7,7 @@ import {DEFAULT_CURRENCY} from "../../common/constants.ts";
 import historyIcon from "../../assets/icons/history.svg";
 import {censor} from "../../utils/censor.ts";
 import {useBetSlipStore} from "../../store/bets.store.ts";
+import {useAvatar} from "../../hooks/useAvatar.ts";
 
 const headerStyles = css({
   display: 'flex',
@@ -58,7 +59,12 @@ const tableItem = css({
     border: `1px solid ${LIGHT_GRAY_COLOR}`,
     display: 'flex',
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
+    img: {
+      width: 16,
+      height: 16,
+      borderRadius: '50%',
+    }
   },
   '& .name': {
     fontSize: 12,
@@ -72,6 +78,8 @@ const tableItem = css({
 export const AllBetsView: FC = () => {
 
   const allBets = useBetSlipStore(state => state.allBetSlips);
+
+  const {assignAvatar} = useAvatar();
   return (
     <div style={{}}>
       <div css={headerStyles}>
@@ -107,7 +115,9 @@ export const AllBetsView: FC = () => {
             <tr key={betSlip.username} style={{backgroundColor: betSlip.exitTime ? SUCCESS_COLOR : 'black'}}
               css={tableItem}>
               <td css={rowStyles}>
-                <div className='avatar'/>
+                <div className='avatar'>
+                  {betSlip.username && <img alt='bet' src={assignAvatar(betSlip.username)}/>}
+                </div>
                 {betSlip.username && <p className='name'>{censor(betSlip.username)}</p>}
               </td>
               <td style={{justifyContent: 'center'}} css={rowStyles}>

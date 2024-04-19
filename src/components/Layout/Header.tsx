@@ -99,7 +99,7 @@ const styles = {
 
 const Header: FC<ComponentProps<'nav'>> = ({...props}) => {
 
-  const [isMenuOpen, setIsMenuOpen] = useState(true);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const handleMenuOpen = useCallback(() => {
     setIsMenuOpen(!isMenuOpen);
@@ -115,7 +115,7 @@ const Header: FC<ComponentProps<'nav'>> = ({...props}) => {
           6.06 <span>{DEFAULT_CURRENCY}</span>
         </div>
         <div css={styles.menuStyles}>
-          {isMenuOpen && <HeaderMenu />}
+          {isMenuOpen && <HeaderMenu handleClose={handleMenuOpen} isOpen={isMenuOpen} />}
           <button onClick={handleMenuOpen}>
             <img src={iconBurger} alt='menu'/>
           </button>

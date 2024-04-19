@@ -1,4 +1,4 @@
-import {FC} from "react";
+import {FC, useEffect, useRef} from "react";
 import {css} from "@emotion/react";
 import {BACKGROUND_COLOR} from "../../styles/colors.ts";
 import {MenuUserCard} from "../cards/menu/MenuUserCard.tsx";
@@ -38,11 +38,36 @@ const footerStyles = css({
   }
 })
 
+type props = {
+  isOpen: boolean,
+  handleClose: () => void
+}
 
 
-export const HeaderMenu: FC = () => {
+export const HeaderMenu: FC<props> = ({isOpen, handleClose}) => {
+
+  const headerRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if(headerRef.current && !headerRef.current.contains(event.target as Node)){
+        handleClose();
+      }
+    }
+
+    if(isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    }
+
+  }, [isOpen]);
+
   return (
-    <div css={menuStyles}>
+    <div ref={headerRef} css={menuStyles}>
       <MenuUserCard username={'randomy'}/>
       <MenuSettingsCard />
       <MenuInfoCard />

@@ -43,7 +43,8 @@ const cardStyles = css({
     a: {
       opacity: 0.5,
       fontSize: 12,
-      fontWeight: 400
+      fontWeight: 400,
+      color: WHITE_COLOR
     },
     img : {
       width: 20,

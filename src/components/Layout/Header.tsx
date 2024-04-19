@@ -1,4 +1,4 @@
-import {ComponentProps, FC, useCallback, useState} from "react";
+import {ComponentProps, FC, useState} from "react";
 import {css} from "@emotion/react";
 import {GRAY_COLOR, LIGHT_GRAY_COLOR, SUCCESS_COLOR, WHITE_COLOR} from "../../styles/colors.ts";
 import {MEDIA_QUERIES} from "../../styles/breakpoints.ts";
@@ -6,7 +6,6 @@ import {DEFAULT_CURRENCY} from "../../common/constants.ts";
 
 import logo from "../../assets/logo.svg";
 import iconBurger from "../../assets/icons/burger.svg";
-import iconChat from "../../assets/icons/chat.svg";
 import {HeaderMenu} from "../menus/HeaderMenu.tsx";
 
 const styles = {
@@ -61,7 +60,7 @@ const styles = {
   }),
   menuStyles: css({
     paddingInline: 8,
-    borderRight: `1px solid ${LIGHT_GRAY_COLOR}`,
+    // borderRight: `1px solid ${LIGHT_GRAY_COLOR}`,
     display: 'grid',
     placeContent: 'center',
     height: '100%',
@@ -101,9 +100,17 @@ const Header: FC<ComponentProps<'nav'>> = ({...props}) => {
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  const handleMenuOpen = useCallback(() => {
-    setIsMenuOpen(!isMenuOpen);
-  }, [isMenuOpen])
+
+  const handleMenuToggle = () => {
+    setIsMenuOpen(state => !state);
+  }
+
+  const handleMenuClose = () => {
+    setIsMenuOpen(false);
+  }
+
+
+
   return (
     <nav
       css={styles.headerStyles}
@@ -115,16 +122,16 @@ const Header: FC<ComponentProps<'nav'>> = ({...props}) => {
           6.06 <span>{DEFAULT_CURRENCY}</span>
         </div>
         <div css={styles.menuStyles}>
-          {isMenuOpen && <HeaderMenu handleClose={handleMenuOpen} isOpen={isMenuOpen} />}
-          <button onClick={handleMenuOpen}>
+          <button onClick={handleMenuToggle}>
             <img src={iconBurger} alt='menu'/>
+            {isMenuOpen && <HeaderMenu handleClose={handleMenuClose} isOpen={isMenuOpen} />}
           </button>
         </div>
-        <div css={styles.chatStyles}>
-          <button>
-            <img src={iconChat} alt='chat'/>
-          </button>
-        </div>
+        {/*<div css={styles.chatStyles}>*/}
+        {/*  <button>*/}
+        {/*    <img src={iconChat} alt='chat'/>*/}
+        {/*  </button>*/}
+        {/*</div>*/}
       </div>
     </nav>
   );

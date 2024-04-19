@@ -49,9 +49,8 @@ export const HeaderMenu: FC<props> = ({isOpen, handleClose}) => {
   const headerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-
     const handleClickOutside = (event: MouseEvent) => {
-      if(headerRef.current && !headerRef.current.contains(event.target as Node)){
+      if(headerRef.current && !headerRef.current.contains(event.target as Node) && isOpen){
         handleClose();
       }
     }

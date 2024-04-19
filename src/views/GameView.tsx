@@ -132,7 +132,7 @@ const GameView = () => {
     const resizeAndStyleCanvases = () => {
       if (!containerRef.current || !ctx) return;
       const currentWidth = containerRef.current.clientWidth;
-      const currentHeight = currentWidth * 0.9;
+      const currentHeight = currentWidth * 0.8;
       if (ctx.canvas.width !== currentWidth || ctx.canvas.height !== currentHeight) {
         setCanvasWidth(currentWidth);
         setCanvasHeight(currentHeight);

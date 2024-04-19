@@ -2,7 +2,7 @@ import {FC} from "react";
 import {css, keyframes} from "@emotion/react";
 import {rowStyles} from "../../styles/common.ts";
 import {MultiplierBadge} from "../badges/MultiplierBadge.tsx";
-import {DARK_GRAY_COLOR, ERROR_COLOR, GRAY_COLOR, MODAL_HEADER_COLOR} from "../../styles/colors.ts";
+import {DARK_GRAY_COLOR, ERROR_COLOR, GRAY_COLOR, HEADER_COLOR} from "../../styles/colors.ts";
 
 import iconClose from "../../assets/icons/close.svg";
 import iconServer from "../../assets/icons/server.svg";
@@ -44,7 +44,7 @@ const headerStyles = css({
   background: '#2c2d30',
   borderTopLeftRadius: 8,
   borderTopRightRadius: 8,
-  backgroundColor: MODAL_HEADER_COLOR,
+  backgroundColor: HEADER_COLOR,
   marginBottom: 8,
   h1: {
     color: 'white',

@@ -8,8 +8,8 @@ const badgeStyles = css({
   background: DARK_GRAY_COLOR,
   borderRadius: 8,
   textAlign: 'center',
-  color: 'purple',
-  fontWeight: 700
+  fontWeight: 700,
+  fontFamily: 'Inter, sans-serif',
 })
 
 type TBadgeProps = {

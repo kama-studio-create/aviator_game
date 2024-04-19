@@ -2,9 +2,8 @@ import {ComponentProps, FC} from "react";
 import {css} from "@emotion/react";
 import Sidebar from "./Sidebar.tsx";
 import Header from "./Header.tsx";
-import BgImage from '../../assets/bg.jpg'
 import {MEDIA_QUERIES} from "../../styles/breakpoints.ts";
-import {translucentBackgroundStyles} from "../../styles/common.ts";
+import {DARK_GRAY_COLOR} from "../../styles/colors.ts";
 
 interface LayoutProps extends ComponentProps<"div"> {
   isAuthenticated?: boolean
@@ -14,11 +13,11 @@ const styles = {
   layoutStyles: css({
     width: '100%',
     minHeight: '100vh',
-    background: `url(${BgImage})`,
-    backgroundSize: 'cover',
+    background: DARK_GRAY_COLOR,
     display: 'flex',
     flexDirection: 'column',
-    gap: 4
+    gap: 4,
+    fontFamily: 'Inter, sans-serif',
   }),
   containerStyles: css({
     width: '100%',
@@ -34,7 +33,7 @@ const styles = {
       minHeight: 'auto',
     }
   }),
-  gameContainerStyles: css([{
+  gameContainerStyles: css({
     width: '100%',
     height: '100%',
     display: 'grid',
@@ -44,7 +43,7 @@ const styles = {
       gap: 8,
       height: 'auto',
     },
-  }, translucentBackgroundStyles])
+  })
 }
 
 

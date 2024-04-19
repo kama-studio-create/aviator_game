@@ -1,28 +1,98 @@
 import {ComponentProps, FC} from "react";
 import {css} from "@emotion/react";
-import {translucentBackgroundStyles} from "../../styles/common.ts";
-import {PillButton} from "../buttons/PillButton.tsx";
-import {APP_NAME} from "../../common/constants.ts";
+import {GRAY_COLOR, LIGHT_GRAY_COLOR, SUCCESS_COLOR, WHITE_COLOR} from "../../styles/colors.ts";
+import {MEDIA_QUERIES} from "../../styles/breakpoints.ts";
+import {DEFAULT_CURRENCY} from "../../common/constants.ts";
+
+import logo from "../../assets/logo.svg";
+import iconBurger from "../../assets/icons/burger.svg";
+import iconChat from "../../assets/icons/chat.svg";
 
 const styles = {
-  headerStyles: css([{
+  headerStyles: css({
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingBlock: 8,
-    paddingInline: 16,
-  }, translucentBackgroundStyles]),
+    paddingInline: 8,
+    backgroundColor: GRAY_COLOR
+  }),
   appNameStyles: css({
-    fontSize: 14,
-    fontWeight: 600,
+    width: 84,
+    height: 'auto',
+    display: 'grid',
+    placeContent: 'center',
+    transition: 'all 0.2s ease-in-out',
+    img: {
+      width: '100%',
+      height: '100%'
+    },
+    [MEDIA_QUERIES[0]]: {
+      width: 72
+    }
   }),
   actionAreaStyles: css({
     display: 'flex',
     flexDirection: 'row',
-    gap: 16,
     justifyContent: "flex-end",
-    alignItems: 'center'
+    alignItems: 'center',
+    gap: 2
   }),
+  balanceStyles: css({
+    display: 'flex',
+    flexDirection: 'row',
+    gap: 2,
+    justifyContent: "flex-end",
+    alignItems: 'baseline',
+    color: SUCCESS_COLOR,
+    fontWeight: 700,
+    fontSize: 18,
+    borderRight: `1px solid ${LIGHT_GRAY_COLOR}`,
+    paddingInline: 8,
+    transform: 'scale(1.1,1)',
+    span: {
+      fontWeight: 400,
+      color: WHITE_COLOR,
+      fontSize: 12,
+      opacity: 0.6,
+      transform: 'scale(0.8,1)'
+    }
+  }),
+  menuStyles: css({
+    paddingInline: 8,
+    borderRight: `1px solid ${LIGHT_GRAY_COLOR}`,
+    display: 'grid',
+    placeContent: 'center',
+    height: '100%',
+    button: {
+      background: 'transparent',
+      border: "none",
+      display: 'grid',
+      placeContent: 'center',
+      paddingBlock: 4,
+      img: {
+        width: 18,
+        height: 18
+      }
+    }
+  }),
+  chatStyles: css({
+    paddingLeft: 8,
+    display: 'grid',
+    placeContent: 'center',
+    height: '100%',
+    button: {
+      background: 'transparent',
+      border: "none",
+      display: 'grid',
+      placeContent: 'center',
+      paddingBlock: 4,
+      img: {
+        width: 18,
+        height: 18
+      }
+    }
+  })
 }
 
 const Header: FC<ComponentProps<'nav'>> = ({...props}) => {
@@ -31,10 +101,21 @@ const Header: FC<ComponentProps<'nav'>> = ({...props}) => {
       css={styles.headerStyles}
       {...props}
     >
-      <p css={styles.appNameStyles} style={{fontSize: 20, fontFamily: 'Courgette'}}>{APP_NAME}</p>
+      <div css={styles.appNameStyles}><img src={logo} alt='aviator'/> </div>
       <div css={styles.actionAreaStyles}>
-        <p css={styles.appNameStyles}>Ksh. 3000</p>
-        <PillButton variant="success">Top Up</PillButton>
+        <div css={styles.balanceStyles}>
+          6.06 <span>{DEFAULT_CURRENCY}</span>
+        </div>
+        <div css={styles.menuStyles}>
+          <button>
+            <img src={iconBurger} alt='menu'/>
+          </button>
+        </div>
+        <div css={styles.chatStyles}>
+          <button>
+            <img src={iconChat} alt='chat'/>
+          </button>
+        </div>
       </div>
     </nav>
   );

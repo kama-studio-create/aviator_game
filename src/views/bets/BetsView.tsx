@@ -1,5 +1,6 @@
 import {css} from "@emotion/react";
 import {
+  BACKGROUND_COLOR,
   BLUE_COLOR,
   BORDER_ERROR_COLOR,
   BORDER_SUCCESS_COLOR,
@@ -9,7 +10,6 @@ import {
   ERROR_COLOR,
   LIGHT_GRAY_COLOR,
   SUCCESS_COLOR,
-  TAB_BACKGROUND_COLOR,
   WARNING_COLOR,
   WHITE_COLOR
 } from "../../styles/colors.ts";
@@ -72,7 +72,7 @@ const betInputStyles = {
     fontSize: 12,
     opacity: 0.6,
     '&.active': {
-      backgroundColor: TAB_BACKGROUND_COLOR,
+      backgroundColor: BACKGROUND_COLOR,
       // border: `1px solid ${DARK_GRAY_COLOR}`,
       opacity: 1
     },

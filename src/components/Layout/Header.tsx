@@ -1,4 +1,4 @@
-import {ComponentProps, FC} from "react";
+import {ComponentProps, FC, useCallback, useState} from "react";
 import {css} from "@emotion/react";
 import {GRAY_COLOR, LIGHT_GRAY_COLOR, SUCCESS_COLOR, WHITE_COLOR} from "../../styles/colors.ts";
 import {MEDIA_QUERIES} from "../../styles/breakpoints.ts";
@@ -7,6 +7,7 @@ import {DEFAULT_CURRENCY} from "../../common/constants.ts";
 import logo from "../../assets/logo.svg";
 import iconBurger from "../../assets/icons/burger.svg";
 import iconChat from "../../assets/icons/chat.svg";
+import {HeaderMenu} from "../menus/HeaderMenu.tsx";
 
 const styles = {
   headerStyles: css({
@@ -64,6 +65,7 @@ const styles = {
     display: 'grid',
     placeContent: 'center',
     height: '100%',
+    position: 'relative',
     button: {
       background: 'transparent',
       border: "none",
@@ -96,6 +98,12 @@ const styles = {
 }
 
 const Header: FC<ComponentProps<'nav'>> = ({...props}) => {
+
+  const [isMenuOpen, setIsMenuOpen] = useState(true);
+
+  const handleMenuOpen = useCallback(() => {
+    setIsMenuOpen(!isMenuOpen);
+  }, [isMenuOpen])
   return (
     <nav
       css={styles.headerStyles}
@@ -107,7 +115,8 @@ const Header: FC<ComponentProps<'nav'>> = ({...props}) => {
           6.06 <span>{DEFAULT_CURRENCY}</span>
         </div>
         <div css={styles.menuStyles}>
-          <button>
+          {isMenuOpen && <HeaderMenu />}
+          <button onClick={handleMenuOpen}>
             <img src={iconBurger} alt='menu'/>
           </button>
         </div>

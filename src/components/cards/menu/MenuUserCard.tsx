@@ -12,8 +12,8 @@ const cardStyles = css({
   justifyContent: 'space-between',
   padding: 8,
   '& .avatar': {
-    width: 48,
-    height: 48,
+    width: 36,
+    height: 36,
     backgroundColor: WHITE_COLOR,
     borderRadius: '50%',
     border: `2px solid ${LIGHT_GRAY_COLOR}`,
@@ -21,8 +21,8 @@ const cardStyles = css({
     justifyContent: 'center',
     alignItems: 'center',
     img: {
-      width: 42,
-      height: 42,
+      width: 32,
+      height: 32,
       borderRadius: '50%'
     }
   },
@@ -52,9 +52,6 @@ const cardStyles = css({
   }
 })
 
-const buttonStyles = css({
-
-})
 
 type props = {
   username: string
@@ -64,13 +61,13 @@ export const MenuUserCard: FC<props> = ({username}) => {
   const {assignAvatar} = useAvatar();
   return (
     <div css={cardStyles}>
-      <div css={rowStyles}>
+      <div style={{gap: 8}} css={rowStyles}>
         <div className='avatar'>
           <img src={assignAvatar(username)} alt=''/>
         </div>
         <h1>{censor(username)}</h1>
       </div>
-      <button css={buttonStyles}>
+      <button>
         <img src={iconAvatar} alt='avatar'/>
         <a>Change avatar</a>
       </button>

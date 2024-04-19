@@ -1,6 +1,6 @@
 import {FC, useCallback, useState} from "react";
 import {css} from "@emotion/react";
-import {SettingsItemCard} from "./SettingsItemCard.tsx";
+import {MenuItemCard} from "./MenuItemCard.tsx";
 import {ANIMATION, MUSIC, SOUND} from "../../../common/constants.ts";
 
 import iconSound from "../../../assets/icons/sound.svg";
@@ -11,7 +11,7 @@ const cardStyles = css({
   display: 'flex',
   flexDirection: 'column',
   gap: 2,
-  marginBottom: 32,
+  marginBottom: 24,
 })
 
 
@@ -37,9 +37,9 @@ export const MenuSettingsCard: FC = () => {
 
   return (
     <div css={cardStyles}>
-      <SettingsItemCard title={SOUND} icon={iconSound} handleChange={handleSound} value={isSoundActive} />
-      <SettingsItemCard title={MUSIC} icon={iconMusic} handleChange={handleMusic} value={isMusicActive} />
-      <SettingsItemCard title={ANIMATION} icon={iconAnimation} handleChange={handleAnimation} value={isAnimationActive} />
+      <MenuItemCard title={SOUND} icon={iconSound} handleChange={handleSound} value={isSoundActive} />
+      <MenuItemCard title={MUSIC} icon={iconMusic} handleChange={handleMusic} value={isMusicActive} />
+      <MenuItemCard title={ANIMATION} icon={iconAnimation} handleChange={handleAnimation} value={isAnimationActive} />
     </div>
   )
 }

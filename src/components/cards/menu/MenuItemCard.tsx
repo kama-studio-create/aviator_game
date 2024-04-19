@@ -3,13 +3,6 @@ import SwitchInput from "../../inputs/SwitchInput.tsx";
 import {css} from "@emotion/react";
 import {GRAY_COLOR} from "../../../styles/colors.ts";
 
-type props = {
-  title: string,
-  icon: string,
-  handleChange: () => void,
-  value: boolean
-}
-
 const cardStyles = css({
   display: "flex",
   alignItems: "center",
@@ -17,17 +10,16 @@ const cardStyles = css({
   width: "100%",
   height: "100%",
   background: GRAY_COLOR,
-  paddingBlock: 8,
+  paddingBlock: 10,
   paddingInline: 12,
   '& .title': {
     display: 'flex',
-    gap: 8,
+    gap: 12,
     alignItems: 'center',
     justifyContent: "start",
     h1: {
       fontSize: 14,
       fontWeight: 400,
-      transform: 'scale(1.1,1)',
       textTransform: 'capitalize',
     },
     img: {
@@ -35,16 +27,22 @@ const cardStyles = css({
       height: 16
     }
   }
-})
+});
+type props = {
+  title: string,
+  icon: string,
+  handleChange: () => void,
+  value?: boolean,
+}
 
-export const SettingsItemCard: FC<props> = ({title, icon, handleChange, value}) => {
+export const MenuItemCard: FC<props> = ({title, icon, handleChange, value}) => {
   return (
     <div css={cardStyles}>
       <div className={'title'}>
         <img src={icon} alt='sound'/>
         <h1>{title}</h1>
       </div>
-      <SwitchInput checked={value} onChange={handleChange}/>
+      {value !== undefined &&<SwitchInput checked={value} onChange={handleChange}/>}
     </div>
   )
 }

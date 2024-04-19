@@ -34,6 +34,16 @@ export const ERROR = 'error';
 export const SUCCESS ='success';
 export const NOTIFICATION_VISIBILITY = 5000;
 
+export const SOUND = 'sound';
+export const MUSIC = 'music';
+export const ANIMATION = 'animation';
+export const FREE_BETS = 'free bets';
+export const PROVABLY_FAIR_SETTINGS = 'provably fair settings';
+export const GAME_RULES = 'game rules';
+export const MY_BET_HISTORY = 'my bet history';
+export const GAME_LIMITS = 'game limits';
+export const HOME = 'home';
+
 
 
 const GAME_STATES = [WAITING, PLAYING, ENDED] as const;

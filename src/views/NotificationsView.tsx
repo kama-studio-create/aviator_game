@@ -99,7 +99,7 @@ export const NotificationsView : FC = () => {
     })
   }, [myNotifications])
   return (
-    <div css={containerStyles}>
+    <div style={{display: myNotifications.length === 0 ? 'none': 'flex'}} css={containerStyles}>
       {myNotifications.map((notification, index) => (
         <NotificationItem
           key={index}

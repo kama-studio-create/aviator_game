@@ -43,6 +43,7 @@ export const GAME_RULES = 'game rules';
 export const MY_BET_HISTORY = 'my bet history';
 export const GAME_LIMITS = 'game limits';
 export const HOME = 'home';
+export const ROUND_HISTORY = 'round history'
 
 
 

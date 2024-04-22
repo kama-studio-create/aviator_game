@@ -46,7 +46,7 @@ export const PreviousRoundsView: FC = () => {
   }
   return (
     <div css={containerStyles}>
-      {isModalOpen && <PreviousRoundsModal onSelect={handleSelectRound}/>}
+      <PreviousRoundsModal handleClose={handleModalOpen} isOpen={isModalOpen} onSelect={handleSelectRound}/>
       {isRoundModalOpen && <SingleRoundModal multiplier={selectedRound} close={() => { setIsRoundModalOpen(false)}}/>}
       <div css={multiplierStyles}>
         {previousRounds.slice(0, 9).map((round) => (

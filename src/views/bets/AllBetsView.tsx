@@ -53,7 +53,9 @@ const tableItem = css({
   padding: 8,
   borderRadius: 8,
   fontFamily: 'Inter, sans-serif',
-  opacity: 0.7,
+  p: {
+    opacity: 0.7
+  },
   '& .avatar': {
     width: 30,
     height: 30,
@@ -112,14 +114,13 @@ export const AllBetsView: FC = () => {
           gap: 4,
           flexDirection: 'column',
           maxHeight: '50vh',
-          overflowY: 'scroll'
+          overflowY: 'scroll',
         }} css={rowStyles}>
           {allBets.map((betSlip) => (
             <tr key={betSlip.username} 
               style={{
                 backgroundColor: betSlip.exitTime ? SUCCESS_COLOR_LIGHT : 'black', 
                 border: betSlip.exitTime ? `1px solid ${SUCCESS_COLOR}`: 'none',
-                opacity: betSlip.exitTime? 1 : 0.7
               }}
               css={tableItem}>
               <td css={rowStyles}>
@@ -129,11 +130,17 @@ export const AllBetsView: FC = () => {
                 {betSlip.username && <p className='name'>{censor(betSlip.username)}</p>}
               </td>
               <td style={{justifyContent: 'center'}} css={rowStyles}>
-                <div style={{textAlign: 'right'}}>{betSlip.amount.toFixed(2)}</div>
+                <p style={{
+                  textAlign: 'right',
+                  opacity: betSlip.exitTime ? 1 : 0.5,
+                }}>{betSlip.amount.toFixed(2)}</p>
                 <MultiplierBadge onClick={() => {}} multiplier={2.5}/>
               </td>
               <td style={{justifyContent: 'end'}} css={rowStyles}>
-                <p style={{textAlign: 'right'}}>2500</p>
+                <p style={{
+                  textAlign: 'right',
+                  opacity: betSlip.exitTime ? 1 : 0.5
+                }}>2500</p>
               </td>
             </tr>
           ))}

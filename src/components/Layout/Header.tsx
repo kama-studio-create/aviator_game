@@ -1,11 +1,10 @@
-import {ComponentProps, FC, useState} from "react";
+import {ComponentProps, FC} from "react";
 import {css} from "@emotion/react";
 import {GRAY_COLOR, LIGHT_GRAY_COLOR, SUCCESS_COLOR, WHITE_COLOR} from "../../styles/colors.ts";
 import {MEDIA_QUERIES} from "../../styles/breakpoints.ts";
 import {DEFAULT_CURRENCY} from "../../common/constants.ts";
 
 import logo from "../../assets/logo.svg";
-import iconBurger from "../../assets/icons/burger.svg";
 import {HeaderMenu} from "../menus/HeaderMenu.tsx";
 
 const styles = {
@@ -58,25 +57,7 @@ const styles = {
       transform: 'scale(0.8,1)'
     }
   }),
-  menuStyles: css({
-    paddingInline: 8,
-    // borderRight: `1px solid ${LIGHT_GRAY_COLOR}`,
-    display: 'grid',
-    placeContent: 'center',
-    height: '100%',
-    position: 'relative',
-    button: {
-      background: 'transparent',
-      border: "none",
-      display: 'grid',
-      placeContent: 'center',
-      paddingBlock: 4,
-      img: {
-        width: 18,
-        height: 18
-      }
-    }
-  }),
+
   chatStyles: css({
     paddingLeft: 8,
     display: 'grid',
@@ -98,16 +79,7 @@ const styles = {
 
 const Header: FC<ComponentProps<'nav'>> = ({...props}) => {
 
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-
-  const handleMenuToggle = () => {
-    setIsMenuOpen(state => !state);
-  }
-
-  const handleMenuClose = () => {
-    setIsMenuOpen(false);
-  }
 
 
 
@@ -121,12 +93,7 @@ const Header: FC<ComponentProps<'nav'>> = ({...props}) => {
         <div css={styles.balanceStyles}>
           6.06 <span>{DEFAULT_CURRENCY}</span>
         </div>
-        <div css={styles.menuStyles}>
-          <button onClick={handleMenuToggle}>
-            <img src={iconBurger} alt='menu'/>
-            {isMenuOpen && <HeaderMenu handleClose={handleMenuClose} isOpen={isMenuOpen} />}
-          </button>
-        </div>
+        <HeaderMenu />
         {/*<div css={styles.chatStyles}>*/}
         {/*  <button>*/}
         {/*    <img src={iconChat} alt='chat'/>*/}

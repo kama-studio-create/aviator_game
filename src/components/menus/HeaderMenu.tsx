@@ -1,4 +1,4 @@
-import {ComponentProps, FC, useEffect, useRef, useState} from "react";
+import {ComponentProps, FC, useCallback, useEffect, useRef, useState} from "react";
 import {css, keyframes} from "@emotion/react";
 import {BACKGROUND_COLOR} from "../../styles/colors.ts";
 import {MenuUserCard} from "../cards/menu/MenuUserCard.tsx";
@@ -79,9 +79,9 @@ export const HeaderMenu: FC<ComponentProps<'div'>> = () => {
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  const handleMenuToggle = () => {
+  const handleMenuToggle = useCallback(() => {
     setIsMenuOpen(!isMenuOpen);
-  }
+  },[isMenuOpen])
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {

@@ -1,4 +1,4 @@
-import {allImageUrls} from "../common/images.ts";
+import {allAvatarURls} from "../common/images.ts";
 
 export const useAvatar = () => {
 
@@ -6,14 +6,14 @@ export const useAvatar = () => {
     const hash = (str: string): number => {
       let hashValue = 0;
       for (let i = 0; i < str.length; i++) {
-        hashValue = (str.charCodeAt(i) + ((hashValue << 5) - hashValue)) % allImageUrls.length;
+        hashValue = (str.charCodeAt(i) + ((hashValue << 5) - hashValue)) % allAvatarURls.length;
       }
       return hashValue;
     };
 
     const avatarIndex = hash(username);
 
-    return allImageUrls[avatarIndex];
+    return allAvatarURls[avatarIndex];
   }
 
   return {

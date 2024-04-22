@@ -1,13 +1,14 @@
 import {FC} from "react";
 import {css} from "@emotion/react";
 import {PillButton} from "../../components/buttons/PillButton.tsx";
-import {DARK_GRAY_COLOR, LIGHT_GRAY_COLOR, SUCCESS_COLOR, WHITE_COLOR} from "../../styles/colors.ts";
+import {LIGHT_GRAY_COLOR, SUCCESS_COLOR, SUCCESS_COLOR_LIGHT, WHITE_COLOR} from "../../styles/colors.ts";
 import {rowStyles} from "../../styles/common.ts";
 import {DEFAULT_CURRENCY} from "../../common/constants.ts";
 import historyIcon from "../../assets/icons/history.svg";
 import {censor} from "../../utils/censor.ts";
 import {useBetSlipStore} from "../../store/bets.store.ts";
 import {useAvatar} from "../../hooks/useAvatar.ts";
+import {MultiplierBadge} from "../../components/badges/MultiplierBadge.tsx";
 
 const headerStyles = css({
   display: 'flex',
@@ -40,7 +41,7 @@ const headerStyles = css({
 
 const tableItem = css({
   width: '100%',
-  fontSize: 12,
+  fontSize: 14,
   fontWeight: 400,
   color: WHITE_COLOR,
   backgroundColor: 'black',
@@ -51,9 +52,11 @@ const tableItem = css({
   paddingBlock: 2,
   padding: 8,
   borderRadius: 8,
+  fontFamily: 'Inter, sans-serif',
+  opacity: 0.7,
   '& .avatar': {
-    width: 24,
-    height: 24,
+    width: 30,
+    height: 30,
     background: 'white',
     borderRadius: '50%',
     border: `1px solid ${LIGHT_GRAY_COLOR}`,
@@ -61,13 +64,13 @@ const tableItem = css({
     justifyContent: 'center',
     alignItems: 'center',
     img: {
-      width: 16,
-      height: 16,
+      width: 30,
+      height: 30,
       borderRadius: '50%',
     }
   },
   '& .name': {
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: 400,
     color: WHITE_COLOR,
     opacity: 0.5
@@ -112,7 +115,12 @@ export const AllBetsView: FC = () => {
           overflowY: 'scroll'
         }} css={rowStyles}>
           {allBets.map((betSlip) => (
-            <tr key={betSlip.username} style={{backgroundColor: betSlip.exitTime ? SUCCESS_COLOR : 'black'}}
+            <tr key={betSlip.username} 
+              style={{
+                backgroundColor: betSlip.exitTime ? SUCCESS_COLOR_LIGHT : 'black', 
+                border: betSlip.exitTime ? `1px solid ${SUCCESS_COLOR}`: 'none',
+                opacity: betSlip.exitTime? 1 : 0.7
+              }}
               css={tableItem}>
               <td css={rowStyles}>
                 <div className='avatar'>
@@ -122,15 +130,7 @@ export const AllBetsView: FC = () => {
               </td>
               <td style={{justifyContent: 'center'}} css={rowStyles}>
                 <div style={{textAlign: 'right'}}>{betSlip.amount.toFixed(2)}</div>
-                <div style={{
-                  paddingInline: 8,
-                  background: DARK_GRAY_COLOR,
-                  borderRadius: 8,
-                  textAlign: 'center',
-                  color: 'purple',
-                  fontWeight: 600
-                }}>1.24
-                </div>
+                <MultiplierBadge onClick={() => {}} multiplier={2.5}/>
               </td>
               <td style={{justifyContent: 'end'}} css={rowStyles}>
                 <p style={{textAlign: 'right'}}>2500</p>

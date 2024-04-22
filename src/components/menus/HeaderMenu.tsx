@@ -95,7 +95,7 @@ export const HeaderMenu: FC<ComponentProps<'div'>> = () => {
       document.removeEventListener('mousedown', handleClickOutside);
     }
 
-  }, [isMenuOpen]);
+  }, [handleMenuToggle, isMenuOpen]);
 
   return (
     <div ref={headerRef} css={menuToggleStyles}>

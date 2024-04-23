@@ -105,7 +105,7 @@ const GameView = () => {
   const [canvasHeight, setCanvasHeight] = useState(300);
 
   const [startTime, setStartTime] = useState<number>(Date.now() - 60 * 1000);
-  const [endTime, setEndTime] = useState(Date.now() + (60 * 1000));
+  const [endTime, setEndTime] = useState(Date.now() + 20 * 1000);
 
   const {audioRef, isPlaying, bgAudioRef} = useAudio({gameState});
 

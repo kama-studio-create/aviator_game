@@ -3,7 +3,7 @@ import {css, keyframes} from "@emotion/react";
 import {BACKGROUND_COLOR, ERROR_COLOR, GRAY_COLOR, HEADER_COLOR} from "../../styles/colors.ts";
 import iconClose from "../../assets/icons/close.svg";
 
-const modalBorderRadius = 16
+const modalBorderRadius = 8
 
 const slideIn = keyframes({
   "0%": {
@@ -96,43 +96,56 @@ type TModalProps = {
   hasCloseButton?: boolean,
   bodyBackgroundColor?: string,
   headerBackgroundColor?: string,
-  footerBackgroundColor?: string
+  footerBackgroundColor?: string,
+  position?: 'fixed' | 'absolute',
 } & ComponentPropsWithRef<'div'>
 
-export const Modal: FC<TModalProps> = forwardRef(({title,footerBackgroundColor, bodyBackgroundColor, headerBackgroundColor, footer, children, isOpen, handleClose, hasCloseButton = false, ...props}, ref) => {
+export const Modal: FC<TModalProps> = forwardRef(
+  ({
+    title,
+    footerBackgroundColor, 
+    bodyBackgroundColor, 
+    headerBackgroundColor, 
+    footer, 
+    children, 
+    isOpen, 
+    handleClose, 
+    hasCloseButton = false, 
+    position = 'absolute',
+    ...props}, ref) => {
 
-  const headerCss: CSSProperties = {
-    background: headerBackgroundColor || HEADER_COLOR
-  }
+    const headerCss: CSSProperties = {
+      background: headerBackgroundColor || HEADER_COLOR
+    }
 
-  const footerCss: CSSProperties = {
-    background: footerBackgroundColor || HEADER_COLOR
-  }
+    const footerCss: CSSProperties = {
+      background: footerBackgroundColor || headerBackgroundColor || HEADER_COLOR
+    }
 
-  const containerCss: CSSProperties = {
-    width: isOpen? '100%' : '0',
-    height: isOpen? '100%' : '0',
-    opacity: isOpen? 1 : 0,
-  }
+    const containerCss: CSSProperties = {
+      width: isOpen? '100%' : '0',
+      height: isOpen? '100%' : '0',
+      opacity: isOpen? 1 : 0,
+    }
 
-  const bodyCss: CSSProperties = {
-    borderBottomRightRadius: footer ? 0: 8,
-    borderBottomLeftRadius: footer ? 0: 8,
-    backgroundColor: bodyBackgroundColor || GRAY_COLOR
-  }
+    const bodyCss: CSSProperties = {
+      borderBottomRightRadius: footer ? 0: 8,
+      borderBottomLeftRadius: footer ? 0: 8,
+      backgroundColor: bodyBackgroundColor || GRAY_COLOR
+    }
 
-  return (
-    <div style={containerCss} ref={ref} css={modalStyles} {...props}>
-      {isOpen && <div css={modalContainer}>
-        <header style={headerCss} css={headerStyles}>
-          <h1>{title}</h1>
-          {hasCloseButton && <button onClick={handleClose}>
-            <img src={iconClose} alt="close"/>
-          </button>}
-        </header>
-        <div style={bodyCss} css={bodyStyles}>{children}</div>
-        {footer && <footer style={footerCss} css={footerStyles}></footer>}
-      </div>}
-    </div>
-  )
-})
+    return (
+      <div style={containerCss} ref={ref} css={modalStyles} {...props}>
+        {isOpen && <div style={{position: position }} css={modalContainer}>
+          <header style={headerCss} css={headerStyles}>
+            <h1>{title}</h1>
+            {hasCloseButton && <button onClick={handleClose}>
+              <img src={iconClose} alt="close"/>
+            </button>}
+          </header>
+          <div style={bodyCss} css={bodyStyles}>{children}</div>
+          {footer && <footer style={footerCss} css={footerStyles}></footer>}
+        </div>}
+      </div>
+    )
+  })

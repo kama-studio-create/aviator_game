@@ -9,6 +9,7 @@ import iconLimits from "../../../assets/icons/limits.svg"
 import {ProvablyFairModal} from "../../modals/menu-modals/ProvablyFairModal.tsx";
 import {GameRulesModal} from "../../modals/menu-modals/GameRulesModal.tsx";
 import {BetHistoryModal} from "../../modals/menu-modals/BetHistoryModal.tsx";
+import {GameLimitsModal} from "../../modals/menu-modals/GameLimitsModal.tsx";
 
 const cardStyles = css({
   display: "flex",
@@ -29,6 +30,7 @@ export const MenuInfoCard: FC = () => {
   const [isProvablyFairModalOpen, setIsProvablyFairModalOpen] = useState(false);
   const [isGameRulesModalOpen, setIsGameRulesModalOpen] = useState(false);
   const [isBetHistoryModalOpen, setIsBetHistoryModalOpen] = useState(false);
+  const [isGameLimitsModalOpen, setIsGameLimitsModalOpen] = useState(false);
 
   useEffect(() => {
   }, [isBetHistoryModalOpen, isGameRulesModalOpen, isProvablyFairModalOpen]);
@@ -95,6 +97,14 @@ export const MenuInfoCard: FC = () => {
         }}/>}
         <MenuItemCard title={MY_BET_HISTORY} icon={iconHistory} handleChange={() => {
           setIsBetHistoryModalOpen(!isBetHistoryModalOpen);
+        }}/>
+      </div>
+      <div onClick={() => {setIsGameLimitsModalOpen(!isGameLimitsModalOpen)}} css={cardStyles}>
+        {isGameLimitsModalOpen && <GameLimitsModal handleClose={() => {
+          setIsGameLimitsModalOpen(!isGameLimitsModalOpen)
+        }}/>}
+        <MenuItemCard title={GAME_LIMITS} icon={iconLimits} handleChange={() => {
+          setIsGameLimitsModalOpen(!isGameLimitsModalOpen);
         }}/>
       </div>
 

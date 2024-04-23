@@ -85,7 +85,11 @@ const footerStyles = css({
     span: {
       color: ERROR_COLOR
     }
+  },
+  div: {
+    opacity: 0.6
   }
+
 })
 
 type TModalProps = {
@@ -119,7 +123,8 @@ export const Modal: FC<TModalProps> = forwardRef(
     }
 
     const footerCss: CSSProperties = {
-      background: footerBackgroundColor || headerBackgroundColor || HEADER_COLOR
+      background: footerBackgroundColor || headerBackgroundColor || HEADER_COLOR,
+
     }
 
     const containerCss: CSSProperties = {
@@ -144,7 +149,11 @@ export const Modal: FC<TModalProps> = forwardRef(
             </button>}
           </header>
           <div style={bodyCss} css={bodyStyles}>{children}</div>
-          {footer && <footer style={footerCss} css={footerStyles}></footer>}
+          {footer && <footer style={footerCss} css={footerStyles}>
+            <div>
+              {footer}
+            </div>
+          </footer>}
         </div>}
       </div>
     )

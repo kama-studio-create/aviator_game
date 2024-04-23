@@ -100,12 +100,12 @@ const GameView = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  const [gameState, setGameState] = useState<TGameState>(WAITING);
+  const [gameState, setGameState] = useState<TGameState>(PLAYING);
   const [canvasWidth, setCanvasWidth] = useState(300);
   const [canvasHeight, setCanvasHeight] = useState(300);
 
-  const [startTime, setStartTime] = useState<number>(Date.now() + WAITING_DURATION);
-  const [endTime, setEndTime] = useState(0);
+  const [startTime, setStartTime] = useState<number>(Date.now() - 60 * 1000);
+  const [endTime, setEndTime] = useState(Date.now() + (60 * 1000));
 
   const {audioRef, isPlaying, bgAudioRef} = useAudio({gameState});
 

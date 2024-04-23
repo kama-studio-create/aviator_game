@@ -86,7 +86,9 @@ export const MenuInfoCard: FC = () => {
       <div onClick={() => {
         setIsGameRulesModalOpen(true);
       }} css={cardStyles}>
-        <GameRulesModal isOpen={isGameRulesModalOpen} handleClose={() => {setIsGameRulesModalOpen(false)}}/>
+        {<GameRulesModal isOpen={isGameRulesModalOpen} handleClose={() => {
+          setIsGameRulesModalOpen(false)
+        }}/>}
         <MenuItemCard title={GAME_RULES} icon={iconRules} handleChange={() => {
           setIsGameRulesModalOpen(true);
         }}/>

@@ -1,9 +1,9 @@
 import PlaneImage from "../assets/plane.svg";
 import BgImage from "../assets/canvas-bg.svg";
 import SpinnerImage from "../assets/spinner.svg";
-import Plane2 from '../assets/plane/plane_2.svg';
-import Plane3 from '../assets/plane/plane_3.svg';
-import Plane4 from '../assets/plane/plane_4.svg';
+import Plane2 from "../assets/plane/plane_2.svg";
+import Plane3 from "../assets/plane/plane_3.svg";
+import Plane4 from "../assets/plane/plane_4.svg";
 
 //avatars
 import beetle from "../assets/avatars/beetle.webp";
@@ -64,10 +64,9 @@ export const avatarImages: HTMLImageElement[] = [
   avatarParis,
   avatarPlymouth,
   avatarRome,
-  avatarTiger
+  avatarTiger,
 ];
-export const allAvatarURls = avatarImages.map(image => image.src);
-
+export const allAvatarURls = avatarImages.map((image) => image.src);
 
 //plane sprites
 export const plane1 = new Image();
@@ -86,16 +85,20 @@ export const backgroundImage = new Image();
 export const spinnerImage = new Image();
 
 backgroundImage.src = BgImage;
-backgroundImage.id = 'canvas-bg';
+backgroundImage.id = "canvas-bg";
 spinnerImage.src = SpinnerImage;
 export const planeSprites = [plane1, plane2, plane3, plane4];
-export const allImages = [backgroundImage, spinnerImage, ...planeSprites, ...avatarImages];
-export const allImageUrls = allImages.map(image => image.src);
+export const allImages = [
+  backgroundImage,
+  spinnerImage,
+  ...planeSprites,
+  ...avatarImages,
+];
+export const allImageUrls = allImages.map((image) => image.src);
 
-export const imageLoadPromises = allImages.map(image => {
+export const imageLoadPromises = allImages.map((image) => {
   return new Promise((resolve, reject) => {
     image.onload = resolve;
     image.onerror = reject;
   });
 });
-

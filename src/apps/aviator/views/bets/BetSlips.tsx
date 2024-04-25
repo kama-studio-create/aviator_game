@@ -1,39 +1,38 @@
-import {FC} from "react";
-import {Tab, Tabs} from "../../components/tabs/Tabs.tsx";
-import {css} from "@emotion/react";
-import {GRAY_COLOR} from "../../styles/colors.ts";
-import {AllBetsView} from "./AllBetsView.tsx";
-import {MyBetsView} from "./MyBetsView.tsx";
-import {TopBetsView} from "./TopBetsView.tsx";
+import { FC } from "react";
+import { Tab, Tabs } from "../../components/tabs/Tabs.tsx";
+import { css } from "@emotion/react";
+import { GRAY_COLOR } from "../../styles/colors.ts";
+import { AllBetsView } from "./AllBetsView.tsx";
+import { MyBetsView } from "./MyBetsView.tsx";
+import { TopBetsView } from "./TopBetsView.tsx";
 
 const container = css({
-  display: 'flex',
-  flexDirection: 'column',
+  display: "flex",
+  flexDirection: "column",
   backgroundColor: GRAY_COLOR,
   padding: 8,
   gap: 4,
   borderRadius: 8,
-})
+});
 
 const tabs: Tab[] = [
   {
-    label: 'All Bets',
-    component: <AllBetsView/>
+    label: "All Bets",
+    component: <AllBetsView />,
   },
   {
-    label: 'My Bets',
-    component: <MyBetsView/>
+    label: "My Bets",
+    component: <MyBetsView />,
   },
   {
-    label: 'Top',
-    component: <TopBetsView/>
-  }
-]
+    label: "Top",
+    component: <TopBetsView />,
+  },
+];
 export const BetSlips: FC = () => {
-
   return (
     <div css={container}>
-      <Tabs tabs={tabs}/>
+      <Tabs tabs={tabs} />
     </div>
-  )
-}
+  );
+};

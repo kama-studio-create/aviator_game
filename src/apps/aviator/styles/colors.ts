@@ -20,6 +20,7 @@ export const BORDER_WARNING_COLOR = "#ffbd71";
 export const TRANSPARENT_RED_COLOR = "rgba(255,0,0,0.26)";
 export const WHITE_COLOR = "#fff";
 export const BLUE_COLOR = "blue";
+export const BORDER_BLUE = "#46c0f2";
 export const GRAY_COLOR = "#1b1c1d";
 export const BG_GRAY_COLOR = "#0c0c0c";
 export const DARK_GRAY_COLOR = "#141516";

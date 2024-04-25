@@ -21,11 +21,32 @@ module.exports = {
             'warn',
             {allowConstantExport: true},
         ],
+        "max-len": ["warn", {"code": 80}],
+        "quotes": ["error", "double", {"avoidEscape": true}],
+        "no-multiple-empty-lines": ["error", {"max": 2, "maxEOF": 0}],
         "@typescript-eslint/indent": ["error", 2],
         "@typescript-eslint/no-unused-vars": "error",
         "@typescript-eslint/no-explicit-any": "error",
-        "max-len": ["warn", {"code": 80}],
-        "quotes": ["error", "double", {"avoidEscape": true}],
-        "no-multiple-empty-lines": ["error", {"max": 2, "maxEOF": 0}]
+        '@typescript-eslint/naming-convention': [
+            'warn',
+            {
+                selector: 'variable',
+                format: ['camelCase', 'UPPER_CASE'],
+                leadingUnderscore: 'allow',
+                trailingUnderscore: 'allow',
+            },
+            {
+                selector: 'variable',
+                modifiers: ['const', 'exported'],
+                types: ['function'],
+                format: ['PascalCase'],
+                leadingUnderscore: 'allow',
+                trailingUnderscore: 'allow',
+            },
+            {
+                selector: 'typeLike',
+                format: ['PascalCase'],
+            },
+        ],
     },
 }

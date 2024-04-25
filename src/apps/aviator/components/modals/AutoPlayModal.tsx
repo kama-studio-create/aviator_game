@@ -17,7 +17,7 @@ import {
   STOP_IF_SINGLE_WIN_EXCEEDS,
 } from "../../common/constants.ts";
 import { ModalToggleCard } from "../cards/ModalToggleCard.tsx";
-import { TAutoPlaySettings } from "../../views/bets/BetsView.tsx";
+import { TAutoPlaySettings } from "../../views/bets/BetCard.tsx";
 
 type ModalProps = {
   isOpen: boolean;

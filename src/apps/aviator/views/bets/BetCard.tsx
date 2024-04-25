@@ -1,20 +1,16 @@
 import { css } from "@emotion/react";
 import {
   BACKGROUND_COLOR,
-  BLUE_COLOR,
   BORDER_ERROR_COLOR,
   BORDER_SUCCESS_COLOR,
   BORDER_WARNING_COLOR,
-  COLOR_BLUE,
   DARK_GRAY_COLOR,
   ERROR_COLOR,
-  LIGHT_GRAY_COLOR,
   SUCCESS_COLOR,
   WARNING_COLOR,
   WHITE_COLOR,
 } from "../../styles/colors.ts";
 import { FC, useCallback, useEffect, useState } from "react";
-import { NumberInput } from "../../components/inputs/NumberInput.tsx";
 import {
   DEFAULT_CURRENCY,
   FACTOR,
@@ -26,12 +22,14 @@ import {
   TGameState,
   WAITING_FOR_NEXT_ROUND,
 } from "../../common/constants.ts";
-import SwitchInput from "../../components/inputs/SwitchInput.tsx";
 import { AutoPlayModal } from "../../components/modals/AutoPlayModal.tsx";
 import { NumberInputWithButtons } from "../../components/inputs/NumberInputWithButtons.tsx";
 import { TBetSlip, useBetSlipStore } from "../../store/bets.store.ts";
 import { useNotificationStore } from "../../store/notifications.store.ts";
-import { useBetCashout, useBetCreate } from "../../hooks/useCrashAppEffect.ts";
+import { getMultiplier } from "../../utils/getMultiplier.ts";
+import { BetButton } from "../../components/buttons/BetButton.tsx";
+import { AutoPlayControls } from "./AutoPlayControls.tsx";
+import { rowStyles } from "../../styles/common.ts";
 
 const betInputStyles = {
   row: css({
@@ -80,6 +78,13 @@ const betInputStyles = {
     transition: "background-color 0.2s ease-in-out",
   }),
 
+  amountContainer: css({
+    display: "flex",
+    flexDirection: "column",
+    gap: 4,
+    flex: 3,
+  }),
+
   smallBtn: css({
     width: 6,
     height: 6,
@@ -117,81 +122,6 @@ const betInputStyles = {
       opacity: 0.6,
     },
   }),
-  betButton: css({
-    width: "100%",
-    height: "100%",
-    flex: 1,
-    paddingBlock: 12,
-    paddingInline: 16,
-    textAlign: "center",
-    backgroundColor: SUCCESS_COLOR,
-    color: WHITE_COLOR,
-    border: `1px solid ${BORDER_SUCCESS_COLOR}`,
-    borderRadius: 16,
-    fontSize: 20,
-    textTransform: "uppercase",
-    display: "flex",
-    flexDirection: "column",
-    gap: 2,
-    justifyContent: "center",
-    alignItems: "center",
-    transition: "background-color 0.4s ease-in-out",
-    textShadow: "0 1px 2px rgba(0,0,0,.5)",
-    span: {
-      fontSize: 16,
-    },
-    "& .amount": {
-      fontSize: 24,
-    },
-    ".success": {
-      backgroundColor: SUCCESS_COLOR,
-      color: WHITE_COLOR,
-      border: `1px solid ${BORDER_SUCCESS_COLOR}`,
-    },
-    ".error": {
-      backgroundColor: ERROR_COLOR,
-      color: WHITE_COLOR,
-      border: `1px solid ${BORDER_ERROR_COLOR}`,
-    },
-    "&.warning": {
-      backgroundColor: WARNING_COLOR,
-      color: WHITE_COLOR,
-      border: `1px solid ${BORDER_ERROR_COLOR}`,
-    },
-  }),
-  autoplayContainer: css({
-    display: "flex",
-    flexDirection: "row",
-    gap: 4,
-    alignItems: "center",
-    justifyContent: "space-between",
-    width: "100%",
-    height: "100%",
-    paddingTop: 16,
-    borderTop: "1px solid black",
-  }),
-  autoplayButton: css({
-    height: "100%",
-    paddingBlock: 4,
-    paddingInline: 8,
-    textAlign: "center",
-    backgroundColor: COLOR_BLUE,
-    border: "none",
-    borderRadius: 16,
-    fontSize: 10,
-    textTransform: "uppercase",
-    display: "flex",
-    flexDirection: "column",
-    gap: 8,
-    justifyContent: "center",
-    alignItems: "center",
-    color: WHITE_COLOR,
-    transition: "background-color 0.2s ease-in-out",
-    ":hover": {
-      backgroundColor: WHITE_COLOR,
-      color: BLUE_COLOR,
-    },
-  }),
 };
 
 type InputProps = {
@@ -215,7 +145,7 @@ const quickBetOptions: { label: string; value: number }[] = [
   { label: "500", value: 500 },
 ];
 
-export const BetsView: FC<InputProps> = ({
+export const BetCard: FC<InputProps> = ({
   gameState,
   startTime,
   now,
@@ -225,31 +155,28 @@ export const BetsView: FC<InputProps> = ({
   const [isPlaying, setIsPlaying] = useState(false);
   const [isWaitingForNext, setIsWaitingForNext] = useState(false);
   const [exitTime, setExitTime] = useState<number | null>(null);
-  const [exitMultiplier, setExitMultiplier] = useState(1);
-  const [buttonColor, setButtonColor] = useState(SUCCESS_COLOR);
-  const [buttonBorder, setButtonBorder] = useState(BORDER_SUCCESS_COLOR);
   const [isAutoPlay, setAutoPlay] = useState(false);
-
-  const [buttonTitle, setButtonTitle] = useState("BET");
 
   const [isAutoCashOut, setIsAutoCashOut] = useState(false);
 
-  const [autoPlayMultiplierLimit, setAutoPlayMultiplierLimit] = useState(1.1);
+  const [autoCashOutPoint, setAutoCashOutPoint] = useState(2);
   const [isAutoplayModalOpen, setIsAutoplayModalOpen] = useState(false);
 
   const [autoPlayConfig, setAutoPlayConfig] = useState<
-    TAutoPlaySettings | undefined
+  TAutoPlaySettings | undefined
   >(undefined);
   const [autoplayRounds, setAutoPlayRounds] = useState(0);
   const [amountLost, setAmountLost] = useState(0);
   const [amountWon, setAmountWon] = useState(0);
 
-  const { cashout } = useBetCashout();
-  const { createBet } = useBetCreate();
+  // TODO: use from store
+  // const { cashout } = useBetCashout();
+  // const { createBet } = useBetCreate();
 
   const currentBetID = useBetSlipStore((state) => state.currentGameID);
 
   const getWinAmount = () => {
+    let amount;
     if (isWaitingForNext) {
       return betAmount;
     }
@@ -257,30 +184,61 @@ export const BetsView: FC<InputProps> = ({
     if (gameState === GAME_STATE_IN_PROGRESS && isPlaying) {
       const elapsedTime = Date.now() - startTime;
       const multiplier = Math.exp(FACTOR * elapsedTime);
-      return (multiplier * betAmount).toFixed(2);
-    } else if (gameState === GAME_STATE_ENDED && isPlaying) {
-      return (exitMultiplier * betAmount).toFixed(2);
+      amount = multiplier * betAmount;
+    } else if (gameState === GAME_STATE_ENDED && isPlaying && exitTime) {
+      const exitMultiplier = getMultiplier(startTime, exitTime);
+      amount = exitMultiplier * betAmount;
     } else {
-      return betAmount.toFixed(2);
+      amount = betAmount;
     }
+    return amount;
   };
 
-  const handleChange = useCallback(
-    (value: number) => {
-      setBetAmount(value);
-      setIsPlaying(false);
-    },
-    [setBetAmount, setIsPlaying],
-  );
-
-  const getMultiplier = (endedAt: number, startedAt: number) => {
-    const elapsedTime = endedAt - startedAt;
-    return Math.exp(FACTOR * elapsedTime);
+  const getButtonColor = (): string => {
+    let color = SUCCESS_COLOR;
+    if (gameState === GAME_STATE_IN_PROGRESS && isPlaying) {
+      color = WARNING_COLOR;
+    } else if (
+      (gameState === GAME_STATE_ENDED && isPlaying) ||
+      (gameState === GAME_STATE_STARTING && isPlaying)
+    ) {
+      color = ERROR_COLOR;
+    }
+    return color;
   };
 
-  const handleSetBet = useCallback(() => {
-    if (isWaitingForNext) {
-      setIsWaitingForNext(false);
+  const getButtonBorder = (): string => {
+    let color = BORDER_SUCCESS_COLOR;
+    if (gameState === GAME_STATE_IN_PROGRESS && isPlaying) {
+      color = BORDER_WARNING_COLOR;
+    } else if (
+      (gameState === GAME_STATE_ENDED && isPlaying) ||
+      (gameState === GAME_STATE_STARTING && isPlaying)
+    ) {
+      color = BORDER_ERROR_COLOR;
+    }
+    return color;
+  };
+
+  const getButtonTitle = (): string => {
+    let title = "BET";
+    if (gameState === GAME_STATE_IN_PROGRESS && isPlaying) {
+      title = "Cash Out";
+    } else if (
+      (gameState === GAME_STATE_ENDED && isPlaying) ||
+      (gameState === GAME_STATE_STARTING && isPlaying)
+    ) {
+      title = "CANCEL";
+    }
+    return title;
+  };
+
+  const onBetAmountChange = useCallback((value: number) => {
+    setBetAmount(value);
+  }, []);
+
+  const onSetBet = useCallback(() => {
+    if (isPlaying && gameState === GAME_STATE_STARTING) {
       setIsPlaying(false);
       return;
     }
@@ -288,22 +246,19 @@ export const BetsView: FC<InputProps> = ({
     if (gameState === GAME_STATE_IN_PROGRESS && isPlaying) {
       setExitTime(Date.now());
       setIsPlaying(false);
-      cashout();
+      // cashout();
       return;
     }
     if (!isPlaying) {
       if (gameState !== GAME_STATE_STARTING) {
         setIsWaitingForNext(true);
       }
-      setButtonColor(ERROR_COLOR);
-      setButtonBorder(BORDER_ERROR_COLOR);
-      setButtonTitle("CANCEL");
       setIsPlaying(true);
       return;
     }
   }, [gameState, isPlaying, isWaitingForNext]);
 
-  const handleEndAutobetSession = useCallback(() => {
+  const onEndAutoPlaySession = useCallback(() => {
     setAutoPlay(false);
     setAutoPlayRounds(0);
     setAmountLost(0);
@@ -312,33 +267,18 @@ export const BetsView: FC<InputProps> = ({
   }, []);
 
   useEffect(() => {
-    if (
-      gameState === GAME_STATE_IN_PROGRESS &&
-      isAutoCashOut &&
-      isPlaying &&
-      !isWaitingForNext
-    ) {
-      const multiplier = getMultiplier(now, startTime);
-      if (multiplier >= autoPlayMultiplierLimit) {
+    if (gameState === GAME_STATE_IN_PROGRESS && isAutoCashOut && isPlaying) {
+      const multiplier = getMultiplier(startTime, now);
+      if (multiplier >= autoCashOutPoint) {
         setExitTime(now);
-        setExitMultiplier(multiplier);
       }
     }
-  }, [
-    autoPlayMultiplierLimit,
-    gameState,
-    isAutoCashOut,
-    isPlaying,
-    isWaitingForNext,
-    now,
-    startTime,
-  ]);
+  }, [autoCashOutPoint, gameState, isAutoCashOut, isPlaying, now, startTime]);
 
   useEffect(() => {
     if (autoPlayConfig) {
       setAutoPlayRounds(autoPlayConfig.rounds);
       setAutoPlay(true);
-      setIsAutoCashOut(true);
       setIsPlaying(true);
     }
   }, [autoPlayConfig]);
@@ -346,32 +286,11 @@ export const BetsView: FC<InputProps> = ({
   useEffect(() => {
     switch (gameState) {
       case GAME_STATE_STARTING:
-        setIsWaitingForNext(false);
         setExitTime(null);
-        setExitMultiplier(0);
-        if (isPlaying) {
-          setButtonTitle("CANCEL");
-        }
         break;
       case GAME_STATE_IN_PROGRESS:
         if (exitTime && isPlaying) {
-          const multiplier = getMultiplier(Date.now(), exitTime);
-          setExitMultiplier(multiplier);
-          setIsWaitingForNext(false);
-          setButtonColor(SUCCESS_COLOR);
-          setButtonBorder(BORDER_SUCCESS_COLOR);
-          setButtonTitle("BET");
           setIsPlaying(false);
-        }
-        if (isPlaying && !isWaitingForNext) {
-          setButtonColor(WARNING_COLOR);
-          setButtonBorder(BORDER_WARNING_COLOR);
-          setButtonTitle("EXIT");
-        }
-        if (!isPlaying && !isWaitingForNext) {
-          setButtonColor(SUCCESS_COLOR);
-          setButtonBorder(BORDER_SUCCESS_COLOR);
-          setButtonTitle("BET");
         }
         break;
       case GAME_STATE_ENDED:
@@ -379,14 +298,8 @@ export const BetsView: FC<InputProps> = ({
           if (autoplayRounds > 0 && isAutoPlay) {
             setIsPlaying(true);
             setIsAutoCashOut(true);
-            setButtonColor(ERROR_COLOR);
-            setButtonBorder(BORDER_ERROR_COLOR);
-            setButtonTitle("CANCEL");
           } else {
             setIsPlaying(false);
-            setButtonColor(SUCCESS_COLOR);
-            setButtonBorder(BORDER_SUCCESS_COLOR);
-            setButtonTitle("BET");
           }
         }
         break;
@@ -399,13 +312,14 @@ export const BetsView: FC<InputProps> = ({
     isWaitingForNext,
     isPlaying,
     isAutoCashOut,
-    autoPlayMultiplierLimit,
+    autoCashOutPoint,
     autoplayRounds,
     isAutoPlay,
   ]);
 
   // handle amount limits on autoplay
 
+  //TODO: make the loss and win be based on the end amount and not be separate values
   useEffect(() => {
     if (gameState === GAME_STATE_ENDED && isAutoPlay) {
       const mySlips = useBetSlipStore.getState().myBetSlips;
@@ -423,7 +337,7 @@ export const BetsView: FC<InputProps> = ({
           autoPlayConfig.singleWinLimit &&
           amountWon > autoPlayConfig.singleWinLimit
         ) {
-          handleEndAutobetSession();
+          onEndAutoPlaySession();
         }
       } else {
         setAmountLost((prev) => prev + mySlip.amount);
@@ -433,7 +347,7 @@ export const BetsView: FC<InputProps> = ({
     autoPlayConfig,
     currentBetID,
     gameState,
-    handleEndAutobetSession,
+    onEndAutoPlaySession,
     index,
     isAutoPlay,
   ]);
@@ -447,7 +361,7 @@ export const BetsView: FC<InputProps> = ({
       autoPlayConfig.lossAmountLimit &&
       amountLost > autoPlayConfig.lossAmountLimit
     ) {
-      handleEndAutobetSession();
+      onEndAutoPlaySession();
     }
 
     if (
@@ -455,14 +369,14 @@ export const BetsView: FC<InputProps> = ({
       autoPlayConfig.winAmountLimit &&
       amountWon > autoPlayConfig.winAmountLimit
     ) {
-      handleEndAutobetSession();
+      onEndAutoPlaySession();
     }
   }, [
     amountLost,
     amountWon,
     autoPlayConfig,
     gameState,
-    handleEndAutobetSession,
+    onEndAutoPlaySession,
     isAutoPlay,
   ]);
 
@@ -478,7 +392,7 @@ export const BetsView: FC<InputProps> = ({
         if (currentBetID && isPlaying && now >= startTime) {
           if (isAutoPlay && autoplayRounds > 0) {
             setAutoPlayRounds((prev) => prev - 1);
-            handleSetBet();
+            onSetBet();
           }
           if (!mySlip) {
             const bet: TBetSlip = {
@@ -535,7 +449,7 @@ export const BetsView: FC<InputProps> = ({
     startTime,
     isAutoPlay,
     autoplayRounds,
-    handleSetBet,
+    onSetBet,
   ]);
 
   //handle notifications
@@ -558,7 +472,7 @@ export const BetsView: FC<InputProps> = ({
       (n) => n.gameId === currentBetID && n.slipIndex === index,
     );
     if (!winNotification) {
-      const multiplier = getMultiplier(exitTime, startTime);
+      const multiplier = getMultiplier(startTime, exitTime);
       const winAmount = multiplier * mySlip.amount;
 
       useNotificationStore.setState((state) => {
@@ -607,14 +521,12 @@ export const BetsView: FC<InputProps> = ({
         </div>
       </div>
       <div css={betInputStyles.row}>
-        <div
-          style={{ display: "flex", flexDirection: "column", gap: 4, flex: 3 }}
-        >
-          <div style={{ display: "flex", width: "100%" }}>
+        <div css={betInputStyles.amountContainer}>
+          <div css={rowStyles}>
             <NumberInputWithButtons
               style={{ width: "100%" }}
               disabled={false}
-              onValueChange={handleChange}
+              onValueChange={onBetAmountChange}
               value={betAmount}
             />
           </div>
@@ -653,56 +565,20 @@ export const BetsView: FC<InputProps> = ({
           >
             {WAITING_FOR_NEXT_ROUND}
           </div>
-          <button
+          <BetButton
             style={{
-              backgroundColor: buttonColor,
-              border: `1px solid ${buttonBorder}`,
-              flexGrow: 1,
-              flex: 1,
+              backgroundColor: getButtonColor(),
+              border: `1px solid ${getButtonBorder()}`,
             }}
-            onClick={handleSetBet}
-            css={betInputStyles.betButton}
-          >
-            <div>{buttonTitle}</div>
-            <div className="amount">
-              {getWinAmount()} <span>{DEFAULT_CURRENCY}</span>{" "}
-            </div>
-          </button>
+            onClick={onSetBet}
+            backgroundColor={getButtonColor()}
+            borderColor={getButtonBorder()}
+            title={getButtonTitle()}
+            amount={getWinAmount()}
+          />
         </div>
       </div>
-      {isAutoPlay && (
-        <div css={betInputStyles.autoplayContainer}>
-          <button
-            onClick={() => {
-              setIsAutoplayModalOpen(true);
-            }}
-            css={betInputStyles.autoplayButton}
-          >
-            Autoplay
-          </button>
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              gap: 16,
-              alignItems: "center",
-              color: LIGHT_GRAY_COLOR,
-              fontWeight: 500,
-            }}
-          >
-            <div>Auto Cash Out</div>
-            <SwitchInput checked={isAutoCashOut} onChange={setIsAutoCashOut} />
-            <NumberInput
-              style={{ maxWidth: 80 }}
-              disabled={!isAutoCashOut}
-              handleChange={(value) => {
-                setAutoPlayMultiplierLimit(value);
-              }}
-              value={autoPlayMultiplierLimit}
-            />
-          </div>
-        </div>
-      )}
+      {isAutoPlay && <AutoPlayControls />}
     </div>
   );
 };

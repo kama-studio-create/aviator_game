@@ -41,7 +41,7 @@ import {
   WHITE_COLOR,
 } from "../styles/colors.ts";
 import { MEDIA_QUERIES } from "../styles/breakpoints.ts";
-import { BetsView } from "./bets/BetsView.tsx";
+import { BetCard } from "./bets/BetCard.tsx";
 import { TBetSlip, useBetSlipStore } from "../store/bets.store.ts";
 import { useSoundEffects } from "../hooks/audio/useSoundEffects.ts";
 import BGAudioFile from "../assets/audio/bg_music.mp3";
@@ -526,13 +526,13 @@ const GameView = () => {
         <canvas width={canvasWidth} height={canvasHeight} ref={canvasRef} />
       </div>
       <div css={gameStyles.userInputContainer}>
-        <BetsView
+        <BetCard
           index={0}
           now={now}
           startTime={startTime}
           gameState={gameState}
         />
-        <BetsView
+        <BetCard
           index={1}
           now={now}
           startTime={startTime}

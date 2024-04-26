@@ -1,15 +1,19 @@
-import { getAtom, setAtom, subAtom } from "../lib/atoms.ts";
+import { getAtom, setAtom, subAtom } from "../data/store/lib/atoms.ts";
 import { useEffect, useState } from "react";
-import { FACTOR, WAITING_DURATION } from "../../../common/constants.ts";
-import { useBetSlipStore } from "../zustanf/bets.store.ts";
-import { getRandomNumber } from "../../../utils/generators.ts";
-import { endTimeAtom, gameStateAtom, startTimeAtom } from "../atoms.ts";
+import { FACTOR, WAITING_DURATION } from "../common/constants.ts";
+import { useBetSlipStore } from "../data/store/zustanf/bets.store.ts";
+import { getRandomNumber } from "../utils/generators.ts";
+import {
+  endTimeAtom,
+  gameStateAtom,
+  startTimeAtom,
+} from "../data/store/atoms.ts";
 import {
   GAME_STATE_ENDED,
   GAME_STATE_IN_PROGRESS,
   GAME_STATE_STARTING,
   GameState,
-} from "../../types/types.ts";
+} from "../data/types/types.ts";
 
 type CrashAppOptions = {
   code: number;

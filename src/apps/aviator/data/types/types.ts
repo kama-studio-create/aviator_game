@@ -1,3 +1,5 @@
+import {TNotificationState} from "../../common/constants.ts";
+
 /**
  * The game is accepting new bets to be placed for the next round.
  * This is usually a five second window
@@ -107,4 +109,13 @@ export type PlayMap = Record<number, Record<number, IPlay>>;
 
 export type Idx = 0 | 1;
 export type Dual<T> = Record<Idx, T>;
+
+export type TNotification = {
+  type: TNotificationState;
+  message: string;
+  header: string;
+  gameId?: string;
+  slipIndex?: number;
+  viewed: boolean;
+};
 

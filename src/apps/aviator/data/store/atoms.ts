@@ -8,6 +8,7 @@ import {
   IBetPayload,
   IGameHistoryItem,
   PlayMap,
+  TNotification,
 } from "../types/types.ts";
 import { createDual } from "./lib/utils.ts";
 
@@ -63,4 +64,4 @@ export const playMapAtom = atom<PlayMap>({});
 
 export const playCountAtom = atom<number>(0);
 
-export const notificationsAtom =
+export const notificationsAtom = atom<TNotification[]>(undefined);

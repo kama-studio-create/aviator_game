@@ -47,7 +47,7 @@ import { NotificationsView } from "./NotificationsView.tsx";
 import { BetSlips } from "./bets/BetSlips.tsx";
 import { PreviousRoundsView } from "./bets/PreviousRoundsView.tsx";
 import { usePreferenceStore } from "../data/store/zustanf/preferences.store.ts";
-import useCrashAppEffect from "../data/store/hooks/useCrashAppEffect.ts";
+import useCrashAppEffect from "../hooks/useCrashAppEffect.ts";
 import { useAtom } from "../data/store/lib/atoms.ts";
 import {
   GAME_STATE_ENDED,

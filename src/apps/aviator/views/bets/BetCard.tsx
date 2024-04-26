@@ -20,7 +20,7 @@ import {
 } from "../../common/constants.ts";
 import { NumberInputWithButtons } from "../../components/inputs/NumberInputWithButtons.tsx";
 import { useBetSlipStore } from "../../data/store/zustanf/bets.store.ts";
-import { useNotificationStore } from "../../data/store/zustanf/notifications.store.ts";
+import { useNotificationStore } from "../../data/store/notifications.store.ts";
 import { getMultiplier } from "../../utils/getMultiplier.ts";
 import { BetButton } from "../../components/buttons/BetButton.tsx";
 import { AutoPlayControls } from "./AutoPlayControls.tsx";

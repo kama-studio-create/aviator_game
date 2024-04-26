@@ -1,13 +1,12 @@
-import { FC, useCallback, useEffect } from "react";
+import { FC, useEffect } from "react";
 import { css, keyframes } from "@emotion/react";
 import { ERROR_COLOR, SUCCESS_COLOR, WHITE_COLOR } from "../styles/colors.ts";
 import iconClose from "../assets/icons/close.svg";
-import { useNotificationStore } from "../data/store/zustanf/notifications.store.ts";
-import {
-  ERROR,
-  NOTIFICATION_VISIBILITY,
-  TNotificationState,
-} from "../common/constants.ts";
+import { removeNotification } from "../data/store/notifications.store.ts";
+import { ERROR, NOTIFICATION_VISIBILITY } from "../common/constants.ts";
+import { useAtom } from "../data/store/lib/atoms.ts";
+import { notificationsAtom } from "../data/store/atoms.ts";
+import { TNotification } from "../data/types/types.ts";
 
 const containerStyles = css({
   display: "flex",
@@ -66,23 +65,18 @@ const notificationsStyles = css({
 });
 
 type NotificationProps = {
-  message: string;
-  type: TNotificationState;
-  onClose: () => void;
-  header: string;
+  notification: TNotification;
+  onClose: (notification: TNotification) => void;
 };
 
-const NotificationItem: FC<NotificationProps> = ({
-  header,
-  message,
-  type,
-  onClose,
-}) => {
+const NotificationItem: FC<NotificationProps> = ({ notification, onClose }) => {
+  const { type, header, message } = notification;
+
   useEffect(() => {
     setTimeout(() => {
-      onClose();
+      onClose(notification);
     }, NOTIFICATION_VISIBILITY);
-  }, [onClose]);
+  }, [notification, onClose]);
 
   return (
     <div
@@ -93,7 +87,7 @@ const NotificationItem: FC<NotificationProps> = ({
         <h1>{header}</h1>
         <p>{message}</p>
       </div>
-      <button type="button" onClick={onClose}>
+      <button type="button" onClick={() => onClose(notification)}>
         <img src={iconClose} alt="close" />
       </button>
     </div>
@@ -101,19 +95,12 @@ const NotificationItem: FC<NotificationProps> = ({
 };
 
 export const NotificationsView: FC = () => {
-  const myNotifications = useNotificationStore(
-    (state) => state.notifications,
-  ).filter((n) => !n.viewed);
+  const myNotifications = useAtom(notificationsAtom);
 
-  const handleCloseNotification = useCallback(
-    (index: number) => {
-      myNotifications[index].viewed = true;
-      useNotificationStore.setState({
-        notifications: myNotifications,
-      });
-    },
-    [myNotifications],
-  );
+  const handleCloseNotification = (notification: TNotification) => {
+    removeNotification(notification);
+  };
+
   return (
     <div
       style={{ display: myNotifications.length === 0 ? "none" : "flex" }}
@@ -122,12 +109,8 @@ export const NotificationsView: FC = () => {
       {myNotifications.map((notification, index) => (
         <NotificationItem
           key={index}
-          message={notification.message}
-          type={notification.type}
-          onClose={() => {
-            handleCloseNotification(index);
-          }}
-          header={notification.header}
+          notification={notification}
+          onClose={handleCloseNotification}
         />
       ))}
     </div>

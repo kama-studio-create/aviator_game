@@ -1,7 +1,7 @@
-import { BET_STATE_QUEUED, IBetPayload, Idx } from "../../types/types.ts";
-import { DEFAULT_CURRENCY } from "../../../common/constants.ts";
-import { getAtom } from "../lib/atoms.ts";
-import { betStateAtom } from "../atoms.ts";
+import { BET_STATE_QUEUED, IBetPayload, Idx } from "../data/types/types.ts";
+import { DEFAULT_CURRENCY } from "../common/constants.ts";
+import { getAtom } from "../data/store/lib/atoms.ts";
+import { betStateAtom } from "../data/store/atoms.ts";
 
 export function useBetCashout() {
   return function cashout(idx: Idx): void {};

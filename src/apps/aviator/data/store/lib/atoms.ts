@@ -18,20 +18,20 @@ type Store = {
 };
 
 /**
- * Create a new store. Each store is an independent, isolated universe of atom
+ * Create a new data. Each data is an independent, isolated universe of atom
  * states.
  *
- * Jotai atoms are not themselves state containers. When you read or write an
- * atom, that state is stored in a store. You can think of a Store like a
- * multi-layered map from atoms to states, like this:
+ * Jotai lib are not themselves state containers. When you read or write an
+ * atom, that state is stored in a data. You can think of a Store like a
+ * multi-layered map from lib to states, like this:
  *
  * ```
- * // Conceptually, a Store is a map from atoms to states.
+ * // Conceptually, a Store is a map from lib to states.
  * // The real type is a bit different.
  * type Store = Map<VersionObject, Map<Atom, AtomState>>
  * ```
  *
- * @returns A store.
+ * @returns A data.
  */
 const createStore = (): Store => {
   const atomStateMap = new WeakMap<AnyAtom, AnyValue>();

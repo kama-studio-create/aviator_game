@@ -1,0 +1,17 @@
+import { allAvatarURls } from "../common/images.ts";
+
+export const assignAvatar = (username: string) => {
+  const hash = (str: string): number => {
+    let hashValue = 0;
+    for (let i = 0; i < str.length; i++) {
+      hashValue =
+        (str.charCodeAt(i) + ((hashValue << 5) - hashValue)) %
+        allAvatarURls.length;
+    }
+    return hashValue;
+  };
+
+  const avatarIndex = hash(username);
+
+  return allAvatarURls[avatarIndex];
+};

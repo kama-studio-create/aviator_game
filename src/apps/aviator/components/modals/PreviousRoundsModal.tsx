@@ -1,7 +1,7 @@
 import { FC } from "react";
 import { css } from "@emotion/react";
 import { MultiplierBadge } from "../badges/MultiplierBadge.tsx";
-import { useBetSlipStore } from "../../store/bets.store.ts";
+import { useBetSlipStore } from "../../data/store/zustanf/bets.store.ts";
 import { Modal } from "./Modal.tsx";
 import { GRAY_COLOR, HEADER_COLOR } from "../../styles/colors.ts";
 import { ROUND_HISTORY } from "../../common/constants.ts";

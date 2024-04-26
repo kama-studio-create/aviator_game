@@ -2,10 +2,10 @@ import { FC } from "react";
 import { css } from "@emotion/react";
 import { rowStyles } from "../../../styles/common.ts";
 import { LIGHT_GRAY_COLOR, WHITE_COLOR } from "../../../styles/colors.ts";
-import { useAvatar } from "../../../hooks/useAvatar.ts";
 import { censor } from "../../../utils/censor.ts";
 
 import iconAvatar from "../../../assets/icons/avatar.svg";
+import { assignAvatar } from "../../../utils/assignAvatar.ts";
 
 const cardStyles = css({
   display: "flex",
@@ -58,7 +58,6 @@ type props = {
 };
 
 export const MenuUserCard: FC<props> = ({ username }) => {
-  const { assignAvatar } = useAvatar();
   return (
     <div css={cardStyles}>
       <div style={{ gap: 8 }} css={rowStyles}>

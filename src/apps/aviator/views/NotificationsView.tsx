@@ -2,7 +2,7 @@ import { FC, useCallback, useEffect } from "react";
 import { css, keyframes } from "@emotion/react";
 import { ERROR_COLOR, SUCCESS_COLOR, WHITE_COLOR } from "../styles/colors.ts";
 import iconClose from "../assets/icons/close.svg";
-import { useNotificationStore } from "../store/notifications.store.ts";
+import { useNotificationStore } from "../data/store/zustanf/notifications.store.ts";
 import {
   ERROR,
   NOTIFICATION_VISIBILITY,

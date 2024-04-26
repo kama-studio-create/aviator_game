@@ -7,9 +7,6 @@ import {
   DOT_SCROLL_SPEED,
   DOT_SPACING,
   FACTOR,
-  GAME_STATE_ENDED,
-  GAME_STATE_IN_PROGRESS,
-  GAME_STATE_STARTING,
   HOVER_OFFSET_CONST,
   PLANE_FRAME_RATE,
   TIME_TO_TOP,
@@ -42,15 +39,26 @@ import {
 } from "../styles/colors.ts";
 import { MEDIA_QUERIES } from "../styles/breakpoints.ts";
 import { BetCard } from "./bets/BetCard.tsx";
-import { TBetSlip, useBetSlipStore } from "../store/bets.store.ts";
+import { TBetSlip, useBetSlipStore } from "../data/store/zustanf/bets.store.ts";
 import { useSoundEffects } from "../hooks/audio/useSoundEffects.ts";
 import BGAudioFile from "../assets/audio/bg_music.mp3";
 import PlaneAudio from "../assets/audio/audio.mp3";
 import { NotificationsView } from "./NotificationsView.tsx";
 import { BetSlips } from "./bets/BetSlips.tsx";
 import { PreviousRoundsView } from "./bets/PreviousRoundsView.tsx";
-import { usePreferenceStore } from "../store/preferences.store.ts";
-import useCrashAppEffect from "../hooks/useCrashAppEffect.ts";
+import { usePreferenceStore } from "../data/store/zustanf/preferences.store.ts";
+import useCrashAppEffect from "../data/store/hooks/useCrashAppEffect.ts";
+import { useAtom } from "../data/store/lib/atoms.ts";
+import {
+  GAME_STATE_ENDED,
+  GAME_STATE_IN_PROGRESS,
+  GAME_STATE_STARTING,
+} from "../data/types/types.ts";
+import {
+  endTimeAtom,
+  gameStateAtom,
+  startTimeAtom,
+} from "../data/store/atoms.ts";
 
 const gameStyles = {
   mainContainer: css({
@@ -104,11 +112,13 @@ Promise.all(imageLoadPromises)
 
 const GameView = () => {
   const [now, setNow] = useState(Date.now());
+  const gameState = useAtom(gameStateAtom);
+  const endTime = useAtom(endTimeAtom);
+  const startTime = useAtom(startTimeAtom);
 
-  const { startTime, gameState, endTime } = useCrashAppEffect({
+  const useCrashApp = useCrashAppEffect({
     code: CODE,
     uid: UID,
-    now,
   });
 
   const containerRef = useRef<HTMLDivElement>(null);

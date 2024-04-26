@@ -6,7 +6,7 @@ import { ANIMATION, MUSIC, SOUND } from "../../../common/constants.ts";
 import iconSound from "../../../assets/icons/sound.svg";
 import iconMusic from "../../../assets/icons/music.svg";
 import iconAnimation from "../../../assets/icons/animation.svg";
-import { usePreferenceStore } from "../../../store/preferences.store.ts";
+import { usePreferenceStore } from "../../../data/store/zustanf/preferences.store.ts";
 
 const cardStyles = css({
   display: "flex",

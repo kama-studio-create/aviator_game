@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { TNotificationState } from "../common/constants.ts";
+import { TNotificationState } from "../../../common/constants.ts";
 
 type TNotification = {
   type: TNotificationState;

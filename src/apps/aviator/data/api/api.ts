@@ -1,6 +1,6 @@
-import { HTTPDate, HTTPPlay } from "../common/types.ts";
-import { URL } from "../common/constants.ts";
+import { URL } from "../../common/constants.ts";
 import axios from "axios";
+import { HTTPDate, HTTPPlay } from "../types/types.ts";
 
 type UserIdOrMe = number | "me";
 type XID = number;

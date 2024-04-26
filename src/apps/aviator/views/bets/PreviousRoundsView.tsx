@@ -3,7 +3,7 @@ import { css } from "@emotion/react";
 import { MultiplierBadge } from "../../components/badges/MultiplierBadge.tsx";
 import { PreviousHandButton } from "../../components/buttons/PreviousHandButton.tsx";
 import { PreviousRoundsModal } from "../../components/modals/PreviousRoundsModal.tsx";
-import { useBetSlipStore } from "../../store/bets.store.ts";
+import { useBetSlipStore } from "../../data/store/zustanf/bets.store.ts";
 import { SingleRoundModal } from "../../components/modals/SingleRoundModal.tsx";
 
 const containerStyles = css({

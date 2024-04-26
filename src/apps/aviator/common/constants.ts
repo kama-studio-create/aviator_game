@@ -7,10 +7,6 @@ export const APP_NAME = "Aviator";
 
 export const WAITING_DURATION = 6000;
 
-export const GAME_STATE_STARTING = 1;
-export const GAME_STATE_IN_PROGRESS = 3;
-export const GAME_STATE_ENDED = 4;
-
 export const AUDIO_START = "start";
 export const AUDIO_FLY_AWAY = "flyAway";
 export const TIME_TO_TOP = 3200;
@@ -48,14 +44,7 @@ export const CODE = 106;
 export const UID = "crash";
 export const URL = "";
 
-const GAME_STATES = [
-  GAME_STATE_STARTING,
-  GAME_STATE_IN_PROGRESS,
-  GAME_STATE_ENDED,
-] as const;
-export type TGameState = (typeof GAME_STATES)[number];
 
 const NOTIFICATION_STATES = [ERROR, SUCCESS] as const;
 export type TNotificationState = (typeof NOTIFICATION_STATES)[number];
-export type Idx = 0 | 1;
-export type Dual<T> = Record<Idx, T>;
+

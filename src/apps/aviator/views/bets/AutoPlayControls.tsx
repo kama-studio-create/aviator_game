@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from "react";
+import { FC, useCallback, useEffect, useState } from "react";
 import { css } from "@emotion/react";
 import {
   BORDER_BLUE,
@@ -10,6 +10,10 @@ import SwitchInput from "../../components/inputs/SwitchInput.tsx";
 import { NumberInput } from "../../components/inputs/NumberInput.tsx";
 import { AutoPlayModal } from "../../components/modals/AutoPlayModal.tsx";
 import { TAutoPlaySettings } from "./BetCard.tsx";
+import { getMultiplier } from "../../utils/getMultiplier.ts";
+import { GAME_STATE_IN_PROGRESS } from "../../data/types/types.ts";
+import { useAtom } from "../../data/store/lib/atoms.ts";
+import { gameStateAtom, startTimeAtom } from "../../data/store/atoms.ts";
 
 const controlStyles = {
   autoplayContainer: css({
@@ -50,20 +54,44 @@ const controlStyles = {
     fontWeight: 500,
   }),
 };
+type props = {
+  now: number;
+};
 
-export const AutoPlayControls: FC = () => {
+export const AutoPlayControls: FC<props> = ({ now }) => {
+  const [isAutoPlayActive, setIsAutoPlayActive] = useState(false);
   const [isAutoPlayModalOpen, setIsAutoplayModalOpen] = useState(false);
   const [isAutoCashOut, setIsAutoCashOut] = useState(false);
   const [autoCashOutPoint, setAutoCashOutPoint] = useState(2.1);
   const [autoPlayConfig, setAutoPlayConfig] = useState<
-  TAutoPlaySettings | undefined
+    TAutoPlaySettings | undefined
   >(undefined);
   const [autoplayRounds, setAutoPlayRounds] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  const gameState = useAtom(gameStateAtom);
+  const startTime = useAtom(startTimeAtom);
 
   useEffect(() => {
     if (!autoPlayConfig) return;
     setAutoPlayRounds(autoPlayConfig.rounds);
+    setIsAutoPlayActive(true);
   }, [autoPlayConfig]);
+
+  const onEndAutoPlaySession = useCallback(() => {
+    setIsAutoPlayActive(false);
+    setAutoPlayRounds(0);
+    setIsAutoCashOut(false);
+  }, []);
+
+  useEffect(() => {
+    if (gameState === GAME_STATE_IN_PROGRESS && isAutoCashOut && isPlaying) {
+      const multiplier = getMultiplier(startTime, now);
+      if (multiplier >= autoCashOutPoint) {
+        setExitTime(now);
+      }
+    }
+  }, [autoCashOutPoint, gameState, isAutoCashOut, isPlaying, now, startTime]);
 
   return (
     <>

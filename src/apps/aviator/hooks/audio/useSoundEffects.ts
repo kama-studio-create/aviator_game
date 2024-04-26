@@ -1,12 +1,11 @@
 import { useEffect, useRef, useState } from "react";
+import { AUDIO_FLY_AWAY, AUDIO_START } from "../../common/constants.ts";
+import { usePreferenceStore } from "../../data/store/zustanf/preferences.store.ts";
 import {
-  AUDIO_FLY_AWAY,
-  AUDIO_START,
   GAME_STATE_ENDED,
   GAME_STATE_IN_PROGRESS,
-  TGameState,
-} from "../../common/constants.ts";
-import { usePreferenceStore } from "../../store/preferences.store.ts";
+  GameState,
+} from "../../data/types/types.ts";
 
 export const audioSprite = {
   flyAway: [2000, 3000],
@@ -14,7 +13,7 @@ export const audioSprite = {
 } as const;
 
 type UseAudioProps = {
-  gameState: TGameState;
+  gameState: GameState;
 };
 
 export const useSoundEffects = ({ gameState }: UseAudioProps) => {

@@ -14,22 +14,23 @@ import { FC, useCallback, useEffect, useState } from "react";
 import {
   DEFAULT_CURRENCY,
   FACTOR,
-  GAME_STATE_ENDED,
-  GAME_STATE_IN_PROGRESS,
-  GAME_STATE_STARTING,
   MINIMUM_BET,
   SUCCESS,
-  TGameState,
   WAITING_FOR_NEXT_ROUND,
 } from "../../common/constants.ts";
-import { AutoPlayModal } from "../../components/modals/AutoPlayModal.tsx";
 import { NumberInputWithButtons } from "../../components/inputs/NumberInputWithButtons.tsx";
-import { TBetSlip, useBetSlipStore } from "../../store/bets.store.ts";
-import { useNotificationStore } from "../../store/notifications.store.ts";
+import { useBetSlipStore } from "../../data/store/zustanf/bets.store.ts";
+import { useNotificationStore } from "../../data/store/zustanf/notifications.store.ts";
 import { getMultiplier } from "../../utils/getMultiplier.ts";
 import { BetButton } from "../../components/buttons/BetButton.tsx";
 import { AutoPlayControls } from "./AutoPlayControls.tsx";
 import { rowStyles } from "../../styles/common.ts";
+import {
+  GAME_STATE_ENDED,
+  GAME_STATE_IN_PROGRESS,
+  GAME_STATE_STARTING,
+  GameState,
+} from "../../data/types/types.ts";
 
 const betInputStyles = {
   row: css({
@@ -125,7 +126,7 @@ const betInputStyles = {
 };
 
 type InputProps = {
-  gameState: TGameState;
+  gameState: GameState;
   startTime: number;
   now: number;
   index: number;
@@ -157,19 +158,7 @@ export const BetCard: FC<InputProps> = ({
   const [exitTime, setExitTime] = useState<number | null>(null);
   const [isAutoPlay, setAutoPlay] = useState(false);
 
-  const [isAutoCashOut, setIsAutoCashOut] = useState(false);
-
-  const [autoCashOutPoint, setAutoCashOutPoint] = useState(2);
-  const [isAutoplayModalOpen, setIsAutoplayModalOpen] = useState(false);
-
-  const [autoPlayConfig, setAutoPlayConfig] = useState<
-  TAutoPlaySettings | undefined
-  >(undefined);
-  const [autoplayRounds, setAutoPlayRounds] = useState(0);
-  const [amountLost, setAmountLost] = useState(0);
-  const [amountWon, setAmountWon] = useState(0);
-
-  // TODO: use from store
+  // TODO: use from data
   // const { cashout } = useBetCashout();
   // const { createBet } = useBetCreate();
 
@@ -258,31 +247,6 @@ export const BetCard: FC<InputProps> = ({
     }
   }, [gameState, isPlaying, isWaitingForNext]);
 
-  const onEndAutoPlaySession = useCallback(() => {
-    setAutoPlay(false);
-    setAutoPlayRounds(0);
-    setAmountLost(0);
-    setAmountWon(0);
-    setIsAutoCashOut(false);
-  }, []);
-
-  useEffect(() => {
-    if (gameState === GAME_STATE_IN_PROGRESS && isAutoCashOut && isPlaying) {
-      const multiplier = getMultiplier(startTime, now);
-      if (multiplier >= autoCashOutPoint) {
-        setExitTime(now);
-      }
-    }
-  }, [autoCashOutPoint, gameState, isAutoCashOut, isPlaying, now, startTime]);
-
-  useEffect(() => {
-    if (autoPlayConfig) {
-      setAutoPlayRounds(autoPlayConfig.rounds);
-      setAutoPlay(true);
-      setIsPlaying(true);
-    }
-  }, [autoPlayConfig]);
-
   useEffect(() => {
     switch (gameState) {
       case GAME_STATE_STARTING:
@@ -294,163 +258,154 @@ export const BetCard: FC<InputProps> = ({
         }
         break;
       case GAME_STATE_ENDED:
-        if (!isWaitingForNext) {
-          if (autoplayRounds > 0 && isAutoPlay) {
-            setIsPlaying(true);
-            setIsAutoCashOut(true);
-          } else {
-            setIsPlaying(false);
-          }
-        }
+        // if (!isWaitingForNext) {
+        //   if (autoplayRounds > 0 && isAutoPlay) {
+        //     setIsPlaying(true);
+        //     setIsAutoCashOut(true);
+        //   } else {
+        //     setIsPlaying(false);
+        //   }
+        // }
         break;
       default:
         break;
     }
-  }, [
-    gameState,
-    exitTime,
-    isWaitingForNext,
-    isPlaying,
-    isAutoCashOut,
-    autoCashOutPoint,
-    autoplayRounds,
-    isAutoPlay,
-  ]);
+  }, [gameState, exitTime, isWaitingForNext, isPlaying, isAutoPlay]);
 
   // handle amount limits on autoplay
 
-  //TODO: make the loss and win be based on the end amount and not be separate values
-  useEffect(() => {
-    if (gameState === GAME_STATE_ENDED && isAutoPlay) {
-      const mySlips = useBetSlipStore.getState().myBetSlips;
-      const mySlip = mySlips.find(
-        (s) => s.gameId === currentBetID && index === s.index,
-      );
-      if (!mySlip) return;
-      if (mySlip.exitTime && mySlip.startTime) {
-        const multiplier = getMultiplier(mySlip.exitTime, mySlip.startTime);
-        const amountWon = Math.floor(multiplier * mySlip.amount);
-        setAmountWon((prev) => prev + amountWon);
-
-        if (
-          autoPlayConfig &&
-          autoPlayConfig.singleWinLimit &&
-          amountWon > autoPlayConfig.singleWinLimit
-        ) {
-          onEndAutoPlaySession();
-        }
-      } else {
-        setAmountLost((prev) => prev + mySlip.amount);
-      }
-    }
-  }, [
-    autoPlayConfig,
-    currentBetID,
-    gameState,
-    onEndAutoPlaySession,
-    index,
-    isAutoPlay,
-  ]);
+  //TODO: make the loss and win be based on the end amount
+  // useEffect(() => {
+  //   if (gameState === GAME_STATE_ENDED && isAutoPlay) {
+  //     const mySlips = useBetSlipStore.getState().myBetSlips;
+  //     const mySlip = mySlips.find(
+  //       (s) => s.gameId === currentBetID && index === s.index,
+  //     );
+  //     if (!mySlip) return;
+  //     if (mySlip.exitTime && mySlip.startTime) {
+  //       const multiplier = getMultiplier(mySlip.exitTime, mySlip.startTime);
+  //       const amountWon = Math.floor(multiplier * mySlip.amount);
+  //       setAmountWon((prev) => prev + amountWon);
+  //
+  //       if (
+  //         autoPlayConfig &&
+  //         autoPlayConfig.singleWinLimit &&
+  //         amountWon > autoPlayConfig.singleWinLimit
+  //       ) {
+  //         onEndAutoPlaySession();
+  //       }
+  //     } else {
+  //       setAmountLost((prev) => prev + mySlip.amount);
+  //     }
+  //   }
+  // }, [
+  //   autoPlayConfig,
+  //   currentBetID,
+  //   gameState,
+  //   onEndAutoPlaySession,
+  //   index,
+  //   isAutoPlay,
+  // ]);
 
   //handle end autoplay if limit exceeded
 
-  useEffect(() => {
-    if (gameState !== GAME_STATE_ENDED && !isAutoPlay) return;
-    if (
-      autoPlayConfig &&
-      autoPlayConfig.lossAmountLimit &&
-      amountLost > autoPlayConfig.lossAmountLimit
-    ) {
-      onEndAutoPlaySession();
-    }
-
-    if (
-      autoPlayConfig &&
-      autoPlayConfig.winAmountLimit &&
-      amountWon > autoPlayConfig.winAmountLimit
-    ) {
-      onEndAutoPlaySession();
-    }
-  }, [
-    amountLost,
-    amountWon,
-    autoPlayConfig,
-    gameState,
-    onEndAutoPlaySession,
-    isAutoPlay,
-  ]);
+  // useEffect(() => {
+  //   if (gameState !== GAME_STATE_ENDED && !isAutoPlay) return;
+  //   if (
+  //     autoPlayConfig &&
+  //     autoPlayConfig.lossAmountLimit &&
+  //     amountLost > autoPlayConfig.lossAmountLimit
+  //   ) {
+  //     onEndAutoPlaySession();
+  //   }
+  //
+  //   if (
+  //     autoPlayConfig &&
+  //     autoPlayConfig.winAmountLimit &&
+  //     amountWon > autoPlayConfig.winAmountLimit
+  //   ) {
+  //     onEndAutoPlaySession();
+  //   }
+  // }, [
+  //   amountLost,
+  //   amountWon,
+  //   autoPlayConfig,
+  //   gameState,
+  //   onEndAutoPlaySession,
+  //   isAutoPlay,
+  // ]);
 
   // handle bet slips
-  useEffect(() => {
-    const mySlips = useBetSlipStore.getState().myBetSlips;
-    const mySlip = mySlips.find(
-      (s) => s.gameId === currentBetID && index === s.index,
-    );
-
-    switch (gameState) {
-      case GAME_STATE_STARTING:
-        if (currentBetID && isPlaying && now >= startTime) {
-          if (isAutoPlay && autoplayRounds > 0) {
-            setAutoPlayRounds((prev) => prev - 1);
-            onSetBet();
-          }
-          if (!mySlip) {
-            const bet: TBetSlip = {
-              amount: betAmount,
-              gameId: currentBetID,
-              startTime: startTime,
-              index,
-            };
-            useBetSlipStore.setState((state) => ({
-              myBetSlips: [...state.myBetSlips, bet],
-            }));
-          }
-        }
-        break;
-      case GAME_STATE_IN_PROGRESS:
-        if (exitTime && mySlip && !mySlip.exitTime) {
-          mySlip.exitTime = exitTime;
-          useBetSlipStore.setState((state) => ({
-            myBetSlips: state.myBetSlips.map((s) => {
-              if (s.gameId === currentBetID && index === s.index) {
-                return mySlip;
-              } else {
-                return s;
-              }
-            }),
-          }));
-        }
-        break;
-      case GAME_STATE_ENDED:
-        if (mySlip) {
-          mySlip.endTime = Date.now();
-          useBetSlipStore.setState((state) => ({
-            myBetSlips: state.myBetSlips.map((s) => {
-              if (s.gameId === currentBetID && index === s.index) {
-                return mySlip;
-              } else {
-                return s;
-              }
-            }),
-          }));
-        }
-        break;
-      default:
-        break;
-    }
-  }, [
-    index,
-    now,
-    betAmount,
-    currentBetID,
-    exitTime,
-    gameState,
-    isPlaying,
-    startTime,
-    isAutoPlay,
-    autoplayRounds,
-    onSetBet,
-  ]);
+  // useEffect(() => {
+  //   const mySlips = useBetSlipStore.getState().myBetSlips;
+  //   const mySlip = mySlips.find(
+  //     (s) => s.gameId === currentBetID && index === s.index,
+  //   );
+  //
+  //   switch (gameState) {
+  //     case GAME_STATE_STARTING:
+  //       if (currentBetID && isPlaying && now >= startTime) {
+  //         if (isAutoPlay && autoplayRounds > 0) {
+  //           setAutoPlayRounds((prev) => prev - 1);
+  //           onSetBet();
+  //         }
+  //         if (!mySlip) {
+  //           const bet: TBetSlip = {
+  //             amount: betAmount,
+  //             gameId: currentBetID,
+  //             startTime: startTime,
+  //             index,
+  //           };
+  //           useBetSlipStore.setState((state) => ({
+  //             myBetSlips: [...state.myBetSlips, bet],
+  //           }));
+  //         }
+  //       }
+  //       break;
+  //     case GAME_STATE_IN_PROGRESS:
+  //       if (exitTime && mySlip && !mySlip.exitTime) {
+  //         mySlip.exitTime = exitTime;
+  //         useBetSlipStore.setState((state) => ({
+  //           myBetSlips: state.myBetSlips.map((s) => {
+  //             if (s.gameId === currentBetID && index === s.index) {
+  //               return mySlip;
+  //             } else {
+  //               return s;
+  //             }
+  //           }),
+  //         }));
+  //       }
+  //       break;
+  //     case GAME_STATE_ENDED:
+  //       if (mySlip) {
+  //         mySlip.endTime = Date.now();
+  //         useBetSlipStore.setState((state) => ({
+  //           myBetSlips: state.myBetSlips.map((s) => {
+  //             if (s.gameId === currentBetID && index === s.index) {
+  //               return mySlip;
+  //             } else {
+  //               return s;
+  //             }
+  //           }),
+  //         }));
+  //       }
+  //       break;
+  //     default:
+  //       break;
+  //   }
+  // }, [
+  //   index,
+  //   now,
+  //   betAmount,
+  //   currentBetID,
+  //   exitTime,
+  //   gameState,
+  //   isPlaying,
+  //   startTime,
+  //   isAutoPlay,
+  //   autoplayRounds,
+  //   onSetBet,
+  // ]);
 
   //handle notifications
   useEffect(() => {
@@ -495,11 +450,6 @@ export const BetCard: FC<InputProps> = ({
 
   return (
     <div css={betInputStyles.inputContainer}>
-      <AutoPlayModal
-        isOpen={isAutoplayModalOpen}
-        onClose={setIsAutoplayModalOpen}
-        onStart={setAutoPlayConfig}
-      />
       <div css={betInputStyles.tabContainer}>
         <div
           onClick={() => {
@@ -578,7 +528,7 @@ export const BetCard: FC<InputProps> = ({
           />
         </div>
       </div>
-      {isAutoPlay && <AutoPlayControls />}
+      {isAutoPlay && <AutoPlayControls now={now} />}
     </div>
   );
 };

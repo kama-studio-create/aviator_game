@@ -11,9 +11,9 @@ import { rowStyles } from "../../styles/common.ts";
 import { DEFAULT_CURRENCY } from "../../common/constants.ts";
 import historyIcon from "../../assets/icons/history.svg";
 import { censor } from "../../utils/censor.ts";
-import { useBetSlipStore } from "../../store/bets.store.ts";
-import { useAvatar } from "../../hooks/useAvatar.ts";
+import { useBetSlipStore } from "../../data/store/zustanf/bets.store.ts";
 import { MultiplierBadge } from "../../components/badges/MultiplierBadge.tsx";
+import { assignAvatar } from "../../utils/assignAvatar.ts";
 
 const headerStyles = css({
   display: "flex",
@@ -87,7 +87,6 @@ const tableItem = css({
 export const AllBetsView: FC = () => {
   const allBets = useBetSlipStore((state) => state.allBetSlips);
 
-  const { assignAvatar } = useAvatar();
   return (
     <div style={{}}>
       <div css={headerStyles}>

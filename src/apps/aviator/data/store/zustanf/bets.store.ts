@@ -1,6 +1,6 @@
 import { create } from "zustand";
-import { getTestData } from "../common/getTestData.ts";
-import createStore from "../common/atoms/atoms.ts";
+import { getTestData } from "../../../common/getTestData.ts";
+import createStore from "../lib/atoms.ts";
 
 export type TBetSlip = {
   amount: number;

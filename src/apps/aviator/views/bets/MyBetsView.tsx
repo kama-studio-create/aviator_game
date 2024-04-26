@@ -3,7 +3,10 @@ import { rowStyles } from "../../styles/common.ts";
 import { DEFAULT_CURRENCY } from "../../common/constants.ts";
 import { css } from "@emotion/react";
 import messageIcon from "../../assets/icons/message.svg";
-import { TBetSlip, useBetSlipStore } from "../../store/bets.store.ts";
+import {
+  TBetSlip,
+  useBetSlipStore,
+} from "../../data/store/zustanf/bets.store.ts";
 import { getMultiplier } from "../../utils/getMultiplier.ts";
 import {
   DARK_GRAY_COLOR,

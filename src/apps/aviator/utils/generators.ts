@@ -1,4 +1,4 @@
-import { TBetSlip } from "../store/bets.store.ts";
+import { TBetSlip } from "../data/store/zustanf/bets.store.ts";
 
 export const getRandomNumber = (min: number, max: number) => {
   return Math.random() * (max - min) + min;

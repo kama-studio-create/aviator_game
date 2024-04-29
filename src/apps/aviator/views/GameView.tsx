@@ -46,7 +46,6 @@ import PlaneAudio from "../assets/audio/audio.mp3";
 import { NotificationsView } from "./NotificationsView.tsx";
 import { BetSlips } from "./bets/BetSlips.tsx";
 import { PreviousRoundsView } from "./bets/PreviousRoundsView.tsx";
-import { usePreferenceStore } from "../data/store/zustanf/preferences.store.ts";
 import useCrashAppEffect from "../hooks/useCrashAppEffect.ts";
 import { useAtom } from "../data/store/lib/atoms.ts";
 import {
@@ -57,6 +56,7 @@ import {
 import {
   endTimeAtom,
   gameStateAtom,
+  preferencesAtom,
   startTimeAtom,
 } from "../data/store/atoms.ts";
 
@@ -79,15 +79,20 @@ const gameStyles = {
     canvas: {
       borderRadius: 32,
     },
+    maxHeight: "40vh",
+    maxWidth: "98vw",
   }),
   loadingContainer: css({
     width: "100%",
     height: "100%",
     background: GRADIENT_DARK,
-    position: "absolute",
+    position: "fixed",
+    top: 0,
+    left: 0,
     display: "grid",
     placeContent: "center",
     fontSize: 32,
+    zIndex: 1000,
   }),
   userInputContainer: css({
     display: "flex",
@@ -115,8 +120,9 @@ const GameView = () => {
   const gameState = useAtom(gameStateAtom);
   const endTime = useAtom(endTimeAtom);
   const startTime = useAtom(startTimeAtom);
+  const { isAnimationEnabled } = useAtom(preferencesAtom);
 
-  const useCrashApp = useCrashAppEffect({
+  useCrashAppEffect({
     code: CODE,
     uid: UID,
   });
@@ -126,6 +132,7 @@ const GameView = () => {
 
   const [canvasWidth, setCanvasWidth] = useState(300);
   const [canvasHeight, setCanvasHeight] = useState(300);
+  //TODO: derive planeWidth & height from canvasWidth & canvasHeight
 
   const { audioRef, isPlaying, bgAudioRef } = useSoundEffects({ gameState });
 
@@ -133,10 +140,6 @@ const GameView = () => {
   const betSlipStore = useBetSlipStore;
 
   const [bgColor, setBgColor] = useState(BG_GRAY_COLOR);
-
-  const isAnimationEnabled = usePreferenceStore(
-    (state) => state.isAnimationEnabled,
-  );
 
   useEffect(() => {
     const ref = audioRef.current;
@@ -151,6 +154,7 @@ const GameView = () => {
   useEffect(() => {
     if (!canvasRef.current || !containerRef.current) return;
     const ctx = canvasRef.current.getContext("2d");
+
     const resizeAndStyleCanvases = () => {
       if (!containerRef.current || !ctx) return;
       const currentWidth = containerRef.current.clientWidth;

@@ -1,6 +1,5 @@
 import { create } from "zustand";
 import { getTestData } from "../../../common/getTestData.ts";
-import createStore from "../lib/atoms.ts";
 
 export type TBetSlip = {
   amount: number;
@@ -33,7 +32,3 @@ export const useBetSlipStore = create<IBetSlipStore>()(() => ({
   previousGameID: "",
   previousRounds: testRoundsData,
 }));
-
-
-
-const betStore = createStore({});

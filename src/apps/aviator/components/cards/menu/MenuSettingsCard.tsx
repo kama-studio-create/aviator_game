@@ -6,7 +6,14 @@ import { ANIMATION, MUSIC, SOUND } from "../../../common/constants.ts";
 import iconSound from "../../../assets/icons/sound.svg";
 import iconMusic from "../../../assets/icons/music.svg";
 import iconAnimation from "../../../assets/icons/animation.svg";
-import { usePreferenceStore } from "../../../data/store/zustanf/preferences.store.ts";
+import { setAtom, useAtom } from "../../../data/store/lib/atoms.ts";
+import { preferencesAtom } from "../../../data/store/atoms.ts";
+import {
+  IS_ANIMATION_ENABLED,
+  IS_MUSIC_ENABLED,
+  IS_SOUND_ENABLED,
+  TPreferences,
+} from "../../../data/types/types.ts";
 
 const cardStyles = css({
   display: "flex",
@@ -16,28 +23,24 @@ const cardStyles = css({
 });
 
 export const MenuSettingsCard: FC = () => {
-  const isSoundEnabled = usePreferenceStore((state) => state.isSoundEnabled);
-  const isMusicEnabled = usePreferenceStore((state) => state.isMusicEnabled);
-  const isAnimationEnabled = usePreferenceStore(
-    (state) => state.isAnimationEnabled,
-  );
+  const preferences: TPreferences = useAtom(preferencesAtom);
+  const { isSoundEnabled, isMusicEnabled, isAnimationEnabled } = preferences;
 
-  const setSoundEnabled = usePreferenceStore((state) => state.setSoundEnabled);
-  const setMusicEnabled = usePreferenceStore((state) => state.setMusicEnabled);
-  const setAnimationEnabled = usePreferenceStore(
-    (state) => state.setAnimationEnabled,
-  );
+  const setPreference = (key: string, value: boolean) => {
+    const newPrefs: TPreferences = { ...preferences, [key]: value };
+    setAtom(preferencesAtom, newPrefs);
+  };
 
   const handleSound = () => {
-    setSoundEnabled(!isSoundEnabled);
+    setPreference(IS_SOUND_ENABLED, !isSoundEnabled);
   };
 
   const handleMusic = () => {
-    setMusicEnabled(!isMusicEnabled);
+    setPreference(IS_MUSIC_ENABLED, !isMusicEnabled);
   };
 
   const handleAnimation = () => {
-    setAnimationEnabled(!isAnimationEnabled);
+    setPreference(IS_ANIMATION_ENABLED, !isAnimationEnabled);
   };
 
   return (

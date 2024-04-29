@@ -1,10 +1,6 @@
 import { ComponentProps, FC, ReactNode, useState } from "react";
 import { css } from "@emotion/react";
-import {
-  DARK_GRAY_COLOR,
-  LIGHT_GRAY_COLOR,
-  WHITE_COLOR,
-} from "../../styles/colors.ts";
+import { TabItem } from "./TabItem.tsx";
 
 const mainContainer = css({
   display: "flex",
@@ -23,29 +19,11 @@ const tabContainer = css({
   marginInline: "auto",
   transition: "all 0.6s ease-in-out",
 });
-const tabStyles = css({
-  width: "100%",
-  padding: 4,
-  display: "flex",
-  flexDirection: "column",
-  gap: 8,
-  flex: 1,
-  backgroundColor: DARK_GRAY_COLOR,
-  borderRadius: 16,
-  textAlign: "center",
-  fontSize: 12,
-  color: "#9ea0a3",
-  "&.active": {
-    backgroundColor: LIGHT_GRAY_COLOR,
-    border: `1px solid ${DARK_GRAY_COLOR}`,
-    opacity: 1,
-    color: WHITE_COLOR,
-  },
-  transition: "background-color 0.2s ease-in-out",
-});
+
 
 const childContainer = css({
   width: "100%",
+  transition: "all 0.4s ease-in-out",
 });
 
 export type Tab = {
@@ -68,16 +46,15 @@ export const Tabs: FC<props> = ({ tabs }) => {
     <div css={mainContainer}>
       <div css={tabContainer}>
         {tabs.map((tab, index) => (
-          <div
-            className={currentTabIndex === index ? "active" : ""}
+          <TabItem
+            isActive={index === currentTabIndex}
             key={tab.label}
-            css={tabStyles}
             onClick={() => {
               setTabAsActive(index);
             }}
           >
             {tab.label}
-          </div>
+          </TabItem>
         ))}
       </div>
       <div css={childContainer}>

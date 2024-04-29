@@ -20,7 +20,6 @@ import {
 } from "../../common/constants.ts";
 import { NumberInputWithButtons } from "../../components/inputs/NumberInputWithButtons.tsx";
 import { useBetSlipStore } from "../../data/store/zustanf/bets.store.ts";
-import { useNotificationStore } from "../../data/store/notifications.store.ts";
 import { getMultiplier } from "../../utils/getMultiplier.ts";
 import { BetButton } from "../../components/buttons/BetButton.tsx";
 import { AutoPlayControls } from "./AutoPlayControls.tsx";
@@ -30,7 +29,11 @@ import {
   GAME_STATE_IN_PROGRESS,
   GAME_STATE_STARTING,
   GameState,
+  TNotification,
 } from "../../data/types/types.ts";
+import { setAtom, useAtom } from "../../data/store/lib/atoms.ts";
+import { notificationsAtom } from "../../data/store/atoms.ts";
+import { TabItem } from "../../components/tabs/TabItem.tsx";
 
 const betInputStyles = {
   row: css({
@@ -154,9 +157,10 @@ export const BetCard: FC<InputProps> = ({
 }) => {
   const [betAmount, setBetAmount] = useState(MINIMUM_BET);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isWaitingForNext, setIsWaitingForNext] = useState(false);
   const [exitTime, setExitTime] = useState<number | null>(null);
   const [isAutoPlay, setAutoPlay] = useState(false);
+
+  const notifications = useAtom(notificationsAtom);
 
   // TODO: use from data
   // const { cashout } = useBetCashout();
@@ -166,10 +170,6 @@ export const BetCard: FC<InputProps> = ({
 
   const getWinAmount = () => {
     let amount;
-    if (isWaitingForNext) {
-      return betAmount;
-    }
-
     if (gameState === GAME_STATE_IN_PROGRESS && isPlaying) {
       const elapsedTime = Date.now() - startTime;
       const multiplier = Math.exp(FACTOR * elapsedTime);
@@ -240,12 +240,12 @@ export const BetCard: FC<InputProps> = ({
     }
     if (!isPlaying) {
       if (gameState !== GAME_STATE_STARTING) {
-        setIsWaitingForNext(true);
+        setIsPlaying(true);
       }
       setIsPlaying(true);
       return;
     }
-  }, [gameState, isPlaying, isWaitingForNext]);
+  }, [gameState, isPlaying]);
 
   useEffect(() => {
     switch (gameState) {
@@ -270,7 +270,7 @@ export const BetCard: FC<InputProps> = ({
       default:
         break;
     }
-  }, [gameState, exitTime, isWaitingForNext, isPlaying, isAutoPlay]);
+  }, [gameState, exitTime, isPlaying, isAutoPlay]);
 
   // handle amount limits on autoplay
 
@@ -422,53 +422,43 @@ export const BetCard: FC<InputProps> = ({
     )
       return;
 
-    const notifications = useNotificationStore.getState().notifications;
     const winNotification = notifications.find(
       (n) => n.gameId === currentBetID && n.slipIndex === index,
     );
     if (!winNotification) {
       const multiplier = getMultiplier(startTime, exitTime);
       const winAmount = multiplier * mySlip.amount;
-
-      useNotificationStore.setState((state) => {
-        return {
-          notifications: [
-            {
-              type: SUCCESS,
-              header: "CONGRATULATIONS!!!!",
-              message: `You have cashed out ${DEFAULT_CURRENCY} ${winAmount.toFixed(2)}`,
-              gameId: currentBetID,
-              slipIndex: index,
-              viewed: false,
-            },
-            ...state.notifications,
-          ],
-        };
-      });
+      const notification: TNotification = {
+        type: SUCCESS,
+        header: "CONGRATULATIONS!!!!",
+        message: `You have cashed out ${DEFAULT_CURRENCY} ${winAmount.toFixed(2)}`,
+        gameId: currentBetID,
+        slipIndex: index,
+        viewed: false,
+      };
+      setAtom(notificationsAtom, [notification, ...notifications]);
     }
-  }, [currentBetID, exitTime, gameState, index, startTime]);
+  }, [currentBetID, exitTime, gameState, index, notifications, startTime]);
 
   return (
     <div css={betInputStyles.inputContainer}>
       <div css={betInputStyles.tabContainer}>
-        <div
+        <TabItem
+          isActive={!isAutoPlay}
           onClick={() => {
             setAutoPlay(false);
           }}
-          className={!isAutoPlay ? "active" : ""}
-          css={betInputStyles.tab}
         >
           Bet
-        </div>
-        <div
+        </TabItem>
+        <TabItem
+          isActive={isAutoPlay}
           onClick={() => {
             setAutoPlay(true);
           }}
-          className={isAutoPlay ? "active" : ""}
-          css={betInputStyles.tab}
         >
           Auto
-        </div>
+        </TabItem>
       </div>
       <div css={betInputStyles.row}>
         <div css={betInputStyles.amountContainer}>
@@ -507,11 +497,13 @@ export const BetCard: FC<InputProps> = ({
           }}
         >
           <div
-            style={{
-              flexGrow: isWaitingForNext ? 1 : 0,
-              height: isWaitingForNext ? 12 : 0,
-              opacity: isWaitingForNext ? 1 : 0,
-            }}
+            style={
+              {
+                // flexGrow: isWaitingForNext ? 1 : 0,
+                // height: isWaitingForNext ? 12 : 0,
+                // opacity: isWaitingForNext ? 1 : 0,
+              }
+            }
           >
             {WAITING_FOR_NEXT_ROUND}
           </div>

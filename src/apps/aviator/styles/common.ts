@@ -1,4 +1,4 @@
-import { css } from "@emotion/react";
+import { css, keyframes } from "@emotion/react";
 
 export const translucentBackgroundStyles = css({
   background: "rgba(0, 0, 0, 0.6)",
@@ -18,4 +18,13 @@ export const rowStyles = css({
   flexDirection: "row",
   gap: 16,
   alignItems: "center",
+});
+
+export const fadeInAnimation = keyframes({
+  "0%": {
+    opacity: 0,
+  },
+  "100%": {
+    opacity: 1,
+  },
 });

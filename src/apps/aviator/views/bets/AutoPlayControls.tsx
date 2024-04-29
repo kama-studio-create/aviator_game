@@ -1,5 +1,5 @@
 import { FC, useCallback, useEffect, useState } from "react";
-import { css } from "@emotion/react";
+import { css, keyframes } from "@emotion/react";
 import {
   BORDER_BLUE,
   COLOR_BLUE,
@@ -11,9 +11,21 @@ import { NumberInput } from "../../components/inputs/NumberInput.tsx";
 import { AutoPlayModal } from "../../components/modals/AutoPlayModal.tsx";
 import { TAutoPlaySettings } from "./BetCard.tsx";
 import { getMultiplier } from "../../utils/getMultiplier.ts";
-import { GAME_STATE_IN_PROGRESS } from "../../data/types/types.ts";
+import {
+  GAME_STATE_ENDED,
+  GAME_STATE_IN_PROGRESS,
+} from "../../data/types/types.ts";
 import { useAtom } from "../../data/store/lib/atoms.ts";
 import { gameStateAtom, startTimeAtom } from "../../data/store/atoms.ts";
+
+const growAnimation = keyframes({
+  "0%": {
+    transform: "scaleY(0)",
+  },
+  "100%": {
+    transform: "scaleY(1)",
+  },
+});
 
 const controlStyles = {
   autoplayContainer: css({
@@ -26,6 +38,8 @@ const controlStyles = {
     height: "100%",
     paddingTop: 16,
     borderTop: "1px solid black",
+    animation: `${growAnimation} 0.1s ease-in-out`,
+    animationDirection: "alternate",
   }),
   autoplayButton: css({
     height: 22,
@@ -76,22 +90,38 @@ export const AutoPlayControls: FC<props> = ({ now }) => {
     if (!autoPlayConfig) return;
     setAutoPlayRounds(autoPlayConfig.rounds);
     setIsAutoPlayActive(true);
+    console.log(isAutoPlayActive);
   }, [autoPlayConfig]);
 
   const onEndAutoPlaySession = useCallback(() => {
     setIsAutoPlayActive(false);
     setAutoPlayRounds(0);
     setIsAutoCashOut(false);
+    setIsPlaying(false);
   }, []);
 
   useEffect(() => {
     if (gameState === GAME_STATE_IN_PROGRESS && isAutoCashOut && isPlaying) {
       const multiplier = getMultiplier(startTime, now);
       if (multiplier >= autoCashOutPoint) {
-        setExitTime(now);
+        // setExitTime(now);
       }
     }
-  }, [autoCashOutPoint, gameState, isAutoCashOut, isPlaying, now, startTime]);
+    if (gameState === GAME_STATE_ENDED && isAutoCashOut && isPlaying) {
+      if (autoplayRounds === 0) {
+        onEndAutoPlaySession();
+      }
+    }
+  }, [
+    autoCashOutPoint,
+    autoplayRounds,
+    gameState,
+    isAutoCashOut,
+    isPlaying,
+    now,
+    onEndAutoPlaySession,
+    startTime,
+  ]);
 
   return (
     <>

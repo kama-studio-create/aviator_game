@@ -1,6 +1,5 @@
 import { ComponentProps, FC } from "react";
 import { css } from "@emotion/react";
-import Sidebar from "./Sidebar.tsx";
 import Header from "./Header.tsx";
 import { MEDIA_QUERIES } from "../../styles/breakpoints.ts";
 import { DARK_GRAY_COLOR } from "../../styles/colors.ts";
@@ -18,6 +17,13 @@ const styles = {
     flexDirection: "column",
     gap: 4,
     fontFamily: "Inter, sans-serif",
+    ":root": {
+      margin: 0,
+      padding: 0,
+      boxSizing: "border-box",
+      fontSize: 14,
+      fontFamily: "Inter, system-ui, Avenir, Helvetica, Arial, sans-serif",
+    },
   }),
   containerStyles: css({
     width: "100%",
@@ -25,7 +31,7 @@ const styles = {
   }),
   mainContainerStyles: css({
     display: "grid",
-    gridTemplateColumns: "8fr 4fr",
+    // gridTemplateColumns: "8fr 4fr",
     gap: 4,
     minHeight: "100vh",
     [MEDIA_QUERIES[0]]: {
@@ -54,7 +60,7 @@ const Layout: FC<LayoutProps> = ({ children, ...props }) => {
           <Header />
           <div css={styles.gameContainerStyles}>{children}</div>
         </div>
-        <Sidebar />
+        {/*<Sidebar />*/}
       </div>
     </div>
   );

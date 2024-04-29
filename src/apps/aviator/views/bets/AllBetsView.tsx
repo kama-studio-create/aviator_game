@@ -7,13 +7,21 @@ import {
   SUCCESS_COLOR_LIGHT,
   WHITE_COLOR,
 } from "../../styles/colors.ts";
-import { rowStyles } from "../../styles/common.ts";
+import { fadeInAnimation, rowStyles } from "../../styles/common.ts";
 import { DEFAULT_CURRENCY } from "../../common/constants.ts";
 import historyIcon from "../../assets/icons/history.svg";
 import { censor } from "../../utils/censor.ts";
 import { useBetSlipStore } from "../../data/store/zustanf/bets.store.ts";
 import { MultiplierBadge } from "../../components/badges/MultiplierBadge.tsx";
 import { assignAvatar } from "../../utils/assignAvatar.ts";
+
+const containerStyles = css({
+  width: "100%",
+  display: "flex",
+  flexDirection: "column",
+  gap: 8,
+  animation: `${fadeInAnimation} 0.3s ease-in-out`,
+});
 
 const headerStyles = css({
   display: "flex",
@@ -85,10 +93,11 @@ const tableItem = css({
 });
 
 export const AllBetsView: FC = () => {
+
   const allBets = useBetSlipStore((state) => state.allBetSlips);
 
   return (
-    <div style={{}}>
+    <div css={containerStyles}>
       <div css={headerStyles}>
         <div>
           <h1>All Bets</h1>

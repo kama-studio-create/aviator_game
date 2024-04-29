@@ -119,3 +119,13 @@ export type TNotification = {
   viewed: boolean;
 };
 
+export const IS_SOUND_ENABLED = "isSoundEnabled";
+export const IS_MUSIC_ENABLED = "isMusicEnabled";
+export const IS_ANIMATION_ENABLED = "isAnimationEnabled";
+
+export type Preference =
+  | typeof IS_MUSIC_ENABLED
+  | typeof IS_SOUND_ENABLED
+  | typeof IS_ANIMATION_ENABLED;
+
+export type TPreferences = Record<Preference, boolean>;

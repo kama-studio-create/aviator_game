@@ -4,14 +4,16 @@ import { getAtom } from "../data/store/lib/atoms.ts";
 import { betStateAtom } from "../data/store/atoms.ts";
 
 export function useBetCashout() {
-  return function cashout(idx: Idx): void {};
+  return function cashout(idx: Idx): void {
+    console.log(idx);
+  };
 }
 
 export function useBetCreate() {
   const currency = DEFAULT_CURRENCY;
 
   return function createBet(params: Omit<IBetPayload, "currency">) {
-    console.log(params);
+    console.log(params, currency);
     return true;
   };
 }

@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { AUDIO_FLY_AWAY, AUDIO_START } from "../../common/constants.ts";
-import { usePreferenceStore } from "../../data/store/zustanf/preferences.store.ts";
 import {
   GAME_STATE_ENDED,
   GAME_STATE_IN_PROGRESS,
   GameState,
 } from "../../data/types/types.ts";
+import { useAtom } from "../../data/store/lib/atoms.ts";
+import { preferencesAtom } from "../../data/store/atoms.ts";
 
 export const audioSprite = {
   flyAway: [2000, 3000],
@@ -22,8 +23,7 @@ export const useSoundEffects = ({ gameState }: UseAudioProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [hasInteracted, setHasInteracted] = useState(false);
 
-  const isMusicEnabled = usePreferenceStore((state) => state.isMusicEnabled);
-  const isSoundEnabled = usePreferenceStore((state) => state.isSoundEnabled);
+  const { isSoundEnabled, isMusicEnabled } = useAtom(preferencesAtom);
 
   useEffect(() => {
     const playSegment = (segmentName: keyof typeof audioSprite) => {
@@ -47,7 +47,7 @@ export const useSoundEffects = ({ gameState }: UseAudioProps) => {
 
     if (gameState === GAME_STATE_IN_PROGRESS) playSegment(AUDIO_START);
     if (gameState === GAME_STATE_ENDED) playSegment(AUDIO_FLY_AWAY);
-  }, [gameState, hasInteracted]);
+  }, [gameState, hasInteracted, isSoundEnabled]);
 
   useEffect(() => {
     const bgAudio = bgAudioRef.current;
@@ -58,9 +58,7 @@ export const useSoundEffects = ({ gameState }: UseAudioProps) => {
         .then(() => {
           bgAudio.volume = 0.5;
         })
-        .catch((e) => {
-          throw Error(e);
-        });
+        .catch(() => {});
     } else {
       bgAudio.pause();
       bgAudio.currentTime = 0;

@@ -34,20 +34,13 @@ const overlay = css({
   backgroundColor: "rgba(0, 0, 0, 0.7)",
   width: "100%",
   height: "100%",
-  zIndex: 100,
+  zIndex: 103,
   display: "flex",
   flexDirection: "column",
   justifyItems: "center",
   alignItems: "start",
   padding: 16,
   transition: "all 0.3s ease-in-out",
-});
-const row = css({
-  display: "flex",
-  flexDirection: "row",
-  justifyContent: "space-between",
-  alignItems: "center",
-  gap: 16,
 });
 const container = css({
   backgroundColor: "#2c2d30",
@@ -113,6 +106,22 @@ const footer = css({
   alignItems: "center",
 });
 
+const roundsButtonContainer = css({
+  width: "70%",
+  marginInline: "auto",
+  display: "flex",
+  flexDirection: "row",
+  justifyContent: "space-between",
+  alignItems: "center",
+});
+
+const roundsButton = css({
+  paddingInline: 16,
+  fontSize: 12,
+  paddingBlock: 8,
+  fontWeight: 400,
+});
+
 const roundOptions = [
   { name: "10", value: 10 },
   { name: "20", value: 20 },
@@ -168,23 +177,24 @@ export const AutoPlayModal: FC<ModalProps> = ({ isOpen, onClose, onStart }) => {
             <div css={body}>
               <div css={bodyCard}>
                 <h2>Number of Rounds:</h2>
-                <div style={{ width: "70%", marginInline: "auto" }} css={row}>
+                <div css={roundsButtonContainer}>
                   {roundOptions.map((option) => (
                     <PillButton
+                      css={roundsButton}
                       style={{
-                        paddingInline: 16,
-                        fontSize: 12,
-                        paddingBlock: 8,
                         backgroundColor:
                           numberOfRounds === option.value
                             ? LIGHT_GRAY_COLOR
                             : DARK_GRAY_COLOR,
-                        fontWeight: 400,
                         color:
                           numberOfRounds === option.value
                             ? WHITE_COLOR
                             : LIGHT_GRAY_COLOR,
-                        border: `1px solid ${numberOfRounds === option.value ? SUCCESS_COLOR : LIGHT_GRAY_COLOR}`,
+                        border: `1px solid ${
+                          numberOfRounds === option.value
+                            ? SUCCESS_COLOR
+                            : LIGHT_GRAY_COLOR
+                        }`,
                       }}
                       key={option.value}
                       variant="success"

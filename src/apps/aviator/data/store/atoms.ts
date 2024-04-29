@@ -9,6 +9,7 @@ import {
   IGameHistoryItem,
   PlayMap,
   TNotification,
+  TPreferences,
 } from "../types/types.ts";
 import { createDual } from "./lib/utils.ts";
 
@@ -64,4 +65,10 @@ export const playMapAtom = atom<PlayMap>({});
 
 export const playCountAtom = atom<number>(0);
 
-export const notificationsAtom = atom<TNotification[]>(undefined);
+export const notificationsAtom = atom<TNotification[]>([]);
+
+export const preferencesAtom = atom<TPreferences>({
+  isAnimationEnabled: true,
+  isMusicEnabled: true,
+  isSoundEnabled: true
+});

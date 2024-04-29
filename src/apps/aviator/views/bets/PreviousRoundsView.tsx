@@ -24,6 +24,7 @@ const multiplierStyles = css({
   overflowX: "hidden",
   width: "90%",
   height: "auto",
+  transition: "all 0.6s ease-in-out",
 });
 
 export const PreviousRoundsView: FC = () => {

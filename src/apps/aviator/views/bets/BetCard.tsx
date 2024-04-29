@@ -25,15 +25,25 @@ import { BetButton } from "../../components/buttons/BetButton.tsx";
 import { AutoPlayControls } from "./AutoPlayControls.tsx";
 import { rowStyles } from "../../styles/common.ts";
 import {
+  BET_STATE_CASHING_OUT,
+  BET_STATE_IDLE,
+  BET_STATE_PLACING,
+  BET_STATE_PLAYING,
+  BET_STATE_QUEUED,
+  BetState,
   GAME_STATE_ENDED,
   GAME_STATE_IN_PROGRESS,
   GAME_STATE_STARTING,
   GameState,
+  HTTPPlay,
+  IBetPayload,
+  Idx,
   TNotification,
 } from "../../data/types/types.ts";
 import { setAtom, useAtom } from "../../data/store/lib/atoms.ts";
 import { notificationsAtom } from "../../data/store/atoms.ts";
 import { TabItem } from "../../components/tabs/TabItem.tsx";
+import { setBet, setNextBet } from "../../data/store/bets.store.ts";
 
 const betInputStyles = {
   row: css({
@@ -128,11 +138,13 @@ const betInputStyles = {
   }),
 };
 
-type InputProps = {
+type BetCardProps = {
   gameState: GameState;
   startTime: number;
   now: number;
-  index: number;
+  index: Idx;
+  betState: BetState;
+  nextBet?: IBetPayload;
 };
 
 export type TAutoPlaySettings = {
@@ -149,11 +161,13 @@ const quickBetOptions: { label: string; value: number }[] = [
   { label: "500", value: 500 },
 ];
 
-export const BetCard: FC<InputProps> = ({
+export const BetCard: FC<BetCardProps> = ({
   gameState,
   startTime,
   now,
   index,
+  betState,
+  nextBet,
 }) => {
   const [betAmount, setBetAmount] = useState(MINIMUM_BET);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -184,29 +198,39 @@ export const BetCard: FC<InputProps> = ({
   };
 
   const getButtonColor = (): string => {
-    let color = SUCCESS_COLOR;
-    if (gameState === GAME_STATE_IN_PROGRESS && isPlaying) {
-      color = WARNING_COLOR;
-    } else if (
-      (gameState === GAME_STATE_ENDED && isPlaying) ||
-      (gameState === GAME_STATE_STARTING && isPlaying)
-    ) {
-      color = ERROR_COLOR;
+    if(nextBet) return ERROR_COLOR;
+    switch (betState) {
+      case BET_STATE_IDLE:
+        return SUCCESS_COLOR;
+      case BET_STATE_QUEUED:
+        return ERROR_COLOR;
+      case BET_STATE_PLACING:
+        return ERROR_COLOR;
+      case BET_STATE_PLAYING:
+        return WARNING_COLOR;
+      case BET_STATE_CASHING_OUT:
+        return WARNING_COLOR;
+      default:
+        return SUCCESS_COLOR;
     }
-    return color;
   };
 
   const getButtonBorder = (): string => {
-    let color = BORDER_SUCCESS_COLOR;
-    if (gameState === GAME_STATE_IN_PROGRESS && isPlaying) {
-      color = BORDER_WARNING_COLOR;
-    } else if (
-      (gameState === GAME_STATE_ENDED && isPlaying) ||
-      (gameState === GAME_STATE_STARTING && isPlaying)
-    ) {
-      color = BORDER_ERROR_COLOR;
+    if(nextBet) return BORDER_ERROR_COLOR;
+    switch (betState) {
+      case BET_STATE_IDLE:
+        return BORDER_SUCCESS_COLOR;
+      case BET_STATE_QUEUED:
+        return BORDER_ERROR_COLOR;
+      case BET_STATE_PLACING:
+        return BORDER_ERROR_COLOR;
+      case BET_STATE_PLAYING:
+        return BORDER_WARNING_COLOR;
+      case BET_STATE_CASHING_OUT:
+        return BORDER_WARNING_COLOR;
+      default:
+        return BORDER_SUCCESS_COLOR;
     }
-    return color;
   };
 
   const getButtonTitle = (): string => {
@@ -226,27 +250,56 @@ export const BetCard: FC<InputProps> = ({
     setBetAmount(value);
   }, []);
 
-  const onSetBet = useCallback(() => {
-    if (isPlaying && gameState === GAME_STATE_STARTING) {
-      setIsPlaying(false);
-      return;
-    }
+  useEffect(() => {
+    console.log("betState", betState);
+  }, [betState]);
 
-    if (gameState === GAME_STATE_IN_PROGRESS && isPlaying) {
-      setExitTime(Date.now());
-      setIsPlaying(false);
-      // cashout();
+  // const onSetBet = useCallback(() => {
+  //   if (isPlaying && gameState === GAME_STATE_STARTING) {
+  //     setIsPlaying(false);
+  //     return;
+  //   }
+  //
+  //   if (gameState === GAME_STATE_IN_PROGRESS && isPlaying) {
+  //     setExitTime(Date.now());
+  //     setIsPlaying(false);
+  //     // cashout();
+  //     return;
+  //   }
+  //   if (!isPlaying) {
+  //     if (gameState !== GAME_STATE_STARTING) {
+  //       setIsPlaying(true);
+  //     }
+  //     setIsPlaying(true);
+  //     return;
+  //   }
+  // }, [gameState, isPlaying]);
+
+  const onSetBet = useCallback(() => {
+    if (GAME_STATE_STARTING) {
+      const bet: HTTPPlay = {
+        user_id: 200009,
+        xid: 0,
+        game_id: 12,
+        idx: index,
+        currency: DEFAULT_CURRENCY,
+        bet: betAmount,
+        username: "test",
+        crash: 0,
+        created_at: Date.now(),
+      };
+      setBet(bet);
       return;
-    }
-    if (!isPlaying) {
-      if (gameState !== GAME_STATE_STARTING) {
-        setIsPlaying(true);
-      }
-      setIsPlaying(true);
-      return;
+    } else if (GAME_STATE_IN_PROGRESS || GAME_STATE_ENDED) {
+      const nextBet: IBetPayload = {
+        currency: DEFAULT_CURRENCY,
+        amount: betAmount,
+        autoCashout: 0,
+        idx: index,
+      };
+      setNextBet(nextBet);
     }
   }, [gameState, isPlaying]);
-
   useEffect(() => {
     switch (gameState) {
       case GAME_STATE_STARTING:

@@ -52,10 +52,13 @@ import {
   GAME_STATE_ENDED,
   GAME_STATE_IN_PROGRESS,
   GAME_STATE_STARTING,
+  Idx,
 } from "../data/types/types.ts";
 import {
+  betStateAtom,
   endTimeAtom,
   gameStateAtom,
+  nextBetAtom,
   preferencesAtom,
   startTimeAtom,
 } from "../data/store/atoms.ts";
@@ -105,6 +108,8 @@ const gameStyles = {
   }),
 };
 
+const betSlipArray: Idx[] = [0,1];
+
 let allImagesLoaded = false;
 
 Promise.all(imageLoadPromises)
@@ -114,6 +119,8 @@ Promise.all(imageLoadPromises)
   .catch((error) => {
     console.error("Error loading images:", error);
   });
+
+
 
 const GameView = () => {
   const [now, setNow] = useState(Date.now());
@@ -140,6 +147,9 @@ const GameView = () => {
   const betSlipStore = useBetSlipStore;
 
   const [bgColor, setBgColor] = useState(BG_GRAY_COLOR);
+
+  const betState = useAtom(betStateAtom);
+  const nextBetState = useAtom(nextBetAtom);
 
   useEffect(() => {
     const ref = audioRef.current;
@@ -540,18 +550,17 @@ const GameView = () => {
         <canvas width={canvasWidth} height={canvasHeight} ref={canvasRef} />
       </div>
       <div css={gameStyles.userInputContainer}>
-        <BetCard
-          index={0}
-          now={now}
-          startTime={startTime}
-          gameState={gameState}
-        />
-        <BetCard
-          index={1}
-          now={now}
-          startTime={startTime}
-          gameState={gameState}
-        />
+        {betSlipArray.map((i) => (
+          <BetCard
+            key={i}
+            index={i}
+            now={now}
+            startTime={startTime}
+            gameState={gameState}
+            betState={betState[i]}
+            nextBet={nextBetState[i]}
+          />
+        ))}
       </div>
       <BetSlips />
       <NotificationsView />

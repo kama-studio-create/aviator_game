@@ -70,5 +70,5 @@ export const notificationsAtom = atom<TNotification[]>([]);
 export const preferencesAtom = atom<TPreferences>({
   isAnimationEnabled: true,
   isMusicEnabled: true,
-  isSoundEnabled: true
+  isSoundEnabled: true,
 });

@@ -1,4 +1,4 @@
-import {TNotificationState} from "../../common/constants.ts";
+import { TNotificationState } from "../../common/constants.ts";
 
 /**
  * The game is accepting new bets to be placed for the next round.

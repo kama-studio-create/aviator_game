@@ -10,6 +10,8 @@ import {
 import { getMultiplier } from "../../utils/getMultiplier.ts";
 import {
   DARK_GRAY_COLOR,
+  GRAY_COLOR,
+  LIGHT_GRAY_COLOR,
   SUCCESS_COLOR,
   SUCCESS_COLOR_LIGHT,
 } from "../../styles/colors.ts";
@@ -51,6 +53,24 @@ const betTableStyles = css({
       borderRadius: 8,
     },
   },
+});
+
+const loadMoreButton = css({
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  width: "100%",
+  marginTop: 16,
+  button: {
+    border: `1px solid ${LIGHT_GRAY_COLOR}`,
+    color: LIGHT_GRAY_COLOR,
+    backgroundColor: GRAY_COLOR,
+    paddingInline: 20,
+    paddingBlock: 8,
+    marginInline: "auto",
+    borderRadius: 16,
+  }
+
 });
 
 export const MyBetsView: FC = () => {
@@ -137,6 +157,9 @@ export const MyBetsView: FC = () => {
           ))}
         </tbody>
       </table>
+      <div css={loadMoreButton}>
+        <button >Load More</button>
+      </div>
     </div>
   );
 };

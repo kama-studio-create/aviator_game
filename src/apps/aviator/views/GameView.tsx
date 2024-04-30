@@ -1,4 +1,4 @@
-import { css } from "@emotion/react";
+import {css} from "@emotion/react";
 import {
   CANVAS_PADDING,
   CANVAS_START_POSITION,
@@ -14,18 +14,9 @@ import {
   WAITING_DURATION,
   WAITING_FOR_NEXT_ROUND,
 } from "../common/constants.ts";
-import { useEffect, useRef, useState } from "react";
-import {
-  backgroundImage,
-  imageLoadPromises,
-  planeSprites,
-  spinnerImage,
-} from "../common/images.ts";
-import {
-  generateBetSlip,
-  getRandomNumber,
-  uuidGenerator,
-} from "../utils/generators.ts";
+import {useEffect, useRef, useState} from "react";
+import {backgroundImage, imageLoadPromises, planeSprites, spinnerImage,} from "../common/images.ts";
+import {generateBetSlip, getRandomNumber, uuidGenerator,} from "../utils/generators.ts";
 import {
   BG_GRAY_COLOR,
   BLUE_COLOR,
@@ -37,23 +28,18 @@ import {
   TRANSPARENT_RED_COLOR,
   WHITE_COLOR,
 } from "../styles/colors.ts";
-import { MEDIA_QUERIES } from "../styles/breakpoints.ts";
-import { BetCard } from "./bets/BetCard.tsx";
-import { TBetSlip, useBetSlipStore } from "../data/store/zustanf/bets.store.ts";
-import { useSoundEffects } from "../hooks/audio/useSoundEffects.ts";
+import {MEDIA_QUERIES} from "../styles/breakpoints.ts";
+import {BetCard} from "./bets/BetCard.tsx";
+import {TBetSlip, useBetSlipStore} from "../data/store/zustanf/bets.store.ts";
+import {useSoundEffects} from "../hooks/audio/useSoundEffects.ts";
 import BGAudioFile from "../assets/audio/bg_music.mp3";
 import PlaneAudio from "../assets/audio/audio.mp3";
-import { NotificationsView } from "./NotificationsView.tsx";
-import { BetSlips } from "./bets/BetSlips.tsx";
-import { PreviousRoundsView } from "./bets/PreviousRoundsView.tsx";
+import {NotificationsView} from "./NotificationsView.tsx";
+import {BetSlips} from "./bets/BetSlips.tsx";
+import {PreviousRoundsView} from "./bets/PreviousRoundsView.tsx";
 import useCrashAppEffect from "../hooks/useCrashAppEffect.ts";
-import { useAtom } from "../data/store/lib/atoms.ts";
-import {
-  GAME_STATE_ENDED,
-  GAME_STATE_IN_PROGRESS,
-  GAME_STATE_STARTING,
-  Idx,
-} from "../data/types/types.ts";
+import {useAtom} from "../data/store/lib/atoms.ts";
+import {GAME_STATE_ENDED, GAME_STATE_IN_PROGRESS, GAME_STATE_STARTING, Idx,} from "../data/types/types.ts";
 import {
   betStateAtom,
   endTimeAtom,
@@ -117,7 +103,7 @@ Promise.all(imageLoadPromises)
     allImagesLoaded = true;
   })
   .catch((error) => {
-    console.error("Error loading images:", error);
+    console.error("Error loading rules:", error);
   });
 
 const GameView = () => {

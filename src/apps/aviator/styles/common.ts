@@ -16,7 +16,7 @@ export const translucentBackgroundStyles = css({
 export const rowStyles = css({
   display: "flex",
   flexDirection: "row",
-  gap: 16,
+  gap: 8,
   alignItems: "center",
 });
 

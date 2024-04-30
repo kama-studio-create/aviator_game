@@ -14,6 +14,7 @@ import iconLimits from "../../../assets/icons/limits.svg";
 import { ProvablyFairModal } from "../../modals/menu-modals/ProvablyFairModal.tsx";
 import { BetHistoryModal } from "../../modals/menu-modals/BetHistoryModal.tsx";
 import { GameLimitsModal } from "../../modals/menu-modals/GameLimitsModal.tsx";
+import { GameRulesModal } from "../../modals/menu-modals/GameRules/GameRulesModal.tsx";
 
 const cardStyles = css({
   display: "flex",
@@ -40,68 +41,6 @@ export const MenuInfoCard: FC = () => {
     isProvablyFairModalOpen,
   ]);
 
-  // const infoItems: TInfoCard[] = [
-  //   {
-  //     title: PROVABLY_FAIR_SETTINGS,
-  //     icon: iconShield,
-  //     onClick: () => {
-  //       setIsProvablyFairModalOpen(!isProvablyFairModalOpen);
-  //     },
-  //     modal: (
-  //       <ProvablyFairModal
-  //         isOpen={isProvablyFairModalOpen}
-  //         handleClose={() => {
-  //           setIsProvablyFairModalOpen(!isProvablyFairModalOpen);
-  //         }}
-  //       />
-  //     ),
-  //   },
-  //   {
-  //     title: GAME_RULES,
-  //     icon: iconRules,
-  //     onClick: () => {
-  //       setIsGameRulesModalOpen(true);
-  //     },
-  //     modal: (
-  //       <GameRulesModal
-  //         isOpen={isGameRulesModalOpen}
-  //         handleClose={() => {
-  //           setIsGameRulesModalOpen(false);
-  //         }}
-  //       />
-  //     ),
-  //   },
-  //   {
-  //     title: MY_BET_HISTORY,
-  //     icon: iconHistory,
-  //     onClick: () => {
-  //       setIsBetHistoryModalOpen(!isBetHistoryModalOpen);
-  //     },
-  //     modal: (
-  //       <BetHistoryModal
-  //         isOpen={true}
-  //         handleClose={() => {
-  //           setIsBetHistoryModalOpen(!isBetHistoryModalOpen);
-  //         }}
-  //       />
-  //     ),
-  //   },
-  //   {
-  //     title: GAME_LIMITS,
-  //     icon: iconLimits,
-  //     onClick: () => {
-  //       setIsProvablyFairModalOpen(!isProvablyFairModalOpen);
-  //     },
-  //     modal: (
-  //       <ProvablyFairModal
-  //         isOpen={isProvablyFairModalOpen}
-  //         handleClose={() => {
-  //           setIsProvablyFairModalOpen(!isProvablyFairModalOpen);
-  //         }}
-  //       />
-  //     ),
-  //   },
-  // ];
   return (
     <>
       {isProvablyFairModalOpen && (
@@ -109,6 +48,29 @@ export const MenuInfoCard: FC = () => {
           isOpen={true}
           handleClose={() => {
             setIsProvablyFairModalOpen(!isProvablyFairModalOpen);
+          }}
+        />
+      )}
+      {isGameRulesModalOpen && (
+        <GameRulesModal
+          isOpen={true}
+          handleClose={() => {
+            setIsGameRulesModalOpen(false);
+          }}
+        />
+      )}
+      {isBetHistoryModalOpen && (
+        <BetHistoryModal
+          isOpen={isBetHistoryModalOpen}
+          handleClose={() => {
+            setIsBetHistoryModalOpen(!isBetHistoryModalOpen);
+          }}
+        />
+      )}
+      {isGameLimitsModalOpen && (
+        <GameLimitsModal
+          handleClose={() => {
+            setIsGameLimitsModalOpen(!isGameLimitsModalOpen);
           }}
         />
       )}
@@ -132,14 +94,6 @@ export const MenuInfoCard: FC = () => {
         }}
         css={cardStyles}
       >
-        {/*{*/}
-        {/*  <GameRulesModal*/}
-        {/*    isOpen={isGameRulesModalOpen}*/}
-        {/*    handleClose={() => {*/}
-        {/*      setIsGameRulesModalOpen(false);*/}
-        {/*    }}*/}
-        {/*  />*/}
-        {/*}*/}
         <MenuItemCard
           title={GAME_RULES}
           icon={iconRules}
@@ -154,14 +108,6 @@ export const MenuInfoCard: FC = () => {
         }}
         css={cardStyles}
       >
-        {isBetHistoryModalOpen && (
-          <BetHistoryModal
-            isOpen={isBetHistoryModalOpen}
-            handleClose={() => {
-              setIsBetHistoryModalOpen(!isBetHistoryModalOpen);
-            }}
-          />
-        )}
         <MenuItemCard
           title={MY_BET_HISTORY}
           icon={iconHistory}
@@ -176,13 +122,6 @@ export const MenuInfoCard: FC = () => {
         }}
         css={cardStyles}
       >
-        {isGameLimitsModalOpen && (
-          <GameLimitsModal
-            handleClose={() => {
-              setIsGameLimitsModalOpen(!isGameLimitsModalOpen);
-            }}
-          />
-        )}
         <MenuItemCard
           title={GAME_LIMITS}
           icon={iconLimits}

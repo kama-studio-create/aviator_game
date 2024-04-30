@@ -34,3 +34,5 @@ export const BADGE_BLUE_COLOR = "#34b4ff";
 export const BADGE_INDIGO_COLOR = "#c017b4";
 
 export const HEADER_COLOR = "#262830";
+
+export const MODAL_OVERLAY_BACKGROUND = "rgba(0, 0, 0, 0.7)";

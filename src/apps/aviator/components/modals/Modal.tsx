@@ -11,6 +11,7 @@ import {
   ERROR_COLOR,
   GRAY_COLOR,
   HEADER_COLOR,
+  MODAL_OVERLAY_BACKGROUND,
 } from "../../styles/colors.ts";
 import iconClose from "../../assets/icons/close.svg";
 
@@ -36,14 +37,22 @@ const modalStyles = css({
   left: 0,
   display: "flex",
   justifyContent: "center",
-  padding: 8,
 });
 
 const modalContainer = css({
-  width: "100%",
-  height: "auto",
+  width: "100vw",
+  height: "100vh",
   animation: `${slideIn} 0.1s ease-in-out`,
   maxWidth: 600,
+  marginInline: "auto",
+  padding: 8,
+  backgroundColor: MODAL_OVERLAY_BACKGROUND,
+  overflow: "scroll",
+  top: 0,
+  left: 0,
+  display: "flex",
+  flexDirection: "column",
+  justifyContent: "start",
 });
 
 const headerStyles = css({
@@ -124,7 +133,7 @@ export const Modal: FC<TModalProps> = forwardRef(
       isOpen,
       handleClose,
       hasCloseButton = false,
-      position = "absolute",
+      position = "fixed",
       ...props
     },
     ref,

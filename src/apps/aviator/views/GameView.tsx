@@ -108,7 +108,7 @@ const gameStyles = {
   }),
 };
 
-const betSlipArray: Idx[] = [0,1];
+const betSlipArray: Idx[] = [0, 1];
 
 let allImagesLoaded = false;
 
@@ -119,8 +119,6 @@ Promise.all(imageLoadPromises)
   .catch((error) => {
     console.error("Error loading images:", error);
   });
-
-
 
 const GameView = () => {
   const [now, setNow] = useState(Date.now());
@@ -222,7 +220,7 @@ const GameView = () => {
       if (gameState !== GAME_STATE_IN_PROGRESS) return;
       const moveX = 0;
       ctx.beginPath();
-      const timeOffset = (elapsedTime / 1000) * DOT_SCROLL_SPEED; // Seconds * speed
+      const timeOffset = (elapsedTime / 1000) * DOT_SCROLL_SPEED;
       const scrollOffset =
         elapsedTime > TIME_TO_TOP ? timeOffset % (DOT_SPACING + DOT_RADIUS) : 0;
       for (

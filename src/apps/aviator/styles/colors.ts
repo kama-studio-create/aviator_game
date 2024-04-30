@@ -28,6 +28,7 @@ export const BACKGROUND_COLOR = "#2c2d30";
 export const COLOR_BLUE = "#358DF3FF";
 export const BORDER_GRAY = "#2a2b2e";
 export const LIGHT_GRAY_COLOR = "#5b5b61";
+export const BUTTON_BG_COLOR = "#252528";
 
 export const BADGE_PURPLE_COLOR = "#913EF8";
 export const BADGE_BLUE_COLOR = "#34b4ff";

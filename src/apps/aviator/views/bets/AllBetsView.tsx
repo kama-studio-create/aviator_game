@@ -33,22 +33,8 @@ const headerStyles = css({
     fontSize: 14,
     fontWeight: 400,
   },
-  "& .button": {
-    fontWeight: 500,
-    fontSize: 12,
-    background: "transparent",
-    border: `1px solid ${LIGHT_GRAY_COLOR}`,
-    color: LIGHT_GRAY_COLOR,
-    display: "flex",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingInline: 8,
-    paddingBlock: 2,
-    gap: 8,
-    img: {
-      opacity: 0.5,
-    },
+  img: {
+    opacity: 0.5,
   },
 });
 
@@ -93,7 +79,6 @@ const tableItem = css({
 });
 
 export const AllBetsView: FC = () => {
-
   const allBets = useBetSlipStore((state) => state.allBetSlips);
 
   return (
@@ -104,8 +89,14 @@ export const AllBetsView: FC = () => {
           <h1>4590</h1>
         </div>
         <div>
-          <PillButton className="button" variant="success">
-            <img width={16} height={16} src={historyIcon} alt="history" />
+          <PillButton size="xs" variant="secondary">
+            <img
+              className="icon"
+              width={16}
+              height={16}
+              src={historyIcon}
+              alt="history"
+            />
             Previous hand
           </PillButton>
         </div>

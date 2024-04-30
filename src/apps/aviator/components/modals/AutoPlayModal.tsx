@@ -1,14 +1,6 @@
 import { FC, useState } from "react";
 import { css } from "@emotion/react";
-import {
-  DARK_GRAY_COLOR,
-  GRAY_COLOR,
-  LIGHT_COLOR,
-  LIGHT_GRAY_COLOR,
-  PRIMARY_COLOR,
-  SUCCESS_COLOR,
-  WHITE_COLOR,
-} from "../../styles/colors.ts";
+import { GRAY_COLOR, LIGHT_COLOR, SUCCESS_COLOR } from "../../styles/colors.ts";
 import iconClose from "../../assets/icons/close.svg";
 import { PillButton } from "../buttons/PillButton.tsx";
 import {
@@ -111,15 +103,9 @@ const roundsButtonContainer = css({
   marginInline: "auto",
   display: "flex",
   flexDirection: "row",
-  justifyContent: "space-between",
+  justifyContent: "center",
   alignItems: "center",
-});
-
-const roundsButton = css({
-  paddingInline: 16,
-  fontSize: 12,
-  paddingBlock: 8,
-  fontWeight: 400,
+  gap: 8,
 });
 
 const roundOptions = [
@@ -180,24 +166,9 @@ export const AutoPlayModal: FC<ModalProps> = ({ isOpen, onClose, onStart }) => {
                 <div css={roundsButtonContainer}>
                   {roundOptions.map((option) => (
                     <PillButton
-                      css={roundsButton}
-                      style={{
-                        backgroundColor:
-                          numberOfRounds === option.value
-                            ? LIGHT_GRAY_COLOR
-                            : DARK_GRAY_COLOR,
-                        color:
-                          numberOfRounds === option.value
-                            ? WHITE_COLOR
-                            : LIGHT_GRAY_COLOR,
-                        border: `1px solid ${
-                          numberOfRounds === option.value
-                            ? SUCCESS_COLOR
-                            : LIGHT_GRAY_COLOR
-                        }`,
-                      }}
+                      active={numberOfRounds === option.value}
                       key={option.value}
-                      variant="success"
+                      variant="secondary"
                       size="sm"
                       onClick={() => {
                         setNumberOfRounds(option.value);
@@ -232,15 +203,8 @@ export const AutoPlayModal: FC<ModalProps> = ({ isOpen, onClose, onStart }) => {
             </div>
             <div css={footer}>
               <PillButton
-                style={{
-                  paddingInline: 16,
-                  fontSize: 10,
-                  paddingBlock: 8,
-                  fontWeight: 400,
-                  background: PRIMARY_COLOR,
-                }}
-                variant="error"
-                size="sm"
+                variant="warning"
+                size="xs"
                 onClick={handleReset}
               >
                 Reset
@@ -248,10 +212,10 @@ export const AutoPlayModal: FC<ModalProps> = ({ isOpen, onClose, onStart }) => {
               <PillButton
                 style={{ fontWeight: 500, backgroundColor: SUCCESS_COLOR }}
                 variant="success"
-                size="sm"
+                size="xl"
                 onClick={handleStart}
               >
-                START
+                Start
               </PillButton>
             </div>
           </div>

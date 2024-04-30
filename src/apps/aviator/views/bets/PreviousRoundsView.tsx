@@ -5,6 +5,7 @@ import { PreviousHandButton } from "../../components/buttons/PreviousHandButton.
 import { PreviousRoundsModal } from "../../components/modals/PreviousRoundsModal.tsx";
 import { useBetSlipStore } from "../../data/store/zustanf/bets.store.ts";
 import { SingleRoundModal } from "../../components/modals/SingleRoundModal.tsx";
+import { uuidGenerator } from "../../utils/generators.ts";
 
 const containerStyles = css({
   display: "flex",
@@ -65,7 +66,7 @@ export const PreviousRoundsView: FC = () => {
             onClick={() => {
               handleSelectRound(round);
             }}
-            key={round}
+            key={uuidGenerator()}
             multiplier={round}
           />
         ))}

@@ -16,6 +16,9 @@ import { createDual } from "./lib/utils.ts";
 export const roundsAtom = atom<IGameHistoryItem[]>([]);
 export const userBetsAtom = atom<HTTPPlay[]>([]);
 
+export const topWinsAtom = atom<HTTPPlay[]>([]);
+export const loadingTopWinsAtom = atom<boolean>(false);
+
 /** The game state is initialized. if not, all fields are unreadable */
 export const initializedAtom = atom<boolean>(false);
 

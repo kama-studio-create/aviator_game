@@ -4,6 +4,7 @@ import {
   BORDER_SUCCESS_COLOR,
   BORDER_WARNING_COLOR,
   BUTTON_BG_COLOR,
+  ERROR_COLOR,
   LIGHT_GRAY_COLOR,
   SUCCESS_COLOR,
   WARNING_COLOR,
@@ -11,7 +12,13 @@ import {
 } from "../../styles/colors.ts";
 
 type Props = {
-  variant?: "primary" | "secondary" | "success" | "error" | "warning";
+  variant?:
+    | "primary"
+    | "secondary"
+    | "success"
+    | "error"
+    | "warning"
+    | "transparent";
   size?: "xs" | "sm" | "md" | "lg" | "xl";
   active?: boolean;
 } & ComponentProps<"button">;
@@ -36,6 +43,32 @@ const baseStyles = css({
   "&.active": {
     fontWeight: 400,
     paddingBlock: 6,
+  },
+  //handle sizes
+  "&[data-size='xs']": {
+    paddingInline: 12,
+    minWidth: 60,
+    fontSize: 12,
+  },
+  "&[data-size='sm']": {
+    paddingInline: 16,
+    minWidth: 60,
+    fontSize: 14,
+  },
+  "&[data-size='md']": {
+    paddingInline: 24,
+    minWidth: 80,
+    fontSize: 14,
+  },
+  "&[data-size='lg']": {
+    paddingInline: 32,
+    minWidth: 120,
+    fontSize: 16,
+  },
+  "&[data-size='xl']": {
+    paddingInline: 40,
+    minWidth: 160,
+    fontSize: 18,
   },
   // handles variants
   "&[data-variant='secondary']": {
@@ -67,32 +100,16 @@ const baseStyles = css({
       border: `2px solid ${SUCCESS_COLOR}`,
     },
   },
-  //handle sizes
-  "&[data-size='xs']": {
-    paddingInline: 12,
-    minWidth: 60,
-    fontSize: 12,
+  "&[data-variant='transparent']": {
+    background: "transparent",
+    color: WHITE_COLOR,
+    border: "none",
+    paddingInline: 6,
+    "&.active": {
+      border: `2px solid ${ERROR_COLOR}`,
+    },
   },
-  "&[data-size='sm']": {
-    paddingInline: 16,
-    minWidth: 60,
-    fontSize: 14,
-  },
-  "&[data-size='md']": {
-    paddingInline: 24,
-    minWidth: 80,
-    fontSize: 14,
-  },
-  "&[data-size='lg']": {
-    paddingInline: 32,
-    minWidth: 120,
-    fontSize: 16,
-  },
-  "&[data-size='xl']": {
-    paddingInline: 40,
-    minWidth: 160,
-    fontSize: 18,
-  },
+
 });
 
 export const PillButton: FC<Props> = ({

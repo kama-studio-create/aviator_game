@@ -1,10 +1,27 @@
-import { FC } from "react";
+import { FC, useEffect, useState } from "react";
 import { css } from "@emotion/react";
 import { Tab, Tabs } from "../../components/tabs/Tabs.tsx";
 import { rowStyles } from "../../styles/common.ts";
 import { DEFAULT_CURRENCY } from "../../common/constants.ts";
 import { DARK_GRAY_COLOR, LIGHT_GRAY_COLOR } from "../../styles/colors.ts";
 import { censor } from "../../utils/censor.ts";
+import {
+  BIGGEST_WINS,
+  DAY,
+  HUGE_WINS,
+  MONTH,
+  MULTIPLIERS,
+  TDateFilter,
+  TWinTypeFilter,
+  YEAR,
+} from "../../data/types/types.ts";
+import { useAtom } from "../../data/store/lib/atoms.ts";
+import { loadingTopWinsAtom, topWinsAtom } from "../../data/store/atoms.ts";
+import { assignAvatar } from "../../utils/assignAvatar.ts";
+import { generateTopWins } from "../../utils/generators.ts";
+import { PillButton } from "../../components/buttons/PillButton.tsx";
+import { Loader } from "../../components/loader/Loader.tsx";
+import { getDayAgo, getMonthAgo, getYearAgo } from "../../utils/date.ts";
 
 const containerStyles = css({
   display: "flex",
@@ -31,6 +48,12 @@ const cardStyles = css([
       height: 40,
       borderRadius: "50%",
       backgroundColor: "white",
+      img: {
+        width: 40,
+        height: 40,
+        borderRadius: "50%",
+        backgroundColor: "white",
+      },
     },
   },
 ]);
@@ -87,59 +110,135 @@ const betDetails = css({
     fontWeight: 900,
   },
 });
+const typeContainer = css({
+  display: "flex",
+  justifyContent: "center",
+  gap: 4,
+  marginBottom: 8,
+});
 
-const TopBetSlips: FC = () => {
+type TSlipProps = {
+  duration: TDateFilter;
+  type: TWinTypeFilter;
+};
+
+const TopBetSlips: FC<TSlipProps> = ({ duration, type }) => {
+  const topBets = useAtom(topWinsAtom);
+  const loading = useAtom(loadingTopWinsAtom);
+
+  useEffect(() => {
+    const toDate = new Date();
+    let fromDate = getDayAgo();
+    switch (duration) {
+      case DAY:
+        fromDate = getDayAgo();
+        break;
+      case MONTH:
+        fromDate = getMonthAgo();
+        break;
+      case YEAR:
+        fromDate = getYearAgo();
+        break;
+      default:
+        fromDate = getDayAgo();
+        break;
+    }
+    generateTopWins(40, { from: fromDate, to: toDate });
+  }, [duration, type]);
+
   return (
-    <div css={containerStyles}>
-      <div css={cardStyles}>
-        <div style={{ display: "grid", placeContent: "center" }}>
-          <div className="avatar"></div>
-          <p style={{ opacity: 0.7, textAlign: "center" }}>
-            {censor("daniel")}
-          </p>
-        </div>
-        <div css={betDetails}>
-          <p className="title">Bet {DEFAULT_CURRENCY}: </p>
-          <p className="value">19.38</p>
-          <p className="title">Cashed out: </p>
-          <p className="value multiplier">198998.38x</p>
-          <p className="title">Win {DEFAULT_CURRENCY}: </p>
-          <p className="value">300,900</p>
-        </div>
-        <div></div>
-      </div>
-      <div css={cardFooterStyles}>
-        <div css={rowStyles}>
-          <p>11 Apr</p>
-          <div style={{ justifyContent: "left", gap: 4 }} css={rowStyles}>
-            <p>Round: </p>
-            <p className="multiplier">2098989.5x</p>
-          </div>
-        </div>
-        <div className="pill">test</div>
-      </div>
-    </div>
+    <>
+      {loading && <Loader />}
+      {!loading && (
+        <>
+          {topBets.map((item) => (
+            <div key={item.user_id} css={containerStyles}>
+              <div css={cardStyles}>
+                <div style={{ display: "grid", placeContent: "center" }}>
+                  <div className="avatar">
+                    <img src={assignAvatar(item.username)} alt="bet" />
+                  </div>
+                  <p style={{ opacity: 0.7, textAlign: "center" }}>
+                    {censor("daniel")}
+                  </p>
+                </div>
+                <div css={betDetails}>
+                  <p className="title">Bet {item.currency}: </p>
+                  <p className="value">{item.bet.toFixed(2)}</p>
+                  <p className="title">Cashed out: </p>
+                  <p className="value multiplier">{item.crash.toFixed(2)}x</p>
+                  <p className="title">Win {DEFAULT_CURRENCY}: </p>
+                  <p className="value">{(item.bet * item.crash).toFixed(2)}</p>
+                </div>
+                <div></div>
+              </div>
+              <div css={cardFooterStyles}>
+                <div css={rowStyles}>
+                  <p>11 Apr</p>
+                  <div
+                    style={{ justifyContent: "left", gap: 4 }}
+                    css={rowStyles}
+                  >
+                    <p>Round: </p>
+                    <p className="multiplier">2098989.5x</p>
+                  </div>
+                </div>
+                <div className="pill">test</div>
+              </div>
+            </div>
+          ))}
+        </>
+      )}
+    </>
   );
 };
 
-const tabs: Tab[] = [
-  {
-    label: "Day",
-    component: <TopBetSlips />,
-  },
-  {
-    label: "Month",
-    component: <TopBetSlips />,
-  },
-  {
-    label: "Year",
-    component: <TopBetSlips />,
-  },
-];
 export const TopBetsView: FC = () => {
+  const [winType, setWinType] = useState<TWinTypeFilter>(HUGE_WINS);
+
+  const tabs: Tab[] = [
+    {
+      label: "Day",
+      component: <TopBetSlips type={winType} duration={DAY} />,
+    },
+    {
+      label: "Month",
+      component: <TopBetSlips type={winType} duration={MONTH} />,
+    },
+    {
+      label: "Year",
+      component: <TopBetSlips type={winType} duration={YEAR} />,
+    },
+  ];
+
   return (
     <div css={containerStyles}>
-      <h1>HUGE WINS BIGGEST WIN MULTIPLIERS</h1>
+      <div css={typeContainer}>
+        <PillButton
+          onClick={() => setWinType(HUGE_WINS)}
+          active={winType === HUGE_WINS}
+          size="sm"
+          variant="transparent"
+        >
+          HUGE WINS
+        </PillButton>
+        <PillButton
+          onClick={() => setWinType(BIGGEST_WINS)}
+          active={winType === BIGGEST_WINS}
+          size="sm"
+          variant="transparent"
+        >
+          BIGGEST WIN
+        </PillButton>
+        <PillButton
+          onClick={() => setWinType(MULTIPLIERS)}
+          active={winType === MULTIPLIERS}
+          size="sm"
+          variant="transparent"
+        >
+          MULTIPLIERS
+        </PillButton>
+      </div>
       <Tabs tabs={tabs} />
     </div>
   );

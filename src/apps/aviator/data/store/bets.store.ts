@@ -1,5 +1,10 @@
 import { BET_STATE_QUEUED, HTTPPlay, IBetPayload } from "../types/types.ts";
-import { betStateAtom, nextBetAtom, userBetsAtom } from "./atoms.ts";
+import {
+  betStateAtom,
+  nextBetAtom,
+  topWinsAtom,
+  userBetsAtom,
+} from "./atoms.ts";
 import { setAtom } from "./lib/atoms.ts";
 
 export const setBet = (bet: HTTPPlay) => {
@@ -16,4 +21,8 @@ export const setNextBet = (bet: IBetPayload) => {
   bets[bet.idx] = bet;
   setAtom(nextBetAtom, bets);
   return true;
+};
+
+export const setTopWins = (bets: HTTPPlay[]) => {
+  return setAtom(topWinsAtom, bets);
 };

@@ -24,6 +24,7 @@ const tabContainer = css({
 const childContainer = css({
   width: "100%",
   transition: "all 0.4s ease-in-out",
+  minHeight: "60vh",
 });
 
 export type Tab = {

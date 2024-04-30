@@ -1,4 +1,4 @@
-import { TNotificationState } from "../../common/constants.ts";
+import {TNotificationState} from "../../common/constants.ts";
 
 /**
  * The game is accepting new bets to be placed for the next round.
@@ -129,3 +129,16 @@ export type Preference =
   | typeof IS_ANIMATION_ENABLED;
 
 export type TPreferences = Record<Preference, boolean>;
+
+// types used to filter the top wins
+export const HUGE_WINS = 0;
+export const BIGGEST_WINS = 1;
+export const MULTIPLIERS = 2;
+
+export const DAY = "day";
+export const MONTH = "month";
+export const YEAR = "year";
+
+export const winFilterTypes = [HUGE_WINS, BIGGEST_WINS, MULTIPLIERS] as const;
+export type TWinTypeFilter = (typeof winFilterTypes)[number];
+export type TDateFilter = typeof DAY | typeof MONTH | typeof YEAR;

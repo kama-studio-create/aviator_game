@@ -1,19 +1,26 @@
-import { FC } from "react";
+import { CSSProperties, FC, useEffect, useState } from "react";
 import { css } from "@emotion/react";
 import { PillButton } from "../../components/buttons/PillButton.tsx";
 import {
+  BUTTON_BG_COLOR,
+  ERROR_COLOR,
   LIGHT_GRAY_COLOR,
   SUCCESS_COLOR,
   SUCCESS_COLOR_LIGHT,
+  TRANSPARENT_RED_COLOR,
   WHITE_COLOR,
 } from "../../styles/colors.ts";
 import { fadeInAnimation, rowStyles } from "../../styles/common.ts";
 import { DEFAULT_CURRENCY } from "../../common/constants.ts";
 import historyIcon from "../../assets/icons/history.svg";
+import iconClose from "../../assets/icons/close.svg";
 import { censor } from "../../utils/censor.ts";
-import { useBetSlipStore } from "../../data/store/zustanf/bets.store.ts";
 import { MultiplierBadge } from "../../components/badges/MultiplierBadge.tsx";
 import { assignAvatar } from "../../utils/assignAvatar.ts";
+import { useAtom } from "../../data/store/lib/atoms.ts";
+import { allBetsAtom, loadingBetsAtom } from "../../data/store/atoms.ts";
+import { Loader } from "../../components/loader/Loader.tsx";
+import { generateAllBets, getRandomNumber } from "../../utils/generators.ts";
 
 const containerStyles = css({
   width: "100%",
@@ -79,100 +86,118 @@ const tableItem = css({
 });
 
 export const AllBetsView: FC = () => {
-  const allBets = useBetSlipStore((state) => state.allBetSlips);
+  const allBets = useAtom(allBetsAtom);
+  const loading = useAtom(loadingBetsAtom);
+  const [isPreviousHandActive, setIsPreviousHandActive] = useState(false);
+  const styles: CSSProperties = {
+    borderColor: isPreviousHandActive ? ERROR_COLOR : LIGHT_GRAY_COLOR,
+    backgroundColor: isPreviousHandActive? TRANSPARENT_RED_COLOR : BUTTON_BG_COLOR,
+    color: isPreviousHandActive? WHITE_COLOR : LIGHT_GRAY_COLOR,
+    opacity: isPreviousHandActive? 0.7 : 1,
+  }
+
+  useEffect(() => {
+    generateAllBets(getRandomNumber(30, 400));
+  }, [isPreviousHandActive]);
 
   return (
     <div css={containerStyles}>
       <div css={headerStyles}>
         <div>
           <h1>All Bets</h1>
-          <h1>4590</h1>
+          <h1>{allBets.length}</h1>
         </div>
         <div>
-          <PillButton size="xs" variant="secondary">
+          <PillButton
+            onClick={() => setIsPreviousHandActive(!isPreviousHandActive)}
+            size="xs"
+            variant="secondary"
+            style={styles}
+          >
             <img
               className="icon"
               width={16}
               height={16}
-              src={historyIcon}
+              src={isPreviousHandActive ? iconClose : historyIcon}
               alt="history"
             />
             Previous hand
           </PillButton>
         </div>
       </div>
-      <table style={{ width: "100%", fontSize: 12, fontWeight: 400 }}>
-        <thead>
-          <tr
-            style={{ justifyContent: "space-between", paddingInline: 4 }}
+      {loading && <Loader />}
+      {!loading && (
+        <table style={{ width: "100%", fontSize: 12, fontWeight: 400 }}>
+          <thead>
+            <tr
+              style={{ justifyContent: "space-between", paddingInline: 4 }}
+              css={rowStyles}
+            >
+              <th css={rowStyles}>User</th>
+              <th style={{ justifyContent: "start" }} css={rowStyles}>
+                <div>Bet {DEFAULT_CURRENCY}</div>
+                <div>X</div>
+              </th>
+              <th css={rowStyles}>Cash Out {DEFAULT_CURRENCY}</th>
+            </tr>
+          </thead>
+          <tbody
+            style={{
+              justifyContent: "space-between",
+              gap: 4,
+              flexDirection: "column",
+              maxHeight: "50vh",
+              overflowY: "scroll",
+            }}
             css={rowStyles}
           >
-            <th css={rowStyles}>User</th>
-            <th style={{ justifyContent: "start" }} css={rowStyles}>
-              <div>Bet {DEFAULT_CURRENCY}</div>
-              <div>X</div>
-            </th>
-            <th css={rowStyles}>Cash Out {DEFAULT_CURRENCY}</th>
-          </tr>
-        </thead>
-        <tbody
-          style={{
-            justifyContent: "space-between",
-            gap: 4,
-            flexDirection: "column",
-            maxHeight: "50vh",
-            overflowY: "scroll",
-          }}
-          css={rowStyles}
-        >
-          {allBets.map((betSlip) => (
-            <tr
-              key={betSlip.username}
-              style={{
-                backgroundColor: betSlip.exitTime
-                  ? SUCCESS_COLOR_LIGHT
-                  : "black",
-                border: betSlip.exitTime
-                  ? `1px solid ${SUCCESS_COLOR}`
-                  : "none",
-              }}
-              css={tableItem}
-            >
-              <td css={rowStyles}>
-                <div className="avatar">
+            {allBets.map((betSlip) => (
+              <tr
+                key={betSlip.username}
+                style={{
+                  backgroundColor: betSlip.stopped_at
+                    ? SUCCESS_COLOR_LIGHT
+                    : "black",
+                  border: betSlip.stopped_at ? `1px solid ${SUCCESS_COLOR}` : "none",
+                }}
+                css={tableItem}
+              >
+                <td css={rowStyles}>
+                  <div className="avatar">
+                    {betSlip.username && (
+                      <img alt="bet" src={assignAvatar(betSlip.username)} />
+                    )}
+                  </div>
                   {betSlip.username && (
-                    <img alt="bet" src={assignAvatar(betSlip.username)} />
+                    <p className="name">{censor(betSlip.username)}</p>
                   )}
-                </div>
-                {betSlip.username && (
-                  <p className="name">{censor(betSlip.username)}</p>
-                )}
-              </td>
-              <td style={{ justifyContent: "center" }} css={rowStyles}>
-                <p
-                  style={{
-                    textAlign: "right",
-                    opacity: betSlip.exitTime ? 1 : 0.5,
-                  }}
-                >
-                  {betSlip.amount.toFixed(2)}
-                </p>
-                <MultiplierBadge onClick={() => {}} multiplier={2.5} />
-              </td>
-              <td style={{ justifyContent: "end" }} css={rowStyles}>
-                <p
-                  style={{
-                    textAlign: "right",
-                    opacity: betSlip.exitTime ? 1 : 0.5,
-                  }}
-                >
-                  2500
-                </p>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+                </td>
+                <td style={{ justifyContent: "center" }} css={rowStyles}>
+                  <p
+                    style={{
+                      textAlign: "right",
+                      opacity: betSlip.stopped_at ? 1 : 0.5,
+                    }}
+                  >
+                    {betSlip.bet.toFixed(2)}
+                  </p>
+                  <MultiplierBadge onClick={() => {}} multiplier={2.5} />
+                </td>
+                <td style={{ justifyContent: "end" }} css={rowStyles}>
+                  <p
+                    style={{
+                      textAlign: "right",
+                      opacity: betSlip.stopped_at ? 1 : 0.5,
+                    }}
+                  >
+                    {betSlip.stopped_at && "2590.99"}
+                  </p>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
     </div>
   );
 };

@@ -1,5 +1,6 @@
 import { BET_STATE_QUEUED, HTTPPlay, IBetPayload } from "../types/types.ts";
 import {
+  allBetsAtom,
   betStateAtom,
   nextBetAtom,
   topWinsAtom,
@@ -26,3 +27,7 @@ export const setNextBet = (bet: IBetPayload) => {
 export const setTopWins = (bets: HTTPPlay[]) => {
   return setAtom(topWinsAtom, bets);
 };
+
+export const setAllBets = (bets: HTTPPlay[]) => {
+  return setAtom(allBetsAtom, bets);
+}

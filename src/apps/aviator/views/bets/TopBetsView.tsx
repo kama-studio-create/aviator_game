@@ -16,7 +16,7 @@ import {
   YEAR,
 } from "../../data/types/types.ts";
 import { useAtom } from "../../data/store/lib/atoms.ts";
-import { loadingTopWinsAtom, topWinsAtom } from "../../data/store/atoms.ts";
+import { loadingBetsAtom, topWinsAtom } from "../../data/store/atoms.ts";
 import { assignAvatar } from "../../utils/assignAvatar.ts";
 import { generateTopWins } from "../../utils/generators.ts";
 import { PillButton } from "../../components/buttons/PillButton.tsx";
@@ -124,7 +124,7 @@ type TSlipProps = {
 
 const TopBetSlips: FC<TSlipProps> = ({ duration, type }) => {
   const topBets = useAtom(topWinsAtom);
-  const loading = useAtom(loadingTopWinsAtom);
+  const loading = useAtom(loadingBetsAtom);
 
   useEffect(() => {
     const toDate = new Date();

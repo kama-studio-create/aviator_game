@@ -1,9 +1,9 @@
 import { TBetSlip } from "../data/store/zustanf/bets.store.ts";
 import { HTTPPlay } from "../data/types/types.ts";
-import { DEFAULT_CURRENCY } from "../common/constants.ts";
-import { setTopWins } from "../data/store/bets.store.ts";
+import { DEFAULT_CURRENCY, WAITING_DURATION } from "../common/constants.ts";
+import { setAllBets, setTopWins } from "../data/store/bets.store.ts";
 import { setAtom } from "../data/store/lib/atoms.ts";
-import { loadingTopWinsAtom } from "../data/store/atoms.ts";
+import { loadingBetsAtom } from "../data/store/atoms.ts";
 
 export const getRandomNumber = (min: number, max: number) => {
   return Math.random() * (max - min) + min;
@@ -45,11 +45,10 @@ export const generateBetSlip = (
 type TopWinProps = {
   from: Date;
   to: Date;
-}
+};
 
 export const generateTopWins = (total: number, params: TopWinProps) => {
-  console.log(params);
-  setAtom(loadingTopWinsAtom, true);
+  setAtom(loadingBetsAtom, true);
   const slips: HTTPPlay[] = [];
   setTimeout(() => {
     for (let i = 0; i < total; i++) {
@@ -67,7 +66,29 @@ export const generateTopWins = (total: number, params: TopWinProps) => {
       slips.push(slip);
     }
     setTopWins(slips);
-    setAtom(loadingTopWinsAtom, false);
+    setAtom(loadingBetsAtom, false);
   }, 2000);
-
+};
+export const generateAllBets = (total: number) => {
+  setAtom(loadingBetsAtom, true);
+  const slips: HTTPPlay[] = [];
+  setTimeout(() => {
+    for (let i = 0; i < total; i++) {
+      const slip: HTTPPlay = {
+        user_id: getRandomNumber(1, 2000000000000),
+        xid: getRandomNumber(1, 2000000000000),
+        game_id: getRandomNumber(1, 2000000000000),
+        idx: 0,
+        currency: DEFAULT_CURRENCY,
+        bet: getRandomNumber(1, 200000),
+        username: randomUsernameGenerator(),
+        crash: i % 3 === 0 ? getRandomNumber(10, 200) : 0,
+        created_at: Date.now(),
+        stopped_at:  i % 3 === 0 ? Date.now() + WAITING_DURATION : undefined,
+      };
+      slips.push(slip);
+    }
+    setAllBets(slips);
+    setAtom(loadingBetsAtom, false);
+  }, 2000);
 };

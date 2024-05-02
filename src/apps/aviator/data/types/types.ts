@@ -1,4 +1,5 @@
 import {TNotificationState} from "../../common/constants.ts";
+import {ReactNode} from "react";
 
 /**
  * The game is accepting new bets to be placed for the next round.
@@ -112,7 +113,9 @@ export type Dual<T> = Record<Idx, T>;
 
 export type TNotification = {
   type: TNotificationState;
-  message: string;
+  message: ReactNode;
+  multiplier?: number;
+  amount?: number;
   header: string;
   gameId?: string;
   slipIndex?: number;

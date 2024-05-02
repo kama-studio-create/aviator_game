@@ -38,7 +38,6 @@ const baseStyles = css({
     alignItems: "center",
     justifyContent: "center",
     gap: 8,
-    transform: "scale(1.1, 1)",
   },
   "&.active": {
     fontWeight: 400,

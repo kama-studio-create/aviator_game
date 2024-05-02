@@ -11,7 +11,8 @@ export const BLACK_COLOR = "#0e0e0e";
 export const LIGHT_COLOR =
   "light-dark(rgba(255, 255, 255, 0.24), rgba(0, 0, 0, 0.2))";
 export const SUCCESS_COLOR = "#28a909";
-export const SUCCESS_COLOR_LIGHT = "rgba(40,169,9,0.24)";
+export const SUCCESS_COLOR_LIGHT = "rgba(40,169,9,0.4)";
+export const SUCCESS_COLOR_DARK = "#123405";
 export const BORDER_SUCCESS_COLOR = "#b2f2a3";
 export const ERROR_COLOR = "#f00";
 export const BORDER_ERROR_COLOR = "#ff7171";

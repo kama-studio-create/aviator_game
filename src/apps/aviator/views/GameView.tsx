@@ -58,19 +58,26 @@ const gameStyles = {
     gap: 8,
     transition: "all 1s ease-in-out",
   }),
+
   canvasContainer: css({
+  width: "100vw",
+  height: "55vh", // or 100vh if you want *truly* fullscreen
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  borderRadius: 20,
+  border: `1px solid ${BORDER_GRAY}`,
+  transition: "all 1s ease-in-out",
+  canvas: {
+    borderRadius: 32,
     width: "100%",
-    display: "grid",
-    placeContent: "center",
-    borderRadius: 20,
-    border: `1px solid ${BORDER_GRAY}`,
-    transition: "all 1s ease-in-out",
-    canvas: {
-      borderRadius: 32,
-    },
-    maxHeight: "40vh",
-    maxWidth: "98vw",
-  }),
+    height: "100%",
+  },
+}),
+
+
+  
+
   loadingContainer: css({
     width: "100%",
     height: "100%",

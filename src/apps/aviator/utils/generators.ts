@@ -47,7 +47,7 @@ type TopWinProps = {
   to: Date;
 };
 
-export const generateTopWins = (total: number, params: TopWinProps) => {
+export const generateTopWins = (total: number, _params: TopWinProps) => {
   setAtom(loadingBetsAtom, true);
   const slips: HTTPPlay[] = [];
   setTimeout(() => {

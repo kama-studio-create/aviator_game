@@ -20,7 +20,7 @@ export const MINIMUM_BET = 10.0;
 export const FACTOR = 0.00006;
 
 export const WAITING_FOR_NEXT_ROUND = "Waiting For Next Round";
-export const DEFAULT_CURRENCY = "KES";
+export const DEFAULT_CURRENCY = "⭐";
 
 export const STOP_IF_CASH_DECREASES = "Stop If Cash Decreases by";
 export const STOP_IF_CASH_INCREASES = "Stop If Cash Increases by";

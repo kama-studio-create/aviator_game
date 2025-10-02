@@ -90,7 +90,7 @@ const Header: FC<ComponentProps<"nav">> = ({ ...props }) => {
       </div>
       <div css={styles.actionAreaStyles}>
         <div css={styles.balanceStyles}>
-          6.06 <span>{DEFAULT_CURRENCY}</span>
+          100 <span>{DEFAULT_CURRENCY}</span>
         </div>
         <HeaderMenu />
         {/*<div css={styles.chatStyles}>*/}

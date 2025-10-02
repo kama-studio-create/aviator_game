@@ -7,8 +7,8 @@ import {
 } from "../../styles/colors.ts";
 
 const buttonStyles = css({
-  width: "100%",
-  height: "100%",
+  width: "90%",
+  height: "90%",
   flex: 1,
   flexGrow: 1,
   paddingBlock: 12,

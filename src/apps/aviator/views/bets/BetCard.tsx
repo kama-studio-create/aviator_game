@@ -86,34 +86,16 @@ const betInputStyles = {
     opacity: 0.6,
     "&.active": {
       backgroundColor: BACKGROUND_COLOR,
-      // border: `1px solid ${DARK_GRAY_COLOR}`,
       opacity: 1,
     },
     transition: "background-color 0.2s ease-in-out",
   }),
-
   amountContainer: css({
     display: "flex",
     flexDirection: "column",
     gap: 4,
     flex: 3,
   }),
-
-  smallBtn: css({
-    width: 6,
-    height: 6,
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    cursor: "pointer",
-    backgroundColor: "transparent",
-    fontSize: 12,
-    border: "none",
-    ":hover": {
-      backgroundColor: "#1b1c1d",
-    },
-  }),
-
   buttonGrid: css({
     display: "grid",
     gridTemplateColumns: "repeat(2, 1fr)",
@@ -175,11 +157,6 @@ export const BetCard: FC<BetCardProps> = ({
   const [isAutoPlay, setAutoPlay] = useState(false);
 
   const notifications = useAtom(notificationsAtom);
-
-  // TODO: use from data
-  // const { cashout } = useBetCashout();
-  // const { createBet } = useBetCreate();
-
   const currentBetID = useBetSlipStore((state) => state.currentGameID);
 
   const getWinAmount = () => {
@@ -198,16 +175,14 @@ export const BetCard: FC<BetCardProps> = ({
   };
 
   const getButtonColor = (): string => {
-    if(nextBet) return ERROR_COLOR;
+    if (nextBet) return ERROR_COLOR;
     switch (betState) {
       case BET_STATE_IDLE:
         return SUCCESS_COLOR;
       case BET_STATE_QUEUED:
-        return ERROR_COLOR;
       case BET_STATE_PLACING:
         return ERROR_COLOR;
       case BET_STATE_PLAYING:
-        return WARNING_COLOR;
       case BET_STATE_CASHING_OUT:
         return WARNING_COLOR;
       default:
@@ -216,16 +191,14 @@ export const BetCard: FC<BetCardProps> = ({
   };
 
   const getButtonBorder = (): string => {
-    if(nextBet) return BORDER_ERROR_COLOR;
+    if (nextBet) return BORDER_ERROR_COLOR;
     switch (betState) {
       case BET_STATE_IDLE:
         return BORDER_SUCCESS_COLOR;
       case BET_STATE_QUEUED:
-        return BORDER_ERROR_COLOR;
       case BET_STATE_PLACING:
         return BORDER_ERROR_COLOR;
       case BET_STATE_PLAYING:
-        return BORDER_WARNING_COLOR;
       case BET_STATE_CASHING_OUT:
         return BORDER_WARNING_COLOR;
       default:
@@ -250,33 +223,9 @@ export const BetCard: FC<BetCardProps> = ({
     setBetAmount(value);
   }, []);
 
-  useEffect(() => {
-    console.log("betState", betState);
-  }, [betState]);
-
-  // const onSetBet = useCallback(() => {
-  //   if (isPlaying && gameState === GAME_STATE_STARTING) {
-  //     setIsPlaying(false);
-  //     return;
-  //   }
-  //
-  //   if (gameState === GAME_STATE_IN_PROGRESS && isPlaying) {
-  //     setExitTime(Date.now());
-  //     setIsPlaying(false);
-  //     // cashout();
-  //     return;
-  //   }
-  //   if (!isPlaying) {
-  //     if (gameState !== GAME_STATE_STARTING) {
-  //       setIsPlaying(true);
-  //     }
-  //     setIsPlaying(true);
-  //     return;
-  //   }
-  // }, [gameState, isPlaying]);
-
   const onSetBet = useCallback(() => {
-    if (GAME_STATE_STARTING) {
+    if (gameState === GAME_STATE_STARTING) {
+      // Place bet before takeoff
       const bet: HTTPPlay = {
         user_id: 200009,
         xid: 0,
@@ -289,17 +238,30 @@ export const BetCard: FC<BetCardProps> = ({
         created_at: Date.now(),
       };
       setBet(bet);
+      setIsPlaying(true);
       return;
-    } else if (GAME_STATE_IN_PROGRESS || GAME_STATE_ENDED) {
-      const nextBet: IBetPayload = {
+    }
+
+    if (gameState === GAME_STATE_IN_PROGRESS && isPlaying) {
+      // Cash out while flying
+      setExitTime(Date.now());
+      setIsPlaying(false);
+      // TODO: integrate cashout API
+      return;
+    }
+
+    if (gameState === GAME_STATE_ENDED) {
+      // Queue bet for next round
+      const queuedBet: IBetPayload = {
         currency: DEFAULT_CURRENCY,
         amount: betAmount,
         autoCashout: 0,
         idx: index,
       };
-      setNextBet(nextBet);
+      setNextBet(queuedBet);
     }
-  }, [gameState, isPlaying]);
+  }, [gameState, isPlaying, betAmount, index]);
+
   useEffect(() => {
     switch (gameState) {
       case GAME_STATE_STARTING:
@@ -311,156 +273,12 @@ export const BetCard: FC<BetCardProps> = ({
         }
         break;
       case GAME_STATE_ENDED:
-        // if (!isWaitingForNext) {
-        //   if (autoplayRounds > 0 && isAutoPlay) {
-        //     setIsPlaying(true);
-        //     setIsAutoCashOut(true);
-        //   } else {
-        //     setIsPlaying(false);
-        //   }
-        // }
         break;
       default:
         break;
     }
-  }, [gameState, exitTime, isPlaying, isAutoPlay]);
+  }, [gameState, exitTime, isPlaying]);
 
-  // handle amount limits on autoplay
-
-  //TODO: make the loss and win be based on the end amount
-  // useEffect(() => {
-  //   if (gameState === GAME_STATE_ENDED && isAutoPlay) {
-  //     const mySlips = useBetSlipStore.getState().myBetSlips;
-  //     const mySlip = mySlips.find(
-  //       (s) => s.gameId === currentBetID && index === s.index,
-  //     );
-  //     if (!mySlip) return;
-  //     if (mySlip.exitTime && mySlip.startTime) {
-  //       const multiplier = getMultiplier(mySlip.exitTime, mySlip.startTime);
-  //       const amountWon = Math.floor(multiplier * mySlip.amount);
-  //       setAmountWon((prev) => prev + amountWon);
-  //
-  //       if (
-  //         autoPlayConfig &&
-  //         autoPlayConfig.singleWinLimit &&
-  //         amountWon > autoPlayConfig.singleWinLimit
-  //       ) {
-  //         onEndAutoPlaySession();
-  //       }
-  //     } else {
-  //       setAmountLost((prev) => prev + mySlip.amount);
-  //     }
-  //   }
-  // }, [
-  //   autoPlayConfig,
-  //   currentBetID,
-  //   gameState,
-  //   onEndAutoPlaySession,
-  //   index,
-  //   isAutoPlay,
-  // ]);
-
-  //handle end autoplay if limit exceeded
-
-  // useEffect(() => {
-  //   if (gameState !== GAME_STATE_ENDED && !isAutoPlay) return;
-  //   if (
-  //     autoPlayConfig &&
-  //     autoPlayConfig.lossAmountLimit &&
-  //     amountLost > autoPlayConfig.lossAmountLimit
-  //   ) {
-  //     onEndAutoPlaySession();
-  //   }
-  //
-  //   if (
-  //     autoPlayConfig &&
-  //     autoPlayConfig.winAmountLimit &&
-  //     amountWon > autoPlayConfig.winAmountLimit
-  //   ) {
-  //     onEndAutoPlaySession();
-  //   }
-  // }, [
-  //   amountLost,
-  //   amountWon,
-  //   autoPlayConfig,
-  //   gameState,
-  //   onEndAutoPlaySession,
-  //   isAutoPlay,
-  // ]);
-
-  // handle bet slips
-  // useEffect(() => {
-  //   const mySlips = useBetSlipStore.getState().myBetSlips;
-  //   const mySlip = mySlips.find(
-  //     (s) => s.gameId === currentBetID && index === s.index,
-  //   );
-  //
-  //   switch (gameState) {
-  //     case GAME_STATE_STARTING:
-  //       if (currentBetID && isPlaying && now >= startTime) {
-  //         if (isAutoPlay && autoplayRounds > 0) {
-  //           setAutoPlayRounds((prev) => prev - 1);
-  //           onSetBet();
-  //         }
-  //         if (!mySlip) {
-  //           const bet: TBetSlip = {
-  //             amount: betAmount,
-  //             gameId: currentBetID,
-  //             startTime: startTime,
-  //             index,
-  //           };
-  //           useBetSlipStore.setState((state) => ({
-  //             myBetSlips: [...state.myBetSlips, bet],
-  //           }));
-  //         }
-  //       }
-  //       break;
-  //     case GAME_STATE_IN_PROGRESS:
-  //       if (exitTime && mySlip && !mySlip.exitTime) {
-  //         mySlip.exitTime = exitTime;
-  //         useBetSlipStore.setState((state) => ({
-  //           myBetSlips: state.myBetSlips.map((s) => {
-  //             if (s.gameId === currentBetID && index === s.index) {
-  //               return mySlip;
-  //             } else {
-  //               return s;
-  //             }
-  //           }),
-  //         }));
-  //       }
-  //       break;
-  //     case GAME_STATE_ENDED:
-  //       if (mySlip) {
-  //         mySlip.endTime = Date.now();
-  //         useBetSlipStore.setState((state) => ({
-  //           myBetSlips: state.myBetSlips.map((s) => {
-  //             if (s.gameId === currentBetID && index === s.index) {
-  //               return mySlip;
-  //             } else {
-  //               return s;
-  //             }
-  //           }),
-  //         }));
-  //       }
-  //       break;
-  //     default:
-  //       break;
-  //   }
-  // }, [
-  //   index,
-  //   now,
-  //   betAmount,
-  //   currentBetID,
-  //   exitTime,
-  //   gameState,
-  //   isPlaying,
-  //   startTime,
-  //   isAutoPlay,
-  //   autoplayRounds,
-  //   onSetBet,
-  // ]);
-
-  //handle notifications
   useEffect(() => {
     const mySlips = useBetSlipStore.getState().myBetSlips;
     const mySlip = mySlips.find(
@@ -498,21 +316,18 @@ export const BetCard: FC<BetCardProps> = ({
       <div css={betInputStyles.tabContainer}>
         <TabItem
           isActive={!isAutoPlay}
-          onClick={() => {
-            setAutoPlay(false);
-          }}
+          onClick={() => setAutoPlay(false)}
         >
           Bet
         </TabItem>
         <TabItem
           isActive={isAutoPlay}
-          onClick={() => {
-            setAutoPlay(true);
-          }}
+          onClick={() => setAutoPlay(true)}
         >
           Auto
         </TabItem>
       </div>
+
       <div css={betInputStyles.row}>
         <div css={betInputStyles.amountContainer}>
           <div css={rowStyles}>
@@ -527,9 +342,7 @@ export const BetCard: FC<BetCardProps> = ({
             {quickBetOptions.map((option) => (
               <button
                 key={option.label}
-                onClick={() => {
-                  setBetAmount(option.value);
-                }}
+                onClick={() => setBetAmount(option.value)}
                 css={betInputStyles.selectAmountBtn}
               >
                 <p>{option.label}</p>
@@ -542,24 +355,13 @@ export const BetCard: FC<BetCardProps> = ({
           style={{
             width: "100%",
             textAlign: "center",
-            height: "100%",
             flex: 5,
             display: "flex",
             flexDirection: "column",
             gap: 6,
           }}
         >
-          <div
-            style={
-              {
-                // flexGrow: isWaitingForNext ? 1 : 0,
-                // height: isWaitingForNext ? 12 : 0,
-                // opacity: isWaitingForNext ? 1 : 0,
-              }
-            }
-          >
-            {WAITING_FOR_NEXT_ROUND}
-          </div>
+          <div>{WAITING_FOR_NEXT_ROUND}</div>
           <BetButton
             style={{
               backgroundColor: getButtonColor(),
@@ -573,6 +375,7 @@ export const BetCard: FC<BetCardProps> = ({
           />
         </div>
       </div>
+
       {isAutoPlay && <AutoPlayControls now={now} />}
     </div>
   );
